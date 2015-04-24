@@ -117,7 +117,9 @@ ApplicationWindow { // Fenetre principale
         minimumValue: app.heureMin.getTime()
         maximumValue: app.heureMax.getTime()
         value: app.heure.getTime()
-        onValueChanged: app.heure = new Date(value) // La variable "heure" prends pour valeur la date du slider
+        onValueChanged: {
+            app.heure = new Date(value);
+            console.log(app.heure);}// La variable "heure" prends pour valeur la date du slider
         //stepSize: 3600 // Fait planter l'application
         //tickmarksEnabled: true
         anchors.right: parent.right
@@ -238,6 +240,8 @@ ApplicationWindow { // Fenetre principale
                         anchors.margins: 5
                         anchors.right: parent.right
                         anchors.left: parent.left
+                        clip:true
+
                         delegate: Column {
                             Text { text: 'Nom :\t' + nom }
                             Text { text: 'Prenom :\t' + prenom }
@@ -252,9 +256,15 @@ ApplicationWindow { // Fenetre principale
                             Text { text: '\t' + email }
                             Text { text: 'Âge :\t' + age + " ans" }
                             Text { text: 'Profession :\t' + profession }
-                            Text { text: 'Compétences :\t' + competences }
+                            Text {
+                                text: 'Compétences : ' + competences
+                                wrapMode: Text.WordWrap
+                                width: parent.width}
                             Text { text: 'Langues :\t' + langues }
-                            Text { text: 'Commentaire :\t' + commentaire_personne }
+                            Text {
+                                text: 'Commentaire : ' + commentaire_personne
+                                wrapMode: Text.WordWrap
+                                width: parent.width}
                         }
                     }
                 }
@@ -334,6 +344,7 @@ ApplicationWindow { // Fenetre principale
                         anchors.right: parent.right
                         anchors.rightMargin: 0
                         anchors.leftMargin: 0
+
                         delegate: Text {
                             text: nom
                             anchors.left: parent.left
@@ -342,6 +353,8 @@ ApplicationWindow { // Fenetre principale
                                 anchors.fill: parent
                                 onClicked: {
                                     app.setIdPoste(id)
+                                    console.log("Cliqué !!")
+                                    console.log("Poste cliqué: " + id)
                                 }
                             }
                         }
@@ -961,11 +974,13 @@ ApplicationWindow { // Fenetre principale
 
                 Button {
                     text: "Inscrire le bénévole"
-                    anchors.top: _commentaireBenevole
+                    anchors.top: _commentaireBenevole.bottom
                     anchors.topMargin: 5
                     anchors.left: parent.left
                     anchors.leftMargin: parent.width * 0.40
-                    onClicked: { console.log("TODO: Faire la requete d'inscription (attendre modification de la base"); }
+                    onClicked: { console.log("TODO: Faire la requete d'inscription (attendre modification de la base");
+                     app.faireInscription(_nomBenevole.text, _prenomBenevole.text, _adresseBenevole.text, _codePostalBenevole.text, _communeBenevole.text,_courrielBenevole.text, _numero);
+                    }
                 }
 
             }

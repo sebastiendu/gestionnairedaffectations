@@ -8,6 +8,7 @@
 #include "poste.h"
 #include <plan.h>
 
+
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     QGuiApplication(argc,argv)
 {
@@ -39,7 +40,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_liste_des_evenements = new SqlQueryModel;
     m_liste_des_evenements->setQuery(query);
 
-    query.prepare("select * from poste where id_evenement=? order by nom");
+    query.prepare("select * from poste where id_evenement=? order by nom ");
     query.addBindValue(idEvenement());
     query.exec();
     m_postes = new SqlQueryModel;
@@ -77,12 +78,17 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_fiche_benevole->setQuery(query);
 
     m_id_poste=0;
-    query.prepare("select * from poste_et_tour where id_poste=?");
-    query.addBindValue(m_id_poste);
+    query.prepare("select * from poste_et_tour where id_poste= :poste "); //AND debut <= :debut AND fin >= :fin"
+    query.bindValue(":poste",m_id_poste);
+  //  query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
+  //  query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
+  //  qDebug() << m_heure.toString("Yyyy-MM-d h:m:s");
+  //  qDebug() << m_heure.toString();
+  //  qDebug() << m_heure;
     query.exec();
     m_fiche_poste = new SqlQueryModel;
     m_fiche_poste->setQuery(query);
-
+    // format: 2014-11-16 08:00:00+01
     m_settings = new Settings;
 
     Plan monPlan;
@@ -182,4 +188,16 @@ void GestionnaireDAffectations::supprimerUnPoste(int p){
     this->listeDePoste.erase(p);
 }
 
-
+/* void GestionnaireDAffectations::faireInscription(int p){
+    QSqlQuery query;
+    query.prepare("insert into evenement (nom, debut, fin, lieu, id_evenement_precedent) values (?,?,?,?,?)");
+    query.addBindValue(nom);
+    query.addBindValue(debut);
+    query.addBindValue(fin);
+    query.addBindValue(lieu);
+    query.addBindValue(id_evenement_precedent);
+    if (query.exec()) {
+        setIdEvenement(query.lastInsertId().toInt());
+    }
+}
+*/
