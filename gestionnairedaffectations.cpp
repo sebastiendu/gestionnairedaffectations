@@ -35,6 +35,26 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
 
     Plan monPlan;
 
+    if(!m_settings->contains("database/databaseName")) {
+        if(!m_settings->contains("database/hostName")) {
+            m_settings->setValue("database/hostName", "localhost");
+        }
+        if(!m_settings->contains("database/port")) {
+            m_settings->setValue("database/port", "5432");
+        }
+        m_settings->setValue("database/databaseName", "laguntzaile");
+        if(!m_settings->contains("database/userName")) {
+            QString name = qgetenv("USER");
+            if (name.isEmpty()) {
+                name = qgetenv("USERNAME");
+            }
+            m_settings->setValue("database/userName", name);
+        }
+        if(!m_settings->contains("database/rememberPassword")) {
+            m_settings->setValue("database/rememberPassword", false);
+        }
+    }
+
     db = QSqlDatabase::addDatabase("QPSQL");
     if (m_settings->value("database/rememberPassword").toBool()) {
         ouvrirLaBase();
