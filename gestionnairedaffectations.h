@@ -30,6 +30,9 @@ public:
     int idEvenement();
     void setIdEvenement(int);
     ~GestionnaireDAffectations();
+    Q_INVOKABLE bool baseEstOuverte();
+    Q_INVOKABLE bool ouvrirLaBase(QString password="");
+    Q_INVOKABLE QString messageDErreurDeLaBase();
     Q_INVOKABLE void setIdEvenementFromModelIndex(int);
     Q_INVOKABLE int getEvenementModelIndex();
     Q_INVOKABLE void setIdPoste(int);
@@ -56,6 +59,7 @@ public slots:
  //   void mettreAJourModelPlan(); : TODO : Mettre à jour le plan
 
 private:
+    QSqlDatabase db;
     SqlQueryModel *m_liste_des_evenements;
     SqlQueryModel *m_postes;
     QSortFilterProxyModel *m_benevoles_disponibles;

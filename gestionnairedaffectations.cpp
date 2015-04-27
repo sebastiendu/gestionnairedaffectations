@@ -21,82 +21,113 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
     qmlRegisterType<Plan>("fr.ldd.qml", 1, 0, "Plan");
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
-    // TODO: lire ces valeurs dans les Settings
-    db.setHostName("bdd.ldd.fr");
-    db.setDatabaseName("laguntzaile");
-    db.setUserName("bastien");
-    db.setPassword("bastien");
-    if (!db.open()) {
-        // TODO : proposer un écran de paramétrage pour mettre à jour les Settings
-        qDebug() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
-        exit(1);
-    }
-
-    QSqlQuery query;
-
-    query.prepare("select * from liste_des_evenements"); // On séléctionne la liste des évenements
-    query.exec();
-    m_liste_des_evenements = new SqlQueryModel;
-    m_liste_des_evenements->setQuery(query);
-
-    query.prepare("select * from poste where id_evenement=? order by nom ");
-    query.addBindValue(idEvenement());
-    query.exec();
-    m_postes = new SqlQueryModel;
-    m_postes->setQuery(query);
-
-    QQmlEngine engine;
-    QQmlComponent component(&engine, QUrl::fromLocalFile("marqueur.qml"));
-
-
-    QSqlQueryModel model;
-    model.setQuery(query);
-    for(int i=0;i<model.rowCount();i++)
-    {
-            qDebug() << model.data(model.index(i, 0)).toInt();
-           // component.create(); Ne veut pas se créer ...
-            //emit placerMarqueur(10,10);
-    }
-
-
-    query.prepare("select * from benevoles_disponibles where id_evenement=?");
-    query.addBindValue(idEvenement());
-    query.exec();
-    m_benevoles_disponibles_sql = new SqlQueryModel;
-    m_benevoles_disponibles_sql->setQuery(query);
-    m_benevoles_disponibles = new QSortFilterProxyModel(this);
-    m_benevoles_disponibles->setSourceModel(m_benevoles_disponibles_sql);
-    m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_benevoles_disponibles->setFilterKeyColumn(-1);
-
-    m_id_disponibilite=0;
-    query.prepare("select * from fiche_benevole where id_disponibilite=?");
-    query.addBindValue(m_id_disponibilite);
-    query.exec();
-    m_fiche_benevole = new SqlQueryModel;
-    m_fiche_benevole->setQuery(query);
-
-    m_id_poste=0;
-    query.prepare("select * from poste_et_tour where id_poste= :poste "); //AND debut <= :debut AND fin >= :fin"
-    query.bindValue(":poste",m_id_poste);
-  //  query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
-  //  query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
-  //  qDebug() << m_heure.toString("Yyyy-MM-d h:m:s");
-  //  qDebug() << m_heure.toString();
-  //  qDebug() << m_heure;
-    query.exec();
-    m_fiche_poste = new SqlQueryModel;
-    m_fiche_poste->setQuery(query);
-    // format: 2014-11-16 08:00:00+01
     m_settings = new Settings;
 
+    m_id_disponibilite=0;
+    m_id_poste=0;
+
+    m_liste_des_evenements = new SqlQueryModel;
+    m_postes = new SqlQueryModel;
+    m_benevoles_disponibles_sql = new SqlQueryModel;
+    m_benevoles_disponibles = new QSortFilterProxyModel(this);
+    m_fiche_benevole = new SqlQueryModel;
+    m_fiche_poste = new SqlQueryModel;
+
     Plan monPlan;
+
+    if(!m_settings->contains("database/databaseName")) {
+        if(!m_settings->contains("database/hostName")) {
+            m_settings->setValue("database/hostName", "localhost");
+        }
+        if(!m_settings->contains("database/port")) {
+            m_settings->setValue("database/port", "5432");
+        }
+        m_settings->setValue("database/databaseName", "laguntzaile");
+        if(!m_settings->contains("database/userName")) {
+            QString name = qgetenv("USER");
+            if (name.isEmpty()) {
+                name = qgetenv("USERNAME");
+            }
+            m_settings->setValue("database/userName", name);
+        }
+        if(!m_settings->contains("database/rememberPassword")) {
+            m_settings->setValue("database/rememberPassword", false);
+        }
+    }
+
+    db = QSqlDatabase::addDatabase("QPSQL");
+    if (m_settings->value("database/rememberPassword").toBool()) {
+        ouvrirLaBase();
+    }
 }
 
 GestionnaireDAffectations::~GestionnaireDAffectations()
 {
-    QSqlDatabase().close();
+    db.close();
+}
+
+QString GestionnaireDAffectations::messageDErreurDeLaBase() {
+    return db.lastError().text();
+}
+
+bool GestionnaireDAffectations::baseEstOuverte() {
+    return db.isOpen();
+}
+
+bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
+    db.setHostName(m_settings->value("database/hostName").toString());
+    db.setPort(m_settings->value("database/port").toInt());
+    db.setDatabaseName(m_settings->value("database/databaseName").toString());
+    db.setUserName(m_settings->value("database/userName").toString());
+    db.setPassword(
+        m_settings->value("database/rememberPassword").toBool()
+        ? m_settings->value("database/password").toString()
+        : password
+    );
+
+    if(db.open()) {
+
+        // Initialiser les modèles
+
+        QSqlQuery query;
+
+        query.prepare("select * from liste_des_evenements");
+        query.exec();
+        m_liste_des_evenements->setQuery(query);
+
+        query.prepare("select * from poste where id_evenement=? order by nom ");
+        query.addBindValue(idEvenement());
+        query.exec();
+        m_postes->setQuery(query);
+
+        query.prepare("select * from benevoles_disponibles where id_evenement=?");
+        query.addBindValue(idEvenement());
+        query.exec();
+        m_benevoles_disponibles_sql->setQuery(query);
+        m_benevoles_disponibles->setSourceModel(m_benevoles_disponibles_sql);
+        m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        m_benevoles_disponibles->setFilterKeyColumn(-1);
+
+        query.prepare("select * from fiche_benevole where id_disponibilite=?");
+        query.addBindValue(m_id_disponibilite);
+        query.exec();
+        m_fiche_benevole->setQuery(query);
+
+        query.prepare("select * from poste_et_tour where id_poste= :poste "); //AND debut <= :debut AND fin >= :fin"
+        query.bindValue(":poste",m_id_poste);
+      //  query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
+      //  query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
+      //  qDebug() << m_heure.toString("Yyyy-MM-d h:m:s");
+      //  qDebug() << m_heure.toString();
+      //  qDebug() << m_heure;
+        query.exec();
+        m_fiche_poste->setQuery(query);
+        // format: 2014-11-16 08:00:00+01
+
+    } else {
+        qDebug() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
+    }
+    return db.isOpen();
 }
 
 int GestionnaireDAffectations::idEvenement() { // Retourne la valeur de la cle "id_evenement", qui ne peux être accédée que via un QSettings

@@ -18,7 +18,41 @@ ApplicationWindow { // Fenetre principale
     minimumHeight: 400
     color: "#ffffff"
 
+    Action {
+        id: nouvelEvenement
+        text: qsTr("&Nouveau")
+        shortcut: StandardKey.New
+        tooltip: "Déclarer un nouvel évènement"
+        onTriggered: {
+            var component = Qt.createComponent("nouvelevenement.qml")
+            if( component.status !== Component.Ready )
+            {
+                if( component.status === Component.Error )
+                    console.debug("Error:"+ component.errorString() );
+                return;
+            }
+            var window = component.createObject(gestionDesAffectations)
+            window.show() // On ouvre la fenetre d'ajout du nouvel évenement
+        }
+    }
 
+    Action {
+        id: parametresDeConnexion
+        text: qsTr("Paramètres de connexion…")
+        shortcut: StandardKey.Preferences
+        tooltip: "Définir les paramètres de connexion à la base de données"
+        onTriggered: {
+            var component = Qt.createComponent("parametres_de_connexion.qml")
+            if( component.status !== Component.Ready )
+            {
+                if( component.status === Component.Error )
+                    console.debug("Error:"+ component.errorString() );
+                return;
+            }
+            var window = component.createObject(gestionDesAffectations)
+            window.show()
+        }
+    }
 
     onClosing: {
         app.settings.setValue("x", x)
@@ -43,26 +77,12 @@ ApplicationWindow { // Fenetre principale
         onCurrentIndexChanged: {
             app.setIdEvenementFromModelIndex(currentIndex) // On appelle la fonction permettant entre autre de charger toutes les informations du nouvel évenement
         }
-
     }
 
     menuBar: MenuBar { // La barre de menu
         Menu {
             title: qsTr("&Évenement")
-            MenuItem {
-                text: qsTr("&Nouveau")
-                onTriggered: {
-                    var component = Qt.createComponent("nouvelevenement.qml")
-                    if( component.status !== Component.Ready )
-                    {
-                        if( component.status === Component.Error )
-                            console.debug("Error:"+ component.errorString() );
-                        return;
-                    }
-                    var window = component.createObject(gestionDesAffectations)
-                    window.show() // On ouvre la fenetre d'ajout du nouvel évenement
-                }
-            }
+            MenuItem { action: nouvelEvenement }
             MenuItem {
                 text: qsTr("Supprimer")
                 onTriggered: console.log("TODO : Ouvrir l'interface de suppression de l'évènement");
@@ -78,6 +98,11 @@ ApplicationWindow { // Fenetre principale
         Menu {
             title: qsTr("&Affichage")
         }
+        Menu {
+            title: qsTr("&Options")
+            MenuItem { action: parametresDeConnexion }
+        }
+
         Menu {
             title: qsTr("&Aide")
         }
