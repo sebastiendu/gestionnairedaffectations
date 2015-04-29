@@ -26,6 +26,83 @@ function dateFR(dateRecu) {
 
 }
 
+function afficherBulleInformative(rectangle,bulle,x,y)
+{
+    console.log ( "-----" );
+    console.log(x);
+    console.log(rectangle.x);
+    console.log(rectangle.width);
+    console.log(rectangle.width + rectangle.x)
+    if((x + 45 + bulle.width) > (rectangle.x + rectangle.width)) bulle.x = ( x - bulle.width);
+    else bulle.x = (x+45);
+
+    bulle.y = y;
+}
+
+function datePourTours(dateRecu) {
+    var heure;
+    var minutes;
+    var numeroMois = dateRecu.getMonth() + 1;
+
+    // ==== On affiche l'heure correctement====//
+    if(dateRecu.getHours() < 10)
+        heure = "0"+dateRecu.getHours();
+    else
+        heure = dateRecu.getHours();
+
+    // ==== On affiche les minutes correctement====//
+    if(dateRecu.getMinutes() < 10)
+        minutes = "0"+dateRecu.getMinutes();
+    else
+        minutes = dateRecu.getMinutes();
+
+
+
+    return dateRecu.getDate()+"/"+numeroMois+"/"+dateRecu.getFullYear()+" "+heure+"h"+minutes;
+
+}
+
+function definirCouleurCercleNom (statut) {
+    if(statut == "acceptee")
+         return "green";
+    else if(statut == "rejetee")
+        return "red"
+    else
+         return "orange";
+}
+
+function couleurCercle(statut){
+    if(statut == "acceptee")
+         return "green";
+    else if(statut == "rejetee")
+        return "red"
+    else
+         return "orange";
+}
+
+function heure(dateRecu) {
+    var heure;
+    var minutes;
+
+
+    // ==== On affiche l'heure correctement====//
+    if(dateRecu.getHours() < 10)
+        heure = "0"+dateRecu.getHours();
+    else
+        heure = dateRecu.getHours();
+
+    // ==== On affiche les minutes correctement====//
+    if(dateRecu.getMinutes() < 10)
+        minutes = "0"+dateRecu.getMinutes();
+    else
+        minutes = dateRecu.getMinutes();
+
+
+
+    return heure+"h"+minutes;
+
+}
+
 function focusCandidat(index)
 {
     if(indexMemoire != index)
@@ -41,28 +118,6 @@ function genererMail()
 
 }
 
-function createSpriteObjectsPlan(x,y) {
-    component = Qt.createComponent("marqueur.qml");
-    if (component.status == Component.Ready)
-        finishCreationPlan(x,y);
-    else
-        component.statusChanged.connect(finishCreation);
-}
-function finishCreationPlan(x,y) {
-    if (component.status == Component.Ready) {
-        numeroMarqueur++;
-        sprite = component.createObject(plan, {"x": x, "y": y,"id":numeroMarqueur});
-        console.log(sprite.id)
-        if (sprite == null) {
-            // Error Handling
-            console.log("Error creating object");
-        }
-    } else if (component.status == Component.Error) {
-        // Error Handling
-        console.log("Error loading component:", component.errorString());
-    }
-}
-
 
 function createSpriteObjects(rect,x,y) {
     component = Qt.createComponent("marqueur.qml");
@@ -74,8 +129,20 @@ function createSpriteObjects(rect,x,y) {
 function finishCreation(rect,x,y) {
     if (component.status == Component.Ready) {
         numeroMarqueur++;
-        sprite = component.createObject(rect, {"x": x, "y": y,"id":numeroMarqueur});
-        console.log(sprite.id)
+
+
+        if(x - ((22/640) * rect.width) > 0) x-= ((22/640) * rect.width); // Pour centrer parfaitement le marqueur sur le curseur
+        if(y - ((22/640) * rect.height) > 0) y-= ((22/640) * rect.height);
+
+
+        var ratioX = x / rect.width;
+        var ratioY = y / rect.height;
+
+        console.log(ratioX);
+        console.log(ratioY);
+
+        sprite = component.createObject(rect, {"ratioX": ratioX, "ratioY": ratioY,"id":numeroMarqueur});
+
         if (sprite == null) {
             // Error Handling
             console.log("Error creating object");
@@ -84,6 +151,16 @@ function finishCreation(rect,x,y) {
         // Error Handling
         console.log("Error loading component:", component.errorString());
     }
+}
+
+function min(a,b){
+    if(a<b) return a;
+    else return b;
+}
+
+function max(a,b){
+    if(a>b) return a;
+    else return b;
 }
 
 function resizePointeur() {

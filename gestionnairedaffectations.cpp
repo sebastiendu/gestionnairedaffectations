@@ -28,12 +28,12 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
 
     m_liste_des_evenements = new SqlQueryModel;
     m_postes = new SqlQueryModel;
+    m_tour_benevole = new SqlQueryModel;
     m_benevoles_disponibles_sql = new SqlQueryModel;
     m_benevoles_disponibles = new QSortFilterProxyModel(this);
     m_fiche_benevole = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
-
-    Plan monPlan;
+    m_plan = new QSortFilterProxyModel(this);
 
     if(!m_settings->contains("database/databaseName")) {
         if(!m_settings->contains("database/hostName")) {
@@ -59,12 +59,14 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     if (m_settings->value("database/rememberPassword").toBool()) {
         ouvrirLaBase();
     }
+    connect(this,SIGNAL(heureChanged()),this,SLOT(mettreAJourModelPlan()));
 }
 
 GestionnaireDAffectations::~GestionnaireDAffectations()
 {
-    db.close();
+    QSqlDatabase().close();
 }
+
 
 QString GestionnaireDAffectations::messageDErreurDeLaBase() {
     return db.lastError().text();
@@ -113,22 +115,27 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_fiche_benevole->setQuery(query);
 
-        query.prepare("select * from poste_et_tour where id_poste= :poste "); //AND debut <= :debut AND fin >= :fin"
+        query.prepare("select * from poste_et_tour where id_poste= :poste AND debut <= :debut AND fin >= :fin ORDER BY debut ASC"); //AND debut <= :debut AND fin >= :fin"
         query.bindValue(":poste",m_id_poste);
-      //  query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
-      //  query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
-      //  qDebug() << m_heure.toString("Yyyy-MM-d h:m:s");
-      //  qDebug() << m_heure.toString();
-      //  qDebug() << m_heure;
+        query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
+        query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
+
         query.exec();
         m_fiche_poste->setQuery(query);
-        // format: 2014-11-16 08:00:00+01
+
+        query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement; ");
+        query.bindValue(":tour",m_id_tour);
+        query.bindValue(":id_evenement",idEvenement());
+        query.exec();
+        m_tour_benevole->setQuery(query);
+
 
     } else {
         qDebug() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
     }
     return db.isOpen();
 }
+
 
 int GestionnaireDAffectations::idEvenement() { // Retourne la valeur de la cle "id_evenement", qui ne peux être accédée que via un QSettings
     QSettings settings;
@@ -163,6 +170,12 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_fiche_poste->setQuery(query);
 
+    query = m_tour_benevole->query();
+    query.bindValue(0,0);
+    query.exec();
+    m_tour_benevole->setQuery(query);
+
+
     query.prepare("select debut, fin from evenement where id=?");
     query.addBindValue(idEvenement());
     query.exec();
@@ -180,9 +193,20 @@ int GestionnaireDAffectations::getEvenementModelIndex() {
 void GestionnaireDAffectations::setIdPoste(int id) {
     m_id_poste = id;
     QSqlQuery query = m_fiche_poste->query();
-    query.bindValue(0, m_id_poste);
+    query.bindValue(":poste", m_id_poste);
+    query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
+    query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
     query.exec();
     m_fiche_poste->setQuery(query);
+}
+
+void GestionnaireDAffectations::setIdTour(int id) {
+    m_id_tour = id;
+    QSqlQuery query = m_tour_benevole->query();
+    query.bindValue(":tour", m_id_tour);
+    query.exec();
+    m_tour_benevole->setQuery(query);
+    qDebug() << "Id du tour changé en " << id;
 }
 
 void GestionnaireDAffectations::setIdDisponibilite(int id) { // A quoi sert cette fonction ?
@@ -217,6 +241,38 @@ void GestionnaireDAffectations::ajouterUnPoste(Poste p){
 
 void GestionnaireDAffectations::supprimerUnPoste(int p){
     this->listeDePoste.erase(p);
+}
+
+void GestionnaireDAffectations::mettreAJourModelPlan(){
+
+    QSqlQuery query;
+
+    query.prepare("select * from poste_et_tour where id_evenement= :evt AND debut <= :debut AND fin >= :fin order by debut ");
+    query.bindValue(":evt",idEvenement());
+    query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
+    query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
+    query.exec();
+    m_postes = new SqlQueryModel;
+    m_postes->setQuery(query);
+
+    m_plan = new QSortFilterProxyModel();
+    m_plan->setSourceModel(m_postes);
+    m_plan->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_plan->setFilterKeyColumn(-1);
+
+    qDebug() << "Nombre de colonne dans plan:" << m_plan->rowCount();
+    qDebug() << m_plan->index(1,1);
+
+    /*query.prepare("select * from poste_et_tour where id_poste= :poste AND debut <= :debut AND fin >= :fin;");
+    query.bindValue(":poste",m_id_poste);
+    query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
+    query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
+    query.exec();
+    m_fiche_poste = new SqlQueryModel;
+    m_fiche_poste->setQuery(query); */
+
+    qDebug() << "La date:" << m_heure.toString("yyyy-MM-d h:m:s");
+    qDebug() << "Nombre de postes à ce moment: " << m_postes->rowCount();
 }
 
 /* void GestionnaireDAffectations::faireInscription(int p){

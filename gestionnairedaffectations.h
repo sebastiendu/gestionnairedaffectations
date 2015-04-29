@@ -24,6 +24,9 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* postes MEMBER m_postes NOTIFY postesChanged)
     Q_PROPERTY(SqlQueryModel* fiche_benevole MEMBER m_fiche_benevole NOTIFY fiche_benevoleChanged)
     Q_PROPERTY(SqlQueryModel* fiche_poste MEMBER m_fiche_poste NOTIFY fiche_posteChanged)
+    Q_PROPERTY(SqlQueryModel* tour_benevoles MEMBER m_tour_benevole NOTIFY tourChanged)
+    Q_PROPERTY(QSortFilterProxyModel* planCourant MEMBER m_plan NOTIFY planChanged)
+
 
 public:
     GestionnaireDAffectations(int & argc, char ** argv);
@@ -36,6 +39,7 @@ public:
     Q_INVOKABLE void setIdEvenementFromModelIndex(int);
     Q_INVOKABLE int getEvenementModelIndex();
     Q_INVOKABLE void setIdPoste(int);
+    Q_INVOKABLE void setIdTour(int);
     Q_INVOKABLE void setIdDisponibilite(int);
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
     Q_INVOKABLE void selectionnerMarqueur();
@@ -53,25 +57,30 @@ signals:
     void postesChanged();
     void fiche_benevoleChanged();
     void fiche_posteChanged();
+    void planChanged();
+    void tourChanged();
 
 
 public slots:
- //   void mettreAJourModelPlan(); : TODO : Mettre à jour le plan
+    void mettreAJourModelPlan();
 
 private:
-    QSqlDatabase db;
+        QSqlDatabase db;
     SqlQueryModel *m_liste_des_evenements;
     SqlQueryModel *m_postes;
     QSortFilterProxyModel *m_benevoles_disponibles;
     SqlQueryModel *m_benevoles_disponibles_sql;
     SqlQueryModel *m_fiche_benevole;
     SqlQueryModel *m_fiche_poste;
+    SqlQueryModel *m_tour_benevole;
     SqlQueryModel *m_postes_tours_affectations;
     int m_id_disponibilite;
     int m_id_poste;
+    int m_id_tour;
     QDateTime m_heureMin, m_heureMax, m_heure;
     Settings *m_settings;
     std::map<int,Poste> listeDePoste;
+    QSortFilterProxyModel *m_plan;
     // Plan monPlan;
 };
 

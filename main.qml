@@ -3,6 +3,8 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
 import fr.ldd.qml 1.0
 import QtWebKit 3.0
+import QtQuick.Controls.Styles 1.2
+import QtGraphicalEffects 1.0
 
 import "fonctions.js" as Fonctions
 
@@ -14,9 +16,10 @@ ApplicationWindow { // Fenetre principale
     y: app.settings.value("y",30)
     width: app.settings.value("width",850)
     height: app.settings.value("height",600)
-    minimumWidth: 640
-    minimumHeight: 400
+    minimumWidth: 740
+    minimumHeight: 500
     color: "#ffffff"
+
 
     Action {
         id: nouvelEvenement
@@ -77,6 +80,7 @@ ApplicationWindow { // Fenetre principale
         onCurrentIndexChanged: {
             app.setIdEvenementFromModelIndex(currentIndex) // On appelle la fonction permettant entre autre de charger toutes les informations du nouvel évenement
         }
+
     }
 
     menuBar: MenuBar { // La barre de menu
@@ -98,10 +102,12 @@ ApplicationWindow { // Fenetre principale
         Menu {
             title: qsTr("&Affichage")
         }
+
         Menu {
             title: qsTr("&Options")
             MenuItem { action: parametresDeConnexion }
         }
+
 
         Menu {
             title: qsTr("&Aide")
@@ -137,23 +143,8 @@ ApplicationWindow { // Fenetre principale
 
     }
 
-    Slider { // Le slider permettant de changer de date
-        id: navigateurDeTemps
-        minimumValue: app.heureMin.getTime()
-        maximumValue: app.heureMax.getTime()
-        value: app.heure.getTime()
-        onValueChanged: {
-            app.heure = new Date(value);
-            console.log(app.heure);}// La variable "heure" prends pour valeur la date du slider
-        //stepSize: 3600 // Fait planter l'application
-        //tickmarksEnabled: true
-        anchors.right: parent.right
-        anchors.rightMargin: 0
-        anchors.left: parent.left
-        anchors.leftMargin: 0
-        anchors.bottom: statusbar.top
-        anchors.bottomMargin: 0
-    }
+
+
 
     TabView { // Les differents onglets
         id: onglet
@@ -162,12 +153,11 @@ ApplicationWindow { // Fenetre principale
         anchors.rightMargin: 0
         anchors.left: parent.left
         anchors.leftMargin: 0
+        anchors.bottom: parent.bottom
 
-
-        anchors.bottom: navigateurDeTemps.top
         // height:parent.height
         Component.onCompleted: {
-            addTab("Carte", carte)
+            addTab("Affectations", carte)
             addTab("Postes & Tours", postesEtTours)
             addTab("Candidature à valider", candidaturesAValider)
             addTab("Inscrire un bénévole", inscrireBenevole)
@@ -176,11 +166,13 @@ ApplicationWindow { // Fenetre principale
         }
 
         // =========================================================
-        // ===================== ONGLET CARTE ======================
+        // ===================== ONGLET Affectations ======================
         // =========================================================
 
         Component {
             id: carte
+
+
             Rectangle {
                 id: affectations
                 anchors.right: parent.right
@@ -192,16 +184,18 @@ ApplicationWindow { // Fenetre principale
                 anchors.top: onglet.bottom
                 anchors.topMargin: 0
 
+
                 Rectangle {
                     id: disponibilites
                     anchors.top: parent.top
                     anchors.topMargin: 0
-                    anchors.bottom: parent.bottom
+                    anchors.bottom: navigateurDeTemps.top
                     anchors.bottomMargin: 0
                     anchors.left: parent.left
                     anchors.leftMargin: 0
                     anchors.right: plan.left
                     anchors.rightMargin: 0
+                    z:1
 
                     TextField {
                         id: rechercheDeDisponibles
@@ -225,6 +219,9 @@ ApplicationWindow { // Fenetre principale
                         anchors.right: parent.right
                         anchors.left: parent.left
                         clip: true
+                        highlight:Rectangle { color: "lightsteelblue"; radius: 5 }
+                        focus: true
+
                         delegate: Rectangle { // Corresponds au block contenant le nom... La  ListView contient donc plusieurs de ces blocks
                             height: 13
                             anchors.left: parent.left
@@ -245,6 +242,7 @@ ApplicationWindow { // Fenetre principale
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: {
+                                    listeDesDisponibles.currentIndex = index
                                     app.setIdDisponibilite(id_disponibilite)
                                     //  Fonction à appeller lorsque une personne est cliquée
                                 }
@@ -252,6 +250,8 @@ ApplicationWindow { // Fenetre principale
                         }
                         model: app.benevoles_disponibles
                     }
+
+
 
                     ScrollBar {
                         flickable: listeDesDisponibles;
@@ -302,37 +302,117 @@ ApplicationWindow { // Fenetre principale
                     fillMode: Image.PreserveAspectFit
                     anchors.top: parent.top
                     anchors.topMargin: 0
-                    anchors.bottom: parent.bottom
+                    anchors.bottom: navigateurDeTemps.top
                     anchors.bottomMargin: 0
                     anchors.horizontalCenter: parent.horizontalCenter
                     source: "../plan.svg"
-
-                    MouseArea{
-                        anchors.fill:parent;
-                        onClicked: Fonctions.createSpriteObjectsPlan(x,y);
-                    }
+                    z:3
 
                     Rectangle {
 
+                        id: rectangleAutourPlan
                         anchors.top: plan.y
                         anchors.topMargin: 0
-
+                        anchors.fill:parent
+                        color:"transparent"
 
                         Repeater {
-                            model: app.postes
+                            id: leRepeater
+                            objectName: "monRepeater"
+                            model: app.planCourant
 
 
-                            Image {
-                                source: "marqueurs/rouge.png"
+
+                            delegate: Rectangle {
+                                id: imageMarqueur
+                                //source: "marqueurs/rouge.png"
                                 x: (plan.width > plan.height) ? (posx * plan.height)+ ((plan.width-plan.height)/2) : posx * plan.width
                                 y: (plan.width > plan.height) ? posy * plan.height : (posy * plan.width)+ ((plan.height-plan.width)/2)
-                                height: (plan.width > plan.height) ? (79/1000) * plan.height : (79/1000) * plan.width
+                                height: (plan.width > plan.height) ? (50/1000) * plan.height : (50/1000) * plan.width
                                 width: (plan.width > plan.height) ? (50/1000) * plan.width : (50/1000) * plan.width
+                                radius: 100
+                                border.width: 4
+                                border.color: "red"
+                                z: 100
+                                transform: Translate {
+                                    x: -width/2
+                                    y: -height/2
+                                }
+                                MouseArea {
 
+                                    hoverEnabled: true
+                                    onEntered : { allongerRectangle.start(); elargirRectangle.start(); remonterRectangle.start(); app.setIdTour(id_tour)} // Le contraire de arrondir
+                                    onExited : { retrecirRectangle.start(); affinerRectangle.start(); redescendreRectangle.start();app.setIdTour(-1) }
+
+
+
+                                    NumberAnimation { id: allongerRectangle; target: imageMarqueur; property: "width"; to: 300; duration: 200}
+                                    NumberAnimation { id: elargirRectangle; target: imageMarqueur; property: "height"; to: 60; duration: 200}
+                                    NumberAnimation { id: derondirRectangle; target: imageMarqueur; property: "radius"; to: 5; duration: 200}
+                                    NumberAnimation { id: remonterRectangle; target: imageMarqueur; property: "z"; to: 200; duration: 200}
+
+                                    NumberAnimation { id: retrecirRectangle; target: imageMarqueur; property: "width"; to: Math.round((plan.width > plan.height) ? (50/1000) * plan.height : (50/1000) * plan.width); duration: 200}
+                                    NumberAnimation { id: affinerRectangle; target: imageMarqueur; property: "height"; to: Math.round((plan.width > plan.height) ? (50/1000) * plan.height : (50/1000) * plan.width); duration: 200}
+                                    NumberAnimation { id: redescendreRectangle; target: imageMarqueur; property: "z"; to: 100; duration: 200}
+
+
+
+                                    anchors.fill : parent
+
+                                }
+
+                                Rectangle {
+                                    id:ddd
+                                    anchors.fill: parent
+                                    color: "transparent"
+
+
+                                    ListView {
+                                          id: interieurCercle
+                                          model: app.tour_benevoles
+
+                                          //anchors.centerIn: parent
+                                          anchors.left: parent.left
+                                          anchors.top: parent.top
+                                          anchors.leftMargin: 50
+                                          width: parent.width
+                                          height: parent.height
+
+                                          anchors.topMargin: 15
+                                          clip:true
+                                          spacing: 13
+                                          orientation: ListView.Horizontal
+                                          delegate:  Rectangle {
+
+                                              Rectangle {color: "black"; radius: 100; width: 10;height: 10}
+                                              Rectangle {color: Fonctions.couleurCercle(statut_affectation); radius: 100; width: 10;height: 10; border.color: "black"; border.width: 1}
+ }
+
+                                    }
+                                }
 
                             }
                         }
 
+                        Rectangle {
+                            id: bulleinformative
+                            color: "white"
+                            x: 0
+                            y: -1000
+                            width: 200
+                            height: 50
+                            radius:5
+                            border.color: "#c0392b"
+                            border.width: 2
+
+                            Text {
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                text: "Exemple d'information"
+                            }
+
+
+                        }
 
 
                     }
@@ -342,10 +422,11 @@ ApplicationWindow { // Fenetre principale
                 Rectangle {
                     id: tours
                     anchors.top: parent.top
-                    anchors.bottom: parent.bottom
+                    anchors.bottom: navigateurDeTemps.top
                     anchors.left: plan.right
                     anchors.right: parent.right
                     anchors.margins: 20
+                    z:2
 
                     TextField {
                         id: rechercheDeTours
@@ -360,63 +441,133 @@ ApplicationWindow { // Fenetre principale
 
                     ListView {
                         id: listeDesTours
-                        anchors.bottom: parent.verticalCenter
-                        anchors.bottomMargin: 0
                         anchors.top: rechercheDeTours.bottom
-                        anchors.topMargin: 0
+                        anchors.topMargin: 10
                         clip: true
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.rightMargin: 0
                         anchors.leftMargin: 0
-
-                        delegate: Text {
+                        spacing: 3
+                        height: parent.height * 0.30
+                        delegate: Button {
                             text: nom
                             anchors.left: parent.left
                             anchors.right: parent.right
+
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: {
-                                    app.setIdPoste(id)
-                                    console.log("Cliqué !!")
-                                    console.log("Poste cliqué: " + id)
+                                    app.setIdPoste(id_poste)
+                                    app.setIdTour(id_tour)
+                                    console.log(id_tour);
+                                    _listeDesAffectes.text = "<hr><u>Liste des affectés</u>";
+
                                 }
                             }
                         }
                         keyNavigationWraps: true
                         boundsBehavior: Flickable.StopAtBounds
-                        model: app.postes
+                        model: app.planCourant
                     }
 
                     ListView {
 
                         id: fichePoste
                         model: app.fiche_poste
-                        anchors.top: parent.verticalCenter
+                        anchors.top: listeDesTours.bottom
                         anchors.topMargin: 15
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 25
+
                         anchors.right: parent.right
                         anchors.rightMargin: 0
                         anchors.left: parent.left
                         anchors.leftMargin: 0
                         clip: true
+                        height: parent.height * 0.20
 
-                        delegate: Column {
+                        delegate:
+
+
+                            Column {
 
                             anchors.topMargin: 10
-                            Text { text: 'id :\t' + id_poste }
-                            Text { text: 'Nom :\t' + nom }
-                            Text { text: 'Description :\t' + description }
 
-                            Text { text: 'Position :\t' + "(" + posx + "," + posy + ") <br>" }
+                            Text {
+                                id: _horaire
+                                text: '<b><h2>' + Fonctions.heure(debut) + " - " + Fonctions.heure(fin) + "</h2></b><br>"
+                                wrapMode: Text.Wrap
+                                width: fichePoste.width
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+
+                            Text {
+                                id: _nombre_affectation
+                                text: "<u>Affectations: </u> " + nombre_affectations+"/"+max
+                                wrapMode: Text.Wrap
+                                width: fichePoste.width
+                            }
+
 
                         }
+
+
                     }
 
+
+                    Rectangle {
+                        anchors.top: fichePoste.bottom
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.margins: 15
+
+                        Text
+                        {
+                            id: _listeDesAffectes
+                            text: "<u>Liste des affectés</u>"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+
+                        ListView {
+                            id: benevolesAffectes
+                            anchors.top: _listeDesAffectes.bottom
+                            anchors.topMargin: 6
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.right: parent.right
+                            clip: true
+                            spacing: 6
+                            model: app.tour_benevoles
+
+                            delegate:
+                                Row {
+
+                                Rectangle { id: rond_couleur_affectation; color:Fonctions.definirCouleurCercleNom(statut_affectation);radius:100; width:10; height:10}
+
+
+
+                                Text {
+                                    text: " " +nom_personne + " " + prenom_personne + " " + statut_affectation
+                                    wrapMode: Text.Wrap
+                                    width: parent.width - rond_couleur_affectation
+
+
+                                }
+
+                            }
+
+                        }
+
+
+                        ScrollBar {
+                            flickable: benevolesAffectes;
+                        }
+                    }
                     ScrollBar {
                         flickable: listeDesTours;
                     }
+
 
                     ScrollBar {
                         flickable: fichePoste;
@@ -433,7 +584,72 @@ ApplicationWindow { // Fenetre principale
                                 } */
 
 
+                Slider { // Le slider permettant de changer de date
+                    id: navigateurDeTemps
+                    minimumValue: app.heureMin.getTime()
+                    maximumValue: app.heureMax.getTime()
+                    value: app.heure.getTime()
+                    z:2
+                    updateValueWhileDragging : false
+                    onValueChanged: {
+                        app.heure = new Date(value);
+                        listeDesTours.model = app.planCourant;
+                        bulleinformative.y = -1000;
+                        leRepeater.model = app.planCourant;
+                        app.setIdPoste(-1)
+                        app.setIdTour(-1)
+                        _listeDesAffectes.text = ""
+                    }
+                    //  console.log(app.heure);}// La variable "heure" prends pour valeur la date du slider
+                    // stepSize: 24*3600 // Fait planter l'application
 
+
+                    anchors.right: parent.right
+                    anchors.rightMargin: 0
+                    anchors.left: parent.left
+                    anchors.leftMargin: 0
+                    // anchors.bottom: statusbar.top NE PLACE PAS AU DESSUS DE LA BARRE DE STATUT
+                    anchors.bottomMargin: 20 // SOLUTION TEMPORAIRE
+                    anchors.bottom:parent.bottom
+
+                    style: SliderStyle {
+                        groove: Rectangle {
+                            implicitWidth: 200
+                            implicitHeight: 8
+                            LinearGradient {
+                                anchors.fill: parent
+                                start: Qt.point(0, 0)
+                                end: Qt.point(navigateurDeTemps.width, 0)
+                                gradient: Gradient {
+                                    GradientStop { position: 0.0; color: "red" }
+                                    GradientStop { position: 1.0; color: "blue" }
+                                }
+                            }
+                            radius: 8
+                        }
+                        handle: Rectangle {
+                            anchors.centerIn: parent
+                            color: control.pressed ? "white" : "lightgray"
+                            border.color: "gray"
+                            border.width: 2
+                            implicitWidth: 55
+                            implicitHeight: 34
+                            radius: 12
+
+                            Rectangle {
+                                anchors.topMargin: 10
+                                anchors.fill:parent
+                                color: "transparent"
+                                Text {
+                                    text: Fonctions.heure(app.heure)
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                }
+                            }
+                        }
+                    }
+
+
+                }
 
 
 
@@ -467,11 +683,26 @@ ApplicationWindow { // Fenetre principale
                     source: "../plan.svg"
                     onStatusChanged: console.log(planPosteEtTours.anchors.right)
 
-                    MouseArea {
-                        id: mouseAreaPlan
-                        anchors.fill: planPosteEtTours
-                        onClicked: Fonctions.createSpriteObjects(rectTest,mouse.x,mouse.y)
+                    Rectangle {
+
+                        id: rectangleBordurePlan
+                        color: "transparent"
+
+
+                        x: (parent.width - width)/2
+                        y: (parent.height - height)/2
+                        height: Fonctions.min(parent.width, parent.height)
+                        width: Fonctions.min(parent.width, parent.height)
+
+                        MouseArea {
+                            id: mouseAreaPlan
+                            anchors.fill: parent
+                            onClicked: Fonctions.createSpriteObjects(rectangleBordurePlan,mouse.x , mouse.y)
+                            cursorShape: Qt.CrossCursor
+                        }
                     }
+
+
 
                 }
 
@@ -567,7 +798,7 @@ ApplicationWindow { // Fenetre principale
 
                     anchors.topMargin: 5
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 5
+                    anchors.bottomMargin: 25
                     anchors.left: descriptionPoste.left
                     anchors.leftMargin: (-(corbeille.width+100))
                     source: "corbeille.png"
@@ -1004,7 +1235,7 @@ ApplicationWindow { // Fenetre principale
                     anchors.left: parent.left
                     anchors.leftMargin: parent.width * 0.40
                     onClicked: { console.log("TODO: Faire la requete d'inscription (attendre modification de la base");
-                     app.faireInscription(_nomBenevole.text, _prenomBenevole.text, _adresseBenevole.text, _codePostalBenevole.text, _communeBenevole.text,_courrielBenevole.text, _numero);
+                        app.faireInscription(_nomBenevole.text, _prenomBenevole.text, _adresseBenevole.text, _codePostalBenevole.text, _communeBenevole.text,_courrielBenevole.text, _numero);
                     }
                 }
 
