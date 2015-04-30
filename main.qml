@@ -343,8 +343,8 @@ ApplicationWindow { // Fenetre principale
                                     hoverEnabled: true
 
 
-                                    onEntered : { allongerRectangle.start(); elargirRectangle.start(); remonterRectangle.start();app.setIdAffectation(id_tour); interieurCercle.model = app.affectations}
-                                    onExited : { retrecirRectangle.start(); affinerRectangle.start(); redescendreRectangle.start();interieurCercle.model = app.setIdAffectation(-1) }
+                                    onEntered : { allongerRectangle.start(); elargirRectangle.start(); remonterRectangle.start();app.setIdTour(id_tour);app.setIdAffectation(id_tour); interieurCercle.model = app.affectations}
+                                    onExited : { retrecirRectangle.start(); affinerRectangle.start(); redescendreRectangle.start();interieurCercle.model = app.setIdAffectation(-1); app.setIdTour(-1) }
 
                                     NumberAnimation { id: allongerRectangle; target: imageMarqueur; property: "width"; to: 300; duration: 200}
                                     NumberAnimation { id: elargirRectangle; target: imageMarqueur; property: "height"; to: 60; duration: 200}
@@ -369,7 +369,6 @@ ApplicationWindow { // Fenetre principale
 
                                     ListView {
                                           id: interieurCercle
-                                          model: app.tour_benevoles
 
                                           //anchors.centerIn: parent
                                           anchors.left: parent.left
