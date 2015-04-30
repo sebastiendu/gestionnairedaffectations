@@ -316,6 +316,7 @@ ApplicationWindow { // Fenetre principale
                         anchors.fill:parent
                         color:"transparent"
 
+
                         Repeater {
                             id: leRepeater
                             objectName: "monRepeater"
@@ -328,67 +329,118 @@ ApplicationWindow { // Fenetre principale
                                 //source: "marqueurs/rouge.png"
                                 x: (plan.width > plan.height) ? (posx * plan.height)+ ((plan.width-plan.height)/2) : posx * plan.width
                                 y: (plan.width > plan.height) ? posy * plan.height : (posy * plan.width)+ ((plan.height-plan.width)/2)
-                                height: (plan.width > plan.height) ? (50/1000) * plan.height : (50/1000) * plan.width
-                                width: (plan.width > plan.height) ? (50/1000) * plan.width : (50/1000) * plan.width
+                                height: (plan.width > plan.height) ? (70/1000) * plan.height : (70/1000) * plan.width
+                                width: (plan.width > plan.height) ? (70/1000) * plan.width : (70/1000) * plan.width
                                 radius: 100
                                 border.width: 4
                                 border.color: "red"
-                                z: 100
+
                                 transform: Translate {
                                     x: -width/2
                                     y: -height/2
                                 }
+
+
                                 MouseArea {
 
                                     hoverEnabled: true
 
 
-                                    onEntered : { allongerRectangle.start(); elargirRectangle.start(); remonterRectangle.start();app.setIdTour(id_tour);app.setIdAffectation(id_tour); interieurCercle.model = app.affectations}
-                                    onExited : { retrecirRectangle.start(); affinerRectangle.start(); redescendreRectangle.start();interieurCercle.model = app.setIdAffectation(-1); app.setIdTour(-1) }
+                                    onEntered : {
+                                        if(Fonctions.bulleClique == false) {
+                                            allongerRectangle.start();
+                                            elargirRectangle.start();
+                                            remonterRectangle.start();
+                                            app.setIdTour(id_tour);
+                                            app.setIdAffectation(id_tour);
+                                            interieurCercle.model = app.affectations;
+                                            imageMarqueur.radius =5 ;
+                                        }
+                                    }
+
+                                    onExited : {
+                                        if(Fonctions.bulleClique == false) {
+                                            retrecirRectangle.start();
+                                            affinerRectangle.start();
+                                            redescendreRectangle.start();
+                                            interieurCercle.model = app.setIdAffectation(-1);
+                                            app.setIdDisponibilite(-1);
+                                            app.setIdTour(-1) ;
+                                            imageMarqueur.radius =100}
+                                    }
+
+
+
 
                                     NumberAnimation { id: allongerRectangle; target: imageMarqueur; property: "width"; to: 300; duration: 200}
-                                    NumberAnimation { id: elargirRectangle; target: imageMarqueur; property: "height"; to: 60; duration: 200}
+                                    NumberAnimation { id: elargirRectangle; target: imageMarqueur; property: "height"; to: 100; duration: 200}
                                     NumberAnimation { id: derondirRectangle; target: imageMarqueur; property: "radius"; to: 5; duration: 200}
                                     NumberAnimation { id: remonterRectangle; target: imageMarqueur; property: "z"; to: 200; duration: 200}
 
-                                    NumberAnimation { id: retrecirRectangle; target: imageMarqueur; property: "width"; to: Math.round((plan.width > plan.height) ? (50/1000) * plan.height : (50/1000) * plan.width); duration: 200}
-                                    NumberAnimation { id: affinerRectangle; target: imageMarqueur; property: "height"; to: Math.round((plan.width > plan.height) ? (50/1000) * plan.height : (50/1000) * plan.width); duration: 200}
+                                    NumberAnimation { id: retrecirRectangle; target: imageMarqueur; property: "width"; to: Math.round((plan.width > plan.height) ? (70/1000) * plan.height : (70/1000) * plan.width); duration: 200}
+                                    NumberAnimation { id: affinerRectangle; target: imageMarqueur; property: "height"; to: Math.round((plan.width > plan.height) ? (70/1000) * plan.height : (70/1000) * plan.width); duration: 200}
                                     NumberAnimation { id: redescendreRectangle; target: imageMarqueur; property: "z"; to: 100; duration: 200}
 
 
 
                                     anchors.fill : parent
 
+
                                 }
 
-                                Rectangle {
-
-                                    anchors.fill: parent
-                                    color: "transparent"
 
 
-                                    ListView {
-                                          id: interieurCercle
+                                GridView {
+                                    id: interieurCercle
+                                    cellWidth: 15
+                                    cellHeight: 15
+                                    property int compteur: interieurCercle.count
+                                    //anchors.centerIn: parent
+                                    anchors.left: parent.left
+                                    anchors.top: parent.top
+                                    anchors.leftMargin: 12
+                                    width: (parent.width - anchors.leftMargin)
+                                    height: parent.height -anchors.topMargin
+                                    anchors.topMargin: 12
+                                    clip: true
 
-                                          //anchors.centerIn: parent
-                                          anchors.left: parent.left
-                                          anchors.top: parent.top
-                                          anchors.leftMargin: 20
-                                          width: parent.width
-                                          height: parent.height
 
-                                          anchors.topMargin: 15
-                                          clip: true
-                                          spacing: 13
-                                          orientation: ListView.Horizontal
-                                          delegate:  Rectangle {
 
-                                              Rectangle {color: "black"; radius: 100; width: 10;height: 10}
-                                              Rectangle {color: Fonctions.couleurCercle(statut_affectation); radius: 100; width: 10;height: 10; border.color: "black"; border.width: 1}
- }
 
+                                    delegate: Rectangle {
+                                        color: Fonctions.couleurCercle(statut_affectation)
+                                        radius: 100
+                                        width: 13
+                                        height: 13
+                                        border.color: "black"
+                                        border.width: 1
+
+
+
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: {
+                                                console.log("Il s'agit de : " + nom_personne);
+                                                Fonctions.bulleClique = !(Fonctions.bulleClique);
+                                                app.setIdDisponibilite(id_disponibilite);
+
+                                            }
+                                            z:105
+
+
+
+
+                                        }
                                     }
+
+
+
+
+
                                 }
+
+
 
                             }
                         }
@@ -415,6 +467,7 @@ ApplicationWindow { // Fenetre principale
 
 
                     }
+
 
                 }
 
@@ -598,6 +651,7 @@ ApplicationWindow { // Fenetre principale
                         app.setIdPoste(-1)
                         app.setIdTour(-1)
                         _listeDesAffectes.text = ""
+                        Fonctions.bulleClique = false;
                     }
                     //  console.log(app.heure);}// La variable "heure" prends pour valeur la date du slider
                     // stepSize: 24*3600 // Fait planter l'application

@@ -2,6 +2,7 @@ var indexMemoire = "-1"; // Permet de connaitre le n° du candidat selectionné,
 var component;
 var sprite;
 var numeroMarqueur = 0;
+var bulleClique = false;
 
 function dateFR(dateRecu) {
     var heure;
