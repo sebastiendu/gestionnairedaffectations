@@ -82,10 +82,6 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
     db.setDatabaseName(m_settings->value("database/databaseName").toString());
     db.setUserName(m_settings->value("database/userName").toString());
     db.setPassword(
-        m_settings->value("database/rememberPassword").toBool()
-        ? m_settings->value("database/password").toString()
-        : password
-    );
 
     if(db.open()) {
 
@@ -288,3 +284,105 @@ void GestionnaireDAffectations::mettreAJourModelPlan(){
     }
 }
 */
+
+void GestionnaireDAffectations::genererFichesDePostes()
+{
+    QSqlQuery query;
+    query.prepare("select * from fiche_de_poste_benevoles_par_tour where id_evenement= :evt");
+    query.bindValue(":evt",idEvenement());
+    query.exec();
+
+    /* Création d'un fichier temporaire
+        // Génération d'un nom aléatoire
+        char *monFichier;
+        char nom[] = "lOlIlOlXXXXXX";
+        monFichier = mktemp(nom);
+
+        // Création du fichier
+        ofstream monFichierTemporaire;
+        monFichierTemporaire.open(monFichier,ios::out);
+        if (!monFichierTemporaire.bad())
+        {
+            monFichierTemporaire << " contenu " ;
+            monFichierTemporaire.close();
+        } */
+    QProcess* pandoc = new QProcess(this);
+    pandoc->setProgram("pandoc");
+    QStringList arguments;
+    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << "/tmp/resultat.odt" << "-";
+    pandoc->setArguments(arguments);
+    pandoc->start();
+    pandoc->waitForStarted();
+
+    // PARCOUR DE LA REQUETE
+    // Initialisation
+    int id_poste = -1;
+    int id_tour = -1;
+
+    // Affichage des résultats en HTML
+    query.next();
+    qDebug () << query.record().value("nom_evenement").toString();
+
+    pandoc->write("\n# Evenement : ");
+    pandoc->write(query.record().value("nom_evenement").toString().toUtf8());
+    pandoc->write("\n\n");
+
+    while (query.next())
+    {
+        if (query.record().value("id_poste").toInt() != id_poste)
+        {
+            id_poste = query.record().value("id_poste").toInt();
+
+            pandoc->write("\n -------- \n");
+            pandoc->write("\n\n## Poste : ");
+            pandoc->write(query.record().value("nom_poste").toString().toUtf8());
+            pandoc->write("\n\n");
+        }
+
+        if (query.record().value("id_tour").toInt() != id_tour)
+        {
+            id_tour = query.record().value("id_tour").toInt();
+
+
+            if (query.record().value("debut_tour").toDateTime().toString("d") == query.record().value("fin_tour").toDateTime().toString("d"))
+            {
+                pandoc->write("\n\n### Tour : Le ");
+                pandoc->write(query.record().value("debut_tour").toDateTime().toString("d/MM/yyyy").toUtf8());
+                pandoc->write(" de ");
+                pandoc->write(query.record().value("debut_tour").toDateTime().toString("H:mm").toUtf8());
+                pandoc->write(" à ");
+                pandoc->write(query.record().value("fin_tour").toDateTime().toString("H:mm").toUtf8());
+                pandoc->write("\n\n");
+            }
+            else
+            {
+                pandoc->write("\n\n### Tour : Du ");
+                pandoc->write(query.record().value("debut_tour").toDateTime().toString("d/MM/yyyy H:mm").toUtf8());
+                pandoc->write(" au ");
+                pandoc->write(query.record().value("fin_tour").toDateTime().toString("d/MM/yyyy H:mm").toUtf8());
+                pandoc->write("\n\n");
+            }
+            pandoc->write("Nom|Prénom|Portable\n");
+            pandoc->write("---|---|---\n");
+        }
+
+        pandoc->write(query.record().value("nom_personne").toString().toUtf8());
+        pandoc->write("|");
+        pandoc->write(query.record().value("prenom_personne").toString().toUtf8());
+        pandoc->write("|");
+        pandoc->write(query.record().value("portable").toString().toUtf8());
+        pandoc->write("\n");
+    }
+    pandoc->closeWriteChannel();
+    pandoc->waitForFinished();
+
+    qDebug() << pandoc->readAll();
+
+    QProcess* lowriter = new QProcess(this);
+    lowriter->start("lowriter", QStringList() << "/tmp/resultat.odt");
+    lowriter->waitForFinished();
+
+    qDebug() << lowriter->readAll();
+
+}
+
