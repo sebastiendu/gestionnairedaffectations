@@ -1,4 +1,5 @@
 #include <QSqlQuery>
+#include <QSqlRecord>
 #include <QSqlError>
 #include <QtQml>
 #include <QtDebug>
@@ -82,6 +83,10 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
     db.setDatabaseName(m_settings->value("database/databaseName").toString());
     db.setUserName(m_settings->value("database/userName").toString());
     db.setPassword(
+                m_settings->value("database/rememberPassword").toBool()
+                ? m_settings->value("database/password").toString()
+                : password
+                  );
 
     if(db.open()) {
 
