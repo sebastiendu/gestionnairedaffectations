@@ -62,6 +62,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     if (m_settings->value("database/rememberPassword").toBool()) {
         ouvrirLaBase();
     }
+
     connect(this,SIGNAL(heureChanged()),this,SLOT(mettreAJourModelPlan()));
 }
 
@@ -143,7 +144,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_affectations->setQuery(query);
 
-        query.prepare("select * from poste_et_tour where id_evenement= :evt;");
+        query.prepare("select * from poste where id_evenement= :evt;");
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_planComplet->setQuery(query);
@@ -323,8 +324,14 @@ void GestionnaireDAffectations::insererPoste(QString poste, QString description,
     query.exec();
     qDebug() << query.lastError().text();
 
-    //   setIdEvenement(query.lastInsertId().toInt());
+    query = m_planComplet->query();
+    query.bindValue(0,idEvenement());
+    query.exec();
+    m_planComplet->setQuery(query);
+
+    planCompletChanged();
 }
+
 
 float GestionnaireDAffectations::getRatioX() { return this->ratioX ; }
 float GestionnaireDAffectations::getRatioY() { return this->ratioY ;}

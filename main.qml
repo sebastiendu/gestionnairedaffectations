@@ -626,13 +626,6 @@ ApplicationWindow { // Fenetre principale
                 }
 
 
-                /*  Connections {
-                                    target: gestionnairedaffectations
-                                    onPlacerMarqueur: {
-                                      Fonctions.createSpriteObjectsPlan(x,y);
-                                    }
-                                } */
-
 
                 Slider { // Le slider permettant de changer de date
                     id: navigateurDeTemps
@@ -745,7 +738,23 @@ ApplicationWindow { // Fenetre principale
 
                         id: rectangleBordurePlan
                         color: "transparent"
+                        // ICI ON MET LE PLAN SUR ECOUTE
 
+                        /* signal planMAJ()
+                        Component.onCompleted: {
+                        rectangleBordurePlan.planMAJ.connect(mettreAJourPlanComplet)
+                        }
+
+                        function mettreAJourPlanComplet() {
+                            repeaterPostesEtTours.model = app.planComplet;
+                        }
+                        */
+                        Connections {
+                            target: app
+                            onPlanCompletChanged: {
+                                repeaterPostesEtTours.model = app.planComplet;
+                            }
+                        }
 
                         x: (parent.width - width)/2
                         y: (parent.height - height)/2
@@ -762,7 +771,6 @@ ApplicationWindow { // Fenetre principale
 
                                 Fonctions.afficherFenetreNouveauPoste();
 
-                               // app.insererPoste("test","test", (mouse.x/parent.width) , (mouse.y/parent.height));
                                // Fonctions.createSpriteObjects(rectangleBordurePlan, mouse.x, mouse.y)
                             }
 
@@ -800,8 +808,11 @@ ApplicationWindow { // Fenetre principale
                                 Rectangle {
                                     id: imageMarqueurPostesEtTours
 
-                                    x: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? (posx * rectangleBordurePlan.height)+ ((rectangleBordurePlan.width-rectangleBordurePlan.height)/2) : posx * rectangleBordurePlan.width
-                                    y: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? posy * rectangleBordurePlan.height : (posy * rectangleBordurePlan.width)+ ((rectangleBordurePlan.height-rectangleBordurePlan.width)/2)
+                                    // Formule compliquée pour placer le marqueur correctement en prenant en compte la taille de l'écran
+                                    x: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? ((posx * rectangleBordurePlan.height)+ ((rectangleBordurePlan.width-rectangleBordurePlan.height)/2) -imageMarqueurPostesEtTours.width/2) : ((posx * rectangleBordurePlan.width) -imageMarqueurPostesEtTours.width/2)
+                                    y: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? ((posy * rectangleBordurePlan.height)-imageMarqueurPostesEtTours.height/2) : ((posy * rectangleBordurePlan.width)+ ((rectangleBordurePlan.height-rectangleBordurePlan.width)/2)  -imageMarqueurPostesEtTours.height/2)
+
+                                    // Fonction compliqué pour adapter la taille du marqueur à la taille de l'écran
                                     height: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? (70/1000) * rectangleBordurePlan.height : (70/1000) * rectangleBordurePlan.width
                                     width: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? (70/1000) * rectangleBordurePlan.width : (70/1000) * rectangleBordurePlan.width
 
@@ -809,10 +820,7 @@ ApplicationWindow { // Fenetre principale
                                     border.width: 4
                                     border.color: "red"
 
-                                    transform: Translate {
-                                        x: -width/2
-                                        y: -height/2
-                                    }
+
                                     z:1
                                 }
 
@@ -824,7 +832,7 @@ ApplicationWindow { // Fenetre principale
                                         console.log("Marqueur cliqué") ;
                                         _nomPoste.text = nom;
                                         _descriptionPoste.text = description;
-                                        app.setIdPosteTour(id_poste);
+                                        app.setIdPosteTour(id);
                                         tableauTours.model = app.fiche_poste_tour;
                                         imageMarqueurPostesEtTours.z = 150;
                                         nomBulle.z = 150;
@@ -906,12 +914,7 @@ ApplicationWindow { // Fenetre principale
                         // model: app.fiche_poste_tour
                     }
 
-                    /*                    ListModel {
-                        id: exemplePeuplement
-                        ListElement{ debut: "05/06/2015 20h00"; fin:"05/06/2015 22h00"; min: "2"; max:"4";}
-                        ListElement{ debut: "05/06/2015 22h00"; fin:"06/06/2015 00h00"; min: "4"; max:"5";}
-                        ListElement{ debut: "06/06/2015 00h00"; fin:"06/06/2015 02h00"; min: "3"; max:"5";}
-                    }  */
+
 
                     Rectangle { // Exemple d'ajout
                         anchors.top : tableauTours.bottom

@@ -58,7 +58,6 @@ public:
 
     Q_INVOKABLE void setRatioX(float x);
     Q_INVOKABLE void setRatioY(float y);
-
 signals:
     void heureChanged();
     void heureMinChanged();
