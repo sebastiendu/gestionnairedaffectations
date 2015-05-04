@@ -34,7 +34,8 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_fiche_benevole = new SqlQueryModel;
     m_affectations = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
-
+    m_fiche_poste_tour = new SqlQueryModel;
+    m_planComplet = new SqlQueryModel;
     m_plan = new QSortFilterProxyModel(this);
 
     if(!m_settings->contains("database/databaseName")) {
@@ -125,6 +126,11 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_fiche_poste->setQuery(query);
 
+        query.prepare("select * from poste_et_tour where id_poste= :poste ;");
+        query.bindValue(":poste",m_id_poste);
+        query.exec();
+        m_fiche_poste_tour->setQuery(query);
+
         query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement; ");
         query.bindValue(":tour",m_id_tour);
         query.bindValue(":id_evenement",idEvenement());
@@ -136,6 +142,12 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_affectations->setQuery(query);
+
+        query.prepare("select * from poste_et_tour where id_evenement= :evt;");
+        query.bindValue(":id_evenement",idEvenement());
+        query.exec();
+        m_planComplet->setQuery(query);
+
 
     } else {
         qDebug() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
@@ -187,6 +199,11 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_affectations->setQuery(query);
 
+    query = m_planComplet->query();
+    query.bindValue(0,idEvenement());
+    query.exec();
+    m_planComplet->setQuery(query);
+
     query.prepare("select debut, fin from evenement where id=?");
     query.addBindValue(idEvenement());
     query.exec();
@@ -210,6 +227,14 @@ void GestionnaireDAffectations::setIdPoste(int id) {
     query.exec();
     m_fiche_poste->setQuery(query);
 }
+
+void GestionnaireDAffectations::setIdPosteTour(int id) {
+    QSqlQuery query = m_fiche_poste_tour->query();
+    query.bindValue(":poste", id);
+    query.exec();
+    m_fiche_poste_tour->setQuery(query);
+}
+
 
 void GestionnaireDAffectations::setIdTour(int id) {
     m_id_tour = id;
@@ -283,28 +308,25 @@ void GestionnaireDAffectations::mettreAJourModelPlan(){
     qDebug() << "Nombre de colonne dans plan:" << m_plan->rowCount();
     qDebug() << m_plan->index(1,1);
 
-    /*query.prepare("select * from poste_et_tour where id_poste= :poste AND debut <= :debut AND fin >= :fin;");
-    query.bindValue(":poste",m_id_poste);
-    query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
-    query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
-    query.exec();
-    m_fiche_poste = new SqlQueryModel;
-    m_fiche_poste->setQuery(query); */
-
     qDebug() << "La date:" << m_heure.toString("yyyy-MM-d h:m:s");
     qDebug() << "Nombre de postes à ce moment: " << m_postes->rowCount();
 }
 
-/* void GestionnaireDAffectations::faireInscription(int p){
+void GestionnaireDAffectations::insererPoste(QString poste, QString description, float posx, float posy) {
     QSqlQuery query;
-    query.prepare("insert into evenement (nom, debut, fin, lieu, id_evenement_precedent) values (?,?,?,?,?)");
-    query.addBindValue(nom);
-    query.addBindValue(debut);
-    query.addBindValue(fin);
-    query.addBindValue(lieu);
-    query.addBindValue(id_evenement_precedent);
-    if (query.exec()) {
-        setIdEvenement(query.lastInsertId().toInt());
-    }
+    query.prepare("INSERT INTO poste (id_evenement,nom,description,posx,posy) VALUES (:id_evenement, :poste, :description, :posx, :posy);");
+    query.bindValue(":id_evenement",idEvenement());
+    query.bindValue(":poste",poste);
+    query.bindValue(":description",description);
+    query.bindValue(":posx",posx);
+    query.bindValue(":posy",posy);
+    query.exec();
+    qDebug() << query.lastError().text();
+
+    //   setIdEvenement(query.lastInsertId().toInt());
 }
-*/
+
+float GestionnaireDAffectations::getRatioX() { return this->ratioX ; }
+float GestionnaireDAffectations::getRatioY() { return this->ratioY ;}
+void GestionnaireDAffectations::setRatioX(float x) {this->ratioX = x ;}
+void GestionnaireDAffectations::setRatioY(float y) {this->ratioY = y;}

@@ -4,6 +4,8 @@ var sprite;
 var numeroMarqueur = 0;
 var bulleClique = false;
 
+
+
 function dateFR(dateRecu) {
     var heure;
     var minutes;
@@ -65,20 +67,20 @@ function datePourTours(dateRecu) {
 
 function definirCouleurCercleNom (statut) {
     if(statut == "acceptee")
-         return "green";
+        return "green";
     else if(statut == "rejetee")
         return "red"
     else
-         return "orange";
+        return "orange";
 }
 
 function couleurCercle(statut){
     if(statut == "acceptee")
-         return "green";
+        return "green";
     else if(statut == "rejetee")
         return "red"
     else
-         return "orange";
+        return "orange";
 }
 
 function heure(dateRecu) {
@@ -119,6 +121,17 @@ function genererMail()
 
 }
 
+function afficherFenetreNouveauPoste() {
+var component = Qt.createComponent("nouveauPoste.qml")
+if( component.status !== Component.Ready )
+{
+    if( component.status === Component.Error )
+        console.debug("Error:"+ component.errorString() );
+    return;
+}
+var window = component.createObject(gestionDesAffectations)
+window.show() // On ouvre la fenetre d'ajout du nouveau poste
+}
 
 function createSpriteObjects(rect,x,y) {
     component = Qt.createComponent("marqueur.qml");

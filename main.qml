@@ -39,6 +39,8 @@ ApplicationWindow { // Fenetre principale
         }
     }
 
+
+
     Action {
         id: parametresDeConnexion
         text: qsTr("Paramètres de connexion…")
@@ -304,7 +306,7 @@ ApplicationWindow { // Fenetre principale
                     Rectangle {
 
                         id: rectangleAutourPlan
-                        anchors.top: plan.y
+                        anchors.top: plan.top
                         anchors.topMargin: 0
                         anchors.fill:parent
                         color:"transparent"
@@ -346,7 +348,9 @@ ApplicationWindow { // Fenetre principale
                                             remonterRectangle.start();
                                             app.setIdTour(id_tour);
                                             app.setIdAffectation(id_tour);
+                                            app.setIdPoste(id_poste);
                                             interieurCercle.model = app.affectations;
+                                            fichePoste.model = app.fiche_poste;
                                             imageMarqueur.radius =5 ;
                                         }
                                     }
@@ -359,6 +363,7 @@ ApplicationWindow { // Fenetre principale
                                             interieurCercle.model = app.setIdAffectation(-1);
                                             app.setIdDisponibilite(-1);
                                             app.setIdTour(-1) ;
+                                            app.setIdPoste(-1);
                                             imageMarqueur.radius =100}
                                     }
 
@@ -703,6 +708,11 @@ ApplicationWindow { // Fenetre principale
 
 
         }
+
+
+
+
+
         // ===================================================================
         // =======================ONGLET POSTES ET TOURS =====================
         // ===================================================================
@@ -745,9 +755,85 @@ ApplicationWindow { // Fenetre principale
                         MouseArea {
                             id: mouseAreaPlan
                             anchors.fill: parent
-                            onClicked: Fonctions.createSpriteObjects(rectangleBordurePlan,mouse.x , mouse.y)
+                            onClicked: {
+
+                                app.setRatioX(mouse.x/parent.width)
+                                app.setRatioY(mouse.y/parent.height)
+
+                                Fonctions.afficherFenetreNouveauPoste();
+
+                               // app.insererPoste("test","test", (mouse.x/parent.width) , (mouse.y/parent.height));
+                               // Fonctions.createSpriteObjects(rectangleBordurePlan, mouse.x, mouse.y)
+                            }
+
                             cursorShape: Qt.CrossCursor
                         }
+
+                        Repeater {
+                            id: repeaterPostesEtTours
+                            objectName: "repeaterPostesEtTours"
+                            model: app.planComplet
+
+
+                            delegate: Rectangle {
+                                z:1
+
+                                Rectangle {
+                                    id: nomBulle
+                                    color: "white"
+                                    height: _nomDuPoste.height
+                                    width: _nomDuPoste.width
+                                    border.color: "black"
+                                    border.width: 1
+                                    y: imageMarqueurPostesEtTours.y - _nomDuPoste.height - 3 // 3 de padding entre texte et bulle
+                                    x: imageMarqueurPostesEtTours.x + imageMarqueurPostesEtTours.width/2 - (_nomDuPoste.width/2)
+                                    radius: 3
+                                    z:1
+                                    Text {
+                                        id: _nomDuPoste
+                                        //text: nom.size < 10 ? (" "+nom+" ") : (" "+nom.substring(0,9) + "… ") // bug … ?
+                                        text: " "+nom+" "
+
+                                    }
+                                }
+
+                                Rectangle {
+                                    id: imageMarqueurPostesEtTours
+
+                                    x: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? (posx * rectangleBordurePlan.height)+ ((rectangleBordurePlan.width-rectangleBordurePlan.height)/2) : posx * rectangleBordurePlan.width
+                                    y: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? posy * rectangleBordurePlan.height : (posy * rectangleBordurePlan.width)+ ((rectangleBordurePlan.height-rectangleBordurePlan.width)/2)
+                                    height: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? (70/1000) * rectangleBordurePlan.height : (70/1000) * rectangleBordurePlan.width
+                                    width: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? (70/1000) * rectangleBordurePlan.width : (70/1000) * rectangleBordurePlan.width
+
+                                    radius: 100
+                                    border.width: 4
+                                    border.color: "red"
+
+                                    transform: Translate {
+                                        x: -width/2
+                                        y: -height/2
+                                    }
+                                    z:1
+                                }
+
+                                MouseArea {
+                                    anchors.fill: imageMarqueurPostesEtTours
+                                    z: 100
+                                    onClicked:
+                                    {
+                                        console.log("Marqueur cliqué") ;
+                                        _nomPoste.text = nom;
+                                        _descriptionPoste.text = description;
+                                        app.setIdPosteTour(id_poste);
+                                        tableauTours.model = app.fiche_poste_tour;
+                                        imageMarqueurPostesEtTours.z = 150;
+                                        nomBulle.z = 150;
+
+                                    }
+                                }
+                            }
+                        }
+
                     }
 
 
@@ -764,14 +850,15 @@ ApplicationWindow { // Fenetre principale
                     anchors.bottomMargin: 10
                     anchors.right: parent.right
                     anchors.rightMargin:10
-                    border.color: "black"
-                    border.width: 1
+                    // border.color: "black"
+                    // border.width: 1
 
                     Label {
                         id : _nom
                         text: "Nom:"
                         anchors.top: parent.top
                         anchors.left: parent.left
+
                         anchors.margins: 10
                     }
 
@@ -779,6 +866,8 @@ ApplicationWindow { // Fenetre principale
                         id: _nomPoste
                         placeholderText: "Nom du poste"
                         anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.rightMargin: 10
                         anchors.topMargin:5
                         anchors.left: _descriptionPoste.left
 
@@ -814,25 +903,46 @@ ApplicationWindow { // Fenetre principale
                         TableViewColumn{ role: "fin" ; title: "Fin du tour" ;width:(3*(tableauTours.width/10))}
                         TableViewColumn{ role: "min"  ; title: "Nb. min" ;width:(tableauTours.width/5)}
                         TableViewColumn{ role: "max" ; title: "Nb. max" ;width:(tableauTours.width/5)}
-                        model: exemplePeuplement
+                        // model: app.fiche_poste_tour
                     }
 
-                    ListModel {
+                    /*                    ListModel {
                         id: exemplePeuplement
                         ListElement{ debut: "05/06/2015 20h00"; fin:"05/06/2015 22h00"; min: "2"; max:"4";}
                         ListElement{ debut: "05/06/2015 22h00"; fin:"06/06/2015 00h00"; min: "4"; max:"5";}
                         ListElement{ debut: "06/06/2015 00h00"; fin:"06/06/2015 02h00"; min: "3"; max:"5";}
-                    }
+                    }  */
 
-                    Button { // Exemple d'ajout
+                    Rectangle { // Exemple d'ajout
                         anchors.top : tableauTours.bottom
-                        anchors.topMargin: 10
-                        onClicked:{
-                            exemplePeuplement.append({debut: "21/12/2012 00h00", fin:"22/12/2012", min: "0", max:"7 milliards"});
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: 25
+                        anchors.bottomMargin: 25
+                        anchors.margins: 15
+                        border.color: "black"
+                        radius: 5
+                        // border.width:1
 
+                        // color:"#ecf0f1"
+
+                        //anchors.horizontalCenter: parent.horizontalCenter
+
+                        Rectangle {
+                            height: _ajouterUnPoste.height
+                            width: _ajouterUnPoste.width
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            Label {
+
+                                id: _ajouterUnPoste
+                                styleColor: "white"
+                                anchors.top: parent.top
+                                anchors.topMargin: -_ajouterUnPoste.height /2
+                                text: " Ajouter un tour "
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
                         }
-                        text:"Ajouter un tour"
-                        anchors.horizontalCenter: parent.horizontalCenter
                     }
 
 
