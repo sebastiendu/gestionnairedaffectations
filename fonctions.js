@@ -154,6 +154,13 @@ function finishCreation(rect,x,y) {
     }
 }
 
+
+function calculerHauteurBulle(h)
+{
+    console.log("h: "+ h)
+    return h*2;
+}
+
 function min(a,b){
     if(a<b) return a;
     else return b;

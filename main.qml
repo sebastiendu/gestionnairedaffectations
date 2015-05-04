@@ -117,7 +117,7 @@ ApplicationWindow { // Fenetre principale
             title: qsTr("&Générer Etat")
             MenuItem {
                 text: qsTr("Fiche de postes / Bénévoles par tours")
-                onTriggered: app.genererFichesDePostes()
+                onTriggered: console.log("A faire");
             }
             MenuItem {
                 text: qsTr("Carte de bénévole / Inscription postes")
@@ -155,14 +155,23 @@ ApplicationWindow { // Fenetre principale
         anchors.leftMargin: 0
         anchors.bottom: parent.bottom
 
+        // height:parent.height
+        Component.onCompleted: {
+            addTab("Affectations", carte)
+            addTab("Postes & Tours", postesEtTours)
+            addTab("Candidature à valider", candidaturesAValider)
+            addTab("Inscrire un bénévole", inscrireBenevole)
+            addTab("Soumettre affectations", soumettreAffectations)
+            addTab("Solliciter d'anciens bénévoles", solliciterAnciensBenevoles)
+        }
 
         // =========================================================
         // ===================== ONGLET Affectations ======================
         // =========================================================
 
-        Tab {
+        Component {
             id: carte
-            title: "Affectation"
+
 
             Rectangle {
                 id: affectations
@@ -705,9 +714,8 @@ ApplicationWindow { // Fenetre principale
         // =======================ONGLET POSTES ET TOURS =====================
         // ===================================================================
 
-        Tab {
+        Component {
             id: postesEtTours
-            title: "Postes & Tours"
             Rectangle {
                 id:rectTest
                 objectName: "recTest"
@@ -857,9 +865,8 @@ ApplicationWindow { // Fenetre principale
         //=====================ONGLET CANDIDATURE A VALIDER =========================
         //===========================================================================
 
-        Tab {
+        Component {
             id: candidaturesAValider
-            title: "Candidature à valider"
             Rectangle {
 
                 color: "purple"
@@ -1048,9 +1055,8 @@ ApplicationWindow { // Fenetre principale
         //===========================================================================
         //=====================   ONGLET INSCRIRE BENEVOLE ==========================
         //===========================================================================
-        Tab {
+        Component {
             id:inscrireBenevole
-            title: "Inscrire un bénévole"
             Rectangle {
                 anchors.fill: parent
                 color: green
@@ -1293,9 +1299,8 @@ ApplicationWindow { // Fenetre principale
         //=====================ONGLET SOUMETTRE AFFECTATION==========================
         //===========================================================================
 
-        Tab {
+        Component {
             id: soumettreAffectations
-            title: "Soumettre affectations"
             Rectangle {
                 color: "pink"
                 Label {
@@ -1360,9 +1365,8 @@ ApplicationWindow { // Fenetre principale
             }
         }
 
-        Tab {
+        Component {
             id: solliciterAnciensBenevoles
-            title: "Solliciter d'anciens bénévoles"
             Rectangle {
                 color: "yellow"
                 Plan {
