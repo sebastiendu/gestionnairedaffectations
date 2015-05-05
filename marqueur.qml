@@ -19,7 +19,8 @@ Rectangle {
     property real ratioX : 10
     property real ratioY : 10
 
-    MouseArea {
+    MouseArea
+    {
         id: mouseArea
         anchors.fill: parent
         acceptedButtons: Qt.RightButton | Qt.LeftButton

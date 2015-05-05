@@ -738,17 +738,8 @@ ApplicationWindow { // Fenetre principale
 
                         id: rectangleBordurePlan
                         color: "transparent"
+
                         // ICI ON MET LE PLAN SUR ECOUTE
-
-                        /* signal planMAJ()
-                        Component.onCompleted: {
-                        rectangleBordurePlan.planMAJ.connect(mettreAJourPlanComplet)
-                        }
-
-                        function mettreAJourPlanComplet() {
-                            repeaterPostesEtTours.model = app.planComplet;
-                        }
-                        */
                         Connections {
                             target: app
                             onPlanCompletChanged: {
@@ -824,21 +815,69 @@ ApplicationWindow { // Fenetre principale
                                     z:1
                                 }
 
+
                                 MouseArea {
+                                    id: mouseArea
                                     anchors.fill: imageMarqueurPostesEtTours
-                                    z: 100
+                                    acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                    drag.target: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    drag.maximumX: rectangleBordurePlan.width
+                                    drag.minimumX: 0
+                                    drag.maximumY: rectangleBordurePlan.height
+                                    drag.minimumY: 0
+                                    z:100
                                     onClicked:
                                     {
-                                        console.log("Marqueur cliqué") ;
-                                        _nomPoste.text = nom;
-                                        _descriptionPoste.text = description;
-                                        app.setIdPosteTour(id);
-                                        tableauTours.model = app.fiche_poste_tour;
-                                        imageMarqueurPostesEtTours.z = 150;
-                                        nomBulle.z = 150;
+                                        if(mouse.button == Qt.RightButton)
+                                        {
+                                            contextMenu.popup();
+
+                                        }
+
+                                        if(mouse.button == Qt.LeftButton)
+                                        {
+                                            _nomPoste.text = nom;
+                                            _descriptionPoste.text = description;
+                                            app.setIdPosteTour(id);
+                                            tableauTours.model = app.fiche_poste_tour;
+                                            imageMarqueurPostesEtTours.z = 150;
+                                            nomBulle.z = 150;
+
+                                        }
+                                    }
+
+                                    onReleased: {
+
+
+                                        //marqueur.ratioX = (marqueur.x / marqueur.parent.width);
+                                        //marqueur.ratioY = (marqueur.y / marqueur.parent.height);
+                                        //console.log("Position x: "  + marqueur.ratioX);
+                                        //console.log("Position y: " + marqueur.ratioY);
 
                                     }
+
                                 }
+                                Menu {
+                                    id: contextMenu
+
+                                    MenuItem {
+                                        text: qsTr("Supprimer")
+                                        onTriggered: {
+                                            app.rafraichirStatistiquePoste(id,nom);
+                                            if (app.getNombreDeTours() != 0 || app.getNombreDAffectations() !=0)
+                                            {
+                                                Fonctions.afficherFenetreSupprimerPoste(id);
+                                            }
+                                            else
+                                            {
+                                                app.supprimerPoste(id);
+                                            }
+
+                                        }
+                                    }
+                                }
+
                             }
                         }
 

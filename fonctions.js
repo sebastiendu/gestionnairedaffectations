@@ -122,16 +122,29 @@ function genererMail()
 }
 
 function afficherFenetreNouveauPoste() {
-var component = Qt.createComponent("nouveauPoste.qml")
-if( component.status !== Component.Ready )
-{
-    if( component.status === Component.Error )
-        console.debug("Error:"+ component.errorString() );
-    return;
+    var component = Qt.createComponent("nouveauPoste.qml")
+    if( component.status !== Component.Ready )
+    {
+        if( component.status === Component.Error )
+            console.debug("Error:"+ component.errorString() );
+        return;
+    }
+    var window = component.createObject(gestionDesAffectations)
+    window.show() // On ouvre la fenetre d'ajout du nouveau poste
 }
-var window = component.createObject(gestionDesAffectations)
-window.show() // On ouvre la fenetre d'ajout du nouveau poste
+
+function afficherFenetreSupprimerPoste() {
+    var component = Qt.createComponent("supprimerPoste.qml")
+    if( component.status !== Component.Ready )
+    {
+        if( component.status === Component.Error )
+            console.debug("Error:"+ component.errorString() );
+        return;
+    }
+    var window = component.createObject(gestionDesAffectations)
+    window.open() // On ouvre la fenetre d'ajout du nouveau poste
 }
+
 
 function createSpriteObjects(rect,x,y) {
     component = Qt.createComponent("marqueur.qml");

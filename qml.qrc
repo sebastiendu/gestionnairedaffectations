@@ -13,5 +13,6 @@
         <file>ScrollBar.qml</file>
         <file>parametres_de_connexion.qml</file>
         <file>nouveauPoste.qml</file>
+        <file>supprimerPoste.qml</file>
     </qresource>
 </RCC>

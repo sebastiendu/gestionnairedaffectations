@@ -86,10 +86,10 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
     db.setDatabaseName(m_settings->value("database/databaseName").toString());
     db.setUserName(m_settings->value("database/userName").toString());
     db.setPassword(
-        m_settings->value("database/rememberPassword").toBool()
-        ? m_settings->value("database/password").toString()
-        : password
-    );
+                m_settings->value("database/rememberPassword").toBool()
+                ? m_settings->value("database/password").toString()
+                : password
+                  );
 
     if(db.open()) {
 
@@ -280,15 +280,6 @@ void GestionnaireDAffectations::selectionnerMarqueur() {
 
 }
 
-void GestionnaireDAffectations::ajouterUnPoste(Poste p){
-    int dernierID = this->listeDePoste.rbegin()->first;
-    this->listeDePoste.insert(std::pair<int,Poste>(dernierID+1,p));
-}
-
-void GestionnaireDAffectations::supprimerUnPoste(int p){
-    this->listeDePoste.erase(p);
-}
-
 void GestionnaireDAffectations::mettreAJourModelPlan(){
 
     QSqlQuery query;
@@ -333,7 +324,62 @@ void GestionnaireDAffectations::insererPoste(QString poste, QString description,
 }
 
 
+void GestionnaireDAffectations::supprimerPoste(int id){
+
+    QSqlQuery query;
+
+    query.prepare("DELETE FROM poste WHERE id = :id;");
+    query.bindValue(":id",id);
+    query.exec();
+    qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
+
+    query = m_planComplet->query();
+    query.bindValue(0,idEvenement());
+    query.exec();
+    m_planComplet->setQuery(query);
+
+    planCompletChanged();
+}
+
+
+
 float GestionnaireDAffectations::getRatioX() { return this->ratioX ; }
 float GestionnaireDAffectations::getRatioY() { return this->ratioY ;}
 void GestionnaireDAffectations::setRatioX(float x) {this->ratioX = x ;}
 void GestionnaireDAffectations::setRatioY(float y) {this->ratioY = y;}
+
+
+int GestionnaireDAffectations::getNombreDeTours() { return this->nombreDeTours ; }
+int GestionnaireDAffectations::getNombreDAffectations() { return this->nombreDAffectations ;}
+QString GestionnaireDAffectations::getNomPoste() { return this->nomPoste ;}
+int GestionnaireDAffectations::getIdPoste() { return this->m_id_poste ;}
+
+
+void GestionnaireDAffectations::rafraichirStatistiquePoste(int id, QString nom) {
+
+    m_id_poste = id;
+    QSqlQuery query;
+
+    query.prepare("SELECT nombre_tours,nombre_affectations FROM statistiques_postes WHERE id_poste = :id");
+    query.bindValue(":id",m_id_poste);
+    query.exec();
+
+    if(query.first())
+    {
+        // La requete a réussie
+        nombreDeTours = query.value(0).toInt();
+        nombreDAffectations = query.value(1).toInt();
+        nomPoste = nom;
+    }
+    else
+    {
+        // La requete a renvoyé 0 lignes, on ne considère pas qu'elle a raté mais qu'aucun tour n'a été associé au poste.
+        nombreDeTours = 0;
+        nombreDAffectations = 0;
+        nomPoste = nom;
+    }
+
+    qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
+
+
+}

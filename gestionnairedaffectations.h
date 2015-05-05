@@ -31,6 +31,8 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
 
 
+
+
 public:
     GestionnaireDAffectations(int & argc, char ** argv);
     int idEvenement();
@@ -49,15 +51,23 @@ public:
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
     Q_INVOKABLE void selectionnerMarqueur();
     Q_INVOKABLE void insererPoste(QString,QString,float,float);
-    Q_INVOKABLE void ajouterUnPoste(Poste);
-    Q_INVOKABLE void supprimerUnPoste(int);
- //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
+    Q_INVOKABLE void supprimerPoste(int);
+    Q_INVOKABLE void rafraichirStatistiquePoste(int n, QString nom);
+
+    //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
+
 
     Q_INVOKABLE float getRatioX();
     Q_INVOKABLE float getRatioY();
-
     Q_INVOKABLE void setRatioX(float x);
     Q_INVOKABLE void setRatioY(float y);
+    Q_INVOKABLE int getIdPoste();
+    Q_INVOKABLE int getNombreDeTours();
+    Q_INVOKABLE int getNombreDAffectations();
+    Q_INVOKABLE QString getNomPoste();
+
+
+
 signals:
     void heureChanged();
     void heureMinChanged();
@@ -79,7 +89,7 @@ public slots:
     void mettreAJourModelPlan();
 
 private:
-        QSqlDatabase db;
+    QSqlDatabase db;
     SqlQueryModel *m_liste_des_evenements;
     SqlQueryModel *m_postes;
     QSortFilterProxyModel *m_benevoles_disponibles;
@@ -102,6 +112,10 @@ private:
     // Variables Temporaires necessaires pour transmettre des informations d'une fenetre QML à une autre
     float ratioX = -1; // Stocke temporairement la position x cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )
     float ratioY = -1; // Stocke temporairement la position y cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )
+    QString nomPoste; // Le nom du poste courant
+    int nombreDeTours; // Le nombre de tours associés au poste
+    int nombreDAffectations;
+
 
 };
 
