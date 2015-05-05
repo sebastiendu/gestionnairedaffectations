@@ -45,7 +45,13 @@ public:
     Q_INVOKABLE void selectionnerMarqueur();
     Q_INVOKABLE void ajouterUnPoste(Poste);
     Q_INVOKABLE void supprimerUnPoste(int);
+
     Q_INVOKABLE void genererFichesDePostes();
+    Q_INVOKABLE void genererCarteBenevoles();
+    Q_INVOKABLE void genererListeMontageDemontage();
+    Q_INVOKABLE void genererTableauRemplissage();
+    Q_INVOKABLE void genererFichesProblemes();
+    Q_INVOKABLE void genererExportGeneral();
  //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
 
 signals:
