@@ -515,35 +515,19 @@ void GestionnaireDAffectations::genererListeMontageDemontage()
     qDebug() << lowriter->readAll();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 void GestionnaireDAffectations::genererTableauRemplissage()
 {
-
+    // FICHIER //
     QTemporaryFile f("tableauRemplissageXXXXXX.odt"); // Création d'un nom de fichier temporaire
-
     f.open(); // Ouverture du fichier
 
+    // REQIETE //
     QSqlQuery query; // Création d'une requete
-
     query.prepare("select * from tableau_de_remplissage where id_evenement= :evt"); // Alimentation de la requete
-
     query.bindValue(":evt",idEvenement()); // Affectation des parametres de la requete
-
     query.exec(); //Execution de la requete
 
-    // PANDOC //
+        // PANDOC //
     QProcess* pandoc = new QProcess(this); // Mise en place de la commande pandoc
     pandoc->setProgram("pandoc");
     QStringList arguments; // Définition des arguments de la commande pandoc
@@ -552,22 +536,28 @@ void GestionnaireDAffectations::genererTableauRemplissage()
     pandoc->start();
     pandoc->waitForStarted();
 
-    // Intialisation d'une valeur d'id_Poste imossible à trouver à bd en premiere occurence
-    int id_poste = -2;
-    // Initlisation d'une valeur de jourCourant impossible à trouver un BD
-    QString jourCourant = "-1";
+
+    int idPostePrecedent = -2; // Intialisation d'une valeur d'id_Poste imossible à trouver à bd en premiere occurence
+
+    QString jourRequetePrecedente = "-1"; // Initlisation d'une valeur de jourRequetePrecedente impossible à trouver un BD
+    QString nomEvenementCourant;
+    QString jourCourant;
+    QString nomPosteCourant;
+    QString lieuEvenementCourant;
     // calcul de la différence entre le nb de participants inscrits et nb necessaire
-    int difference;
+    int difference, nbAffectationCourant, minNecessaireCourant, maxNecessaireCourant, idPosteCourant; // calcul de la différence entre le nb de participants inscrits et nb necessaire
 
 
     if (query.next()) // Si la requete n'a pas rendu de résultat vide, alors :
     {
         pandoc->write("#");
-        pandoc->write(query.record().value("nom_evenement").toString().toUtf8());
+        nomEvenementCourant = query.record().value("nom_evenement").toString();
+        pandoc->write(nomEvenementCourant.toUtf8());
         pandoc->write("\n\n");
 
         pandoc->write("###");
-        pandoc->write(query.record().value("lieu_evenement").toString().toUtf8());
+        lieuEvenementCourant = query.record().value("lieu_evenement").toString();
+        pandoc->write(lieuEvenementCourant.toUtf8());
         pandoc->write("\n\n");
 
         pandoc->write("###");
@@ -582,21 +572,24 @@ void GestionnaireDAffectations::genererTableauRemplissage()
 
         else
         {
-        pandoc->write(query.record().value("debut_tour").toDateTime().toString("d MMMM yyyy").toUtf8());
+           pandoc->write(query.record().value("debut_tour").toDateTime().toString("d MMMM yyyy").toUtf8());
         }
 
         pandoc->write(" au ");
-        if (query.record().value("fin_tour").toDateTime().toString("d") == "1")
+
+        if (query.record().value("fin_tour").toDateTime().toString("d") == "1") // Si la date est le "1" alors on suffixe par "-er"
         {
             pandoc->write(query.record().value("fin_tour").toDateTime().toString("d").toUtf8());
             pandoc->write("er ");
             pandoc->write(query.record().value("fin_tour").toDateTime().toString("MMMM yyyy").toUtf8());
 
         }
+
         else
         {
-        pandoc->write(query.record().value("fin_tour").toDateTime().toString("d MMMM yyyy").toUtf8());
+            pandoc->write(query.record().value("fin_tour").toDateTime().toString("d MMMM yyyy").toUtf8());
         }
+
         pandoc->write("\n\n");
 
         query.previous(); // Ne pas oublier la première ligne
@@ -604,31 +597,35 @@ void GestionnaireDAffectations::genererTableauRemplissage()
 
     while (query.next())
     {
-        int nbAffectations = query.record().value("nombre_affectations").toInt();
-        int minNecessaire = query.record().value("min").toInt();
-        int maxNecessaire = query.record().value("max").toInt();
+        nbAffectationCourant = query.record().value("nombre_affectations").toInt();
+        minNecessaireCourant = query.record().value("min").toInt();
+        maxNecessaireCourant = query.record().value("max").toInt();
+    idPosteCourant = query.record().value("id_poste").toInt();
+    jourCourant = query.record().value("debut_tour").toDateTime().toString("d/MM");
+    nomPosteCourant = query.record().value("nom_poste").toString();
 
-       if (query.record().value("debut_tour").toDateTime().toString("d/MM") != jourCourant)
+       if (jourCourant != jourRequetePrecedente)
        {
-           jourCourant = query.record().value("debut_tour").toDateTime().toString("d/MM");
-           id_poste = -1;
+           jourRequetePrecedente = jourCourant;
+           idPostePrecedent = -1; // On réinitialise pour ne pas l'oublier
            pandoc->write("\n\n##");
            pandoc->write(query.record().value("debut_tour").toDateTime().toString("d MMMM yyyy").toUtf8());
            pandoc->write("\n");
            pandoc->write("Tour|Poste|Min|Max|Inscrits|Remplissage\n");
            pandoc->write("---|---|---|---|---|---\n");
        }
+
        // Colonne Tour
            pandoc->write(query.record().value("debut_tour").toDateTime().toString("H:mm").toUtf8());
            pandoc->write(" → ");
            pandoc->write(query.record().value("fin_tour").toDateTime().toString("H:mm").toUtf8());
-
            pandoc->write("|");
+
         // Colonne Poste
-       if(query.record().value("id_poste").toInt() != id_poste)
+       if(idPosteCourant != idPostePrecedent)
        {
-           id_poste = query.record().value("id_poste").toInt();
-           pandoc->write(query.record().value("nom_poste").toString().toUtf8());
+           idPostePrecedent = idPosteCourant;
+           pandoc->write(nomPosteCourant.toUtf8());
        }
        else
        {
@@ -637,44 +634,42 @@ void GestionnaireDAffectations::genererTableauRemplissage()
 
            pandoc->write("|");
 
-
-
        //Colonne Min
-           if (minNecessaire > nbAffectations)
+           if (minNecessaireCourant > nbAffectationCourant)
            {
             pandoc->write("**");
-            pandoc->write(query.record().value("min").toString().toUtf8());
+            pandoc->write(QString().setNum(minNecessaireCourant).toUtf8());
             pandoc->write("**");
            }
 
            else
-               pandoc->write(query.record().value("min").toString().toUtf8());
+               pandoc->write(QString().setNum(minNecessaireCourant).toUtf8());
 
            pandoc->write("|");
 
        //Colonne Max
-           if (maxNecessaire < nbAffectations)
+           if (maxNecessaireCourant < nbAffectationCourant)
            {
                pandoc->write("**");
-               pandoc->write(query.record().value("max").toString().toUtf8());
+               pandoc->write(QString().setNum(maxNecessaireCourant).toUtf8());
                pandoc->write("**");
            }
            else
-                pandoc->write(query.record().value("max").toString().toUtf8());
+                pandoc->write(QString().setNum(maxNecessaireCourant).toUtf8());
 
            pandoc->write("|");
 
 
        //Colonne Nombre d'inscrits
-           if (nbAffectations < minNecessaire || nbAffectations > maxNecessaire)
+           if (nbAffectationCourant < minNecessaireCourant || nbAffectationCourant > maxNecessaireCourant)
            {
                pandoc->write("**");
-               pandoc->write(query.record().value("nombre_affectations").toString().toUtf8());
+               pandoc->write(QString().setNum(nbAffectationCourant).toUtf8());
                pandoc->write("**");
            }
 
            else
-               pandoc->write(query.record().value("nombre_affectations").toString().toUtf8());
+               pandoc->write(QString().setNum(nbAffectationCourant).toUtf8());
 
            pandoc->write("|");
 
@@ -683,73 +678,52 @@ void GestionnaireDAffectations::genererTableauRemplissage()
            QString rondBlanc = QString("○");
            QString etatRemplissage = QString("null");
 
-           if ((query.record().value("nombre_affectations").toInt() >= query.record().value("min").toInt()) && (query.record().value("nombre_affectations").toInt() <= query.record().value("max").toInt()))
+           if (nbAffectationCourant >= minNecessaireCourant && nbAffectationCourant <= maxNecessaireCourant)
            {
                etatRemplissage = "ok";
-
            }
-           else if (query.record().value("nombre_affectations").toInt() < query.record().value("min").toInt())
+
+           else if (nbAffectationCourant < minNecessaireCourant)
            {
               etatRemplissage = "manque";
-              difference = ((query.record().value("min").toInt())-(query.record().value("nombre_affectations").toInt()));
-              //pandoc->write(QString().setNum(difference).toUtf8());
+              difference = (minNecessaireCourant-nbAffectationCourant);
            }
-           else if (query.record().value("nombre_affectations").toInt() > query.record().value("max").toInt())
+
+           else if (nbAffectationCourant > maxNecessaireCourant)
            {
                etatRemplissage = "trop";
-               difference = ((query.record().value("nombre_affectations").toInt())-(query.record().value("max").toInt()));
-               /*pandoc->write(QString().setNum(difference).toUtf8());
-               pandoc->write(" en trop");*/
+               difference = (maxNecessaireCourant);
+
            }
-           /*pandoc->write(" (min = ");
-           pandoc->write(query.record().value("min").toString().toUtf8());
-           pandoc->write(";max = ");
-           pandoc->write(query.record().value("max").toString().toUtf8());
-           pandoc->write(") ");
-           pandoc->write(QString().setNum(query.record().value("nombre_affectations").toInt()).toUtf8());
-           pandoc->write(query.record().value("nombre_affectations").toInt()>1?" inscrits":" inscrit");*/
-
-
 
            if (etatRemplissage == "ok")
            {
-
-               if (nbAffectations < 10)
+               if (nbAffectationCourant < 10)
                {
-
-                   for (int i = 0 ; i < nbAffectations ; i++)
-                   {
+                   for (int i = 0 ; i < nbAffectationCourant ; i++)
                       pandoc->write(rondNoir.toUtf8());
-                   }
                }
                else
                {
-
                    for (int i = 0 ; i < 10 ; i++)
-                   {
                       pandoc->write(rondNoir.toUtf8());
-                   }
                }
            }
 
            else if (etatRemplissage == "manque")
            {
-               if (minNecessaire < 10)
+               if (minNecessaireCourant < 10)
                {
-                   for (int i = 0; i< nbAffectations ; i++)
-                   {
+                   for (int i = 0; i< nbAffectationCourant ; i++)
                         pandoc->write(rondNoir.toUtf8());
-                   }
 
-                   for (int j = nbAffectations ; j < minNecessaire ; j++)
-                   {
+                   for (int j = nbAffectationCourant ; j < minNecessaireCourant ; j++)
                         pandoc->write(rondBlanc.toUtf8());
-                   }
                }
 
-               else if (minNecessaire >= 10)
+               else if (minNecessaireCourant >= 10)
                {
-                   int nbRondsNoirs = nbAffectations * 10 / minNecessaire;
+                   int nbRondsNoirs = nbAffectationCourant * 10 / minNecessaireCourant;
                    for (int i = 0 ; i < nbRondsNoirs ; i++)
                        pandoc->write(rondNoir.toUtf8());
 
@@ -761,23 +735,20 @@ void GestionnaireDAffectations::genererTableauRemplissage()
 
            else if (etatRemplissage == "trop")
            {
-                if (maxNecessaire < 10)
+                if (maxNecessaireCourant < 10)
                 {
-                    for (int i = 0; i < maxNecessaire ; i++)
-                    {
+                    for (int i = 0; i < maxNecessaireCourant ; i++)
                         pandoc->write(rondNoir.toUtf8());
-                    }
 
-                    for (int j = maxNecessaire ; j < nbAffectations ; j++)
-                    {
+                    for (int j = maxNecessaireCourant ; j < nbAffectationCourant ; j++)
                          pandoc->write("**#**");
-                    }
+
                 }
 
-                   else if (maxNecessaire >= 10)
+                   else if (maxNecessaireCourant >= 10)
                    {
-                       int nbRondsNoirs = maxNecessaire * 10 / minNecessaire;
-                       int nbDieses = nbAffectations / maxNecessaire;
+                       int nbRondsNoirs = maxNecessaireCourant * 10 / minNecessaireCourant;
+                       int nbDieses = nbAffectationCourant / maxNecessaireCourant;
                        (nbDieses == 0?nbDieses=1:nbDieses=nbDieses); // Si l'arrondi est fait en dessous, on s'assure d'avoir au moins un diese
 
                        for (int i = 0 ; i < 10-nbDieses ; i++)
@@ -786,15 +757,9 @@ void GestionnaireDAffectations::genererTableauRemplissage()
                        for (int j = 0 ; j < nbDieses ; j++)
                            pandoc->write("**#**");
                    }
-               /*int personnesEnTrop = (query.record().value("nombre_affectations").toInt()) * 10 / (query.record().value("max").toInt());
-               for (int i = 0 ; i < 10 ; i++)
-                   pandoc->write(rondNoir.toUtf8());
-
-               for (int j = 10 ; j < personnesEnTrop ; j++)
-                   pandoc->write("#");*/
-           }
+              }
            pandoc->write("\n");
-    }
+    } // Fin du parcours
 
     pandoc->closeWriteChannel();
     pandoc->waitForFinished();
