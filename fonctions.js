@@ -106,20 +106,7 @@ function heure(dateRecu) {
 
 }
 
-function focusCandidat(index)
-{
-    if(indexMemoire != index)
-    {
-        cadreCandidat.color = "blue"
-        indexMemoire = index;
-    }
 
-}
-
-function genererMail()
-{
-
-}
 
 function afficherFenetreNouveauPoste() {
     var component = Qt.createComponent("nouveauPoste.qml")
@@ -146,6 +133,19 @@ function afficherFenetreSupprimerPoste() {
 }
 
 
+function afficherFenetreAjouterTour(champ, valeur) {
+    var component = Qt.createComponent("CalendrierTour.qml")
+    if( component.status !== Component.Ready )
+    {
+        if( component.status === Component.Error )
+            console.debug("Error:"+ component.errorString() );
+        return;
+    }
+    var window = component.createObject(gestionDesAffectations, {"champ":champ, "valeur": valeur})
+    window.show() // On ouvre la fenetre d'ajout du nouveau poste
+}
+
+
 function createSpriteObjects(rect,x,y) {
     component = Qt.createComponent("marqueur.qml");
     if (component.status == Component.Ready)
@@ -153,39 +153,10 @@ function createSpriteObjects(rect,x,y) {
     else
         component.statusChanged.connect(finishCreation);
 }
-function finishCreation(rect,x,y) {
-    if (component.status == Component.Ready) {
-        numeroMarqueur++;
 
 
-        if(x - ((22/640) * rect.width) > 0) x-= ((22/640) * rect.width); // Pour centrer parfaitement le marqueur sur le curseur
-        if(y - ((22/640) * rect.height) > 0) y-= ((22/640) * rect.height);
 
 
-        var ratioX = x / rect.width;
-        var ratioY = y / rect.height;
-
-        console.log(ratioX);
-        console.log(ratioY);
-
-        sprite = component.createObject(rect, {"ratioX": ratioX, "ratioY": ratioY,"id":numeroMarqueur});
-
-        if (sprite == null) {
-            // Error Handling
-            console.log("Error creating object");
-        }
-    } else if (component.status == Component.Error) {
-        // Error Handling
-        console.log("Error loading component:", component.errorString());
-    }
-}
-
-
-function calculerHauteurBulle(h)
-{
-    console.log("h: "+ h)
-    return h*2;
-}
 
 function min(a,b){
     if(a<b) return a;
@@ -197,10 +168,3 @@ function max(a,b){
     else return b;
 }
 
-function resizePointeur() {
-
-}
-
-function afficherMessage(message){
-    console.log(message);
-}

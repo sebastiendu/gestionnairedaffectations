@@ -370,6 +370,29 @@ void GestionnaireDAffectations::supprimerPoste(int id){
     planCompletChanged();
 }
 
+void GestionnaireDAffectations::modifierTourDebut(QDateTime debut, QDateTime ancienDebut) {
+
+    QSqlQuery query;
+    query.prepare("UPDATE tour SET debut = :debut WHERE id_poste = :poste");
+    query.bindValue(":poste",m_id_poste);
+    query.bindValue(":debut",debut);
+    query.exec();
+    qDebug() << query.lastError().text();
+
+}
+
+void GestionnaireDAffectations::modifierTourFin(QDateTime fin, QDateTime ancienFin) {
+
+    QSqlQuery query;
+    query.prepare("UPDATE tour SET fin = :fin WHERE id_poste = :poste AND fin= :ancienfin");
+    query.bindValue(":poste",m_id_poste);
+    query.bindValue(":fin",fin);
+    query.bindValue(":ancienfin",ancienFin);
+
+    query.exec();
+    qDebug() << query.lastError().text();
+
+}
 
 
 float GestionnaireDAffectations::getRatioX() { return this->ratioX ; }

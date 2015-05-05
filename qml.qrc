@@ -15,5 +15,7 @@
         <file>nouveauPoste.qml</file>
         <file>supprimerPoste.qml</file>
         <file>rectangleTitre.qml</file>
+        <file>CalendrierTour.qml</file>
+        <file>test.qml</file>
     </qresource>
 </RCC>

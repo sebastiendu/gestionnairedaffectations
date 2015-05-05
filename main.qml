@@ -443,25 +443,7 @@ ApplicationWindow { // Fenetre principale
                             }
                         }
 
-                        Rectangle {
-                            id: bulleinformative
-                            color: "white"
-                            x: 0
-                            y: -1000
-                            width: 200
-                            height: 50
-                            radius:5
-                            border.color: "#c0392b"
-                            border.width: 2
 
-                            Text {
-                                anchors.fill: parent
-                                anchors.margins: 10
-                                text: "Exemple d'information"
-                            }
-
-
-                        }
 
 
                     }
@@ -775,18 +757,20 @@ ApplicationWindow { // Fenetre principale
                                 Rectangle {
                                     id: nomBulle
                                     color: "white"
-                                    height: _nomDuPoste.height
-                                    width: _nomDuPoste.width
+                                    height: _nomDuPoste.height+3
+                                    width: _nomDuPoste.width+5
                                     border.color: "black"
                                     border.width: 1
-                                    y: imageMarqueurPostesEtTours.y - _nomDuPoste.height - 3 // 3 de padding entre texte et bulle
-                                    x: imageMarqueurPostesEtTours.x + imageMarqueurPostesEtTours.width/2 - (_nomDuPoste.width/2)
+                                    y: imageMarqueurPostesEtTours.y + _nomDuPoste.height -1
+                                    x: imageMarqueurPostesEtTours.x + imageMarqueurPostesEtTours.width/2 - (_nomDuPoste.width/2) -3
                                     radius: 3
-                                    z:1
+                                    z:150
                                     Text {
                                         id: _nomDuPoste
                                         //text: nom.size < 10 ? (" "+nom+" ") : (" "+nom.substring(0,9) + "… ") // bug … ?
                                         text: " "+nom+" "
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        anchors.verticalCenter: parent.verticalCenter
 
                                     }
                                 }
@@ -836,7 +820,7 @@ ApplicationWindow { // Fenetre principale
                                             app.setIdPoste(id);
                                             imageMarqueurPostesEtTours.border.color = "#3498db";
                                             imageMarqueurPostesEtTours.border.width= 5
-                                            imageMarqueurPostesEtTours.z = 200;
+                                            imageMarqueurPostesEtTours.z = 149;
 
                                             if(mouse.button == Qt.RightButton)
                                             {
@@ -850,7 +834,7 @@ ApplicationWindow { // Fenetre principale
                                                 _descriptionPoste.text = description;
                                                 app.setIdPosteTour(id);
                                                 tableauTours.model = app.fiche_poste_tour;
-                                                imageMarqueurPostesEtTours.z = 150;
+                                                imageMarqueurPostesEtTours.z = 149;
                                                 nomBulle.z = 150;
 
                                             }
@@ -955,8 +939,57 @@ ApplicationWindow { // Fenetre principale
                         TableViewColumn{ role: "fin" ; title: "Fin du tour" ;width:(3*(tableauTours.width/10))}
                         TableViewColumn{ role: "min"  ; title: "Nb. min" ;width:(tableauTours.width/5)}
                         TableViewColumn{ role: "max" ; title: "Nb. max" ;width:(tableauTours.width/5)}
-                        // model: app.fiche_poste_tour
+
+                        itemDelegate: Component {
+
+                            Item {
+
+                                id: caseCourante
+
+                                Text {
+                                    width: parent.width
+                                    anchors.margins: 4
+                                    anchors.left: parent.left
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: styleData.value !== undefined ? styleData.value : ""
+                                    color: styleData.textColor
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                }
+                                MouseArea
+                                 {
+                                     anchors.fill: parent
+                                     onDoubleClicked: {
+                                         console.log(styleData.row + ":" + styleData.role + styleData.value);
+
+                                         Fonctions.afficherFenetreAjouterTour(styleData.role, styleData.value);
+                                     }
+                                 }
+
+                            }
+
+                        }
+
                     }
+
+                    Button {
+                        id: _btnAjouterTour
+                        text: "+"
+                        anchors.top: tableauTours.bottom
+                        anchors.right: _btnSupprimerTour.left
+                        anchors.topMargin: 5
+                        onClicked: { Fonctions.afficherFenetreAjouterTour() }
+                    }
+
+                    Button {
+                        id: _btnSupprimerTour
+                        text: "-"
+                        anchors.top: tableauTours.bottom
+                        anchors.right: parent.right
+                        anchors.topMargin: 5
+                        anchors.rightMargin: 15
+                    }
+
+
 
                 }
 
