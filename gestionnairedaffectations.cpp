@@ -373,9 +373,10 @@ void GestionnaireDAffectations::supprimerPoste(int id){
 void GestionnaireDAffectations::modifierTourDebut(QDateTime debut, QDateTime ancienDebut) {
 
     QSqlQuery query;
-    query.prepare("UPDATE tour SET debut = :debut WHERE id_poste = :poste");
+    query.prepare("UPDATE tour SET debut = :debut WHERE id_poste = :poste AND debut = :anciendebut");
     query.bindValue(":poste",m_id_poste);
     query.bindValue(":debut",debut);
+        query.bindValue(":anciendebut",ancienDebut);
     query.exec();
     qDebug() << query.lastError().text();
 
