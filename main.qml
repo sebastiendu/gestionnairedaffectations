@@ -691,14 +691,9 @@ ApplicationWindow { // Fenetre principale
                             }
                         }
                     }
-
-
                 }
 
-
-
             }
-
 
         }
 
@@ -813,70 +808,80 @@ ApplicationWindow { // Fenetre principale
 
 
                                     z:1
-                                }
+
+                                    MouseArea {
+                                        id: mouseArea
+                                        anchors.fill: imageMarqueurPostesEtTours
+                                        acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                        drag.target: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        drag.maximumX: rectangleBordurePlan.width
+                                        drag.minimumX: 0
+                                        drag.maximumY: rectangleBordurePlan.height
+                                        drag.minimumY: 0
+                                        z:100
+
+                                        onReleased: {
 
 
-                                MouseArea {
-                                    id: mouseArea
-                                    anchors.fill: imageMarqueurPostesEtTours
-                                    acceptedButtons: Qt.RightButton | Qt.LeftButton
-                                    drag.target: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    drag.maximumX: rectangleBordurePlan.width
-                                    drag.minimumX: 0
-                                    drag.maximumY: rectangleBordurePlan.height
-                                    drag.minimumY: 0
-                                    z:100
-                                    onClicked:
-                                    {
-                                        if(mouse.button == Qt.RightButton)
-                                        {
-                                            contextMenu.popup();
-
-                                        }
-
-                                        if(mouse.button == Qt.LeftButton)
-                                        {
-                                            _nomPoste.text = nom;
-                                            _descriptionPoste.text = description;
-                                            app.setIdPosteTour(id);
-                                            tableauTours.model = app.fiche_poste_tour;
-                                            imageMarqueurPostesEtTours.z = 150;
-                                            nomBulle.z = 150;
+                                            app.setRatioX((imageMarqueurPostesEtTours.x/rectangleBordurePlan.width)+(imageMarqueurPostesEtTours.width/rectangleBordurePlan.width)/2)
+                                            app.setRatioY((imageMarqueurPostesEtTours.y/rectangleBordurePlan.height)+(imageMarqueurPostesEtTours.height/rectangleBordurePlan.height)/2)
+                                            app.modifierPositionPoste(posx,posy);
+                                            imageMarqueurPostesEtTours.border.color = "red";
+                                            imageMarqueurPostesEtTours.border.width= 4
 
                                         }
-                                    }
 
-                                    onReleased: {
+                                        onPressed: {
+                                            app.setIdPoste(id);
+                                            imageMarqueurPostesEtTours.border.color = "#3498db";
+                                            imageMarqueurPostesEtTours.border.width= 5
+                                            imageMarqueurPostesEtTours.z = 200;
 
-
-                                        //marqueur.ratioX = (marqueur.x / marqueur.parent.width);
-                                        //marqueur.ratioY = (marqueur.y / marqueur.parent.height);
-                                        //console.log("Position x: "  + marqueur.ratioX);
-                                        //console.log("Position y: " + marqueur.ratioY);
-
-                                    }
-
-                                }
-                                Menu {
-                                    id: contextMenu
-
-                                    MenuItem {
-                                        text: qsTr("Supprimer")
-                                        onTriggered: {
-                                            app.rafraichirStatistiquePoste(id,nom);
-                                            if (app.getNombreDeTours() != 0 || app.getNombreDAffectations() !=0)
+                                            if(mouse.button == Qt.RightButton)
                                             {
-                                                Fonctions.afficherFenetreSupprimerPoste(id);
-                                            }
-                                            else
-                                            {
-                                                app.supprimerPoste(id);
+                                                contextMenu.popup();
+
                                             }
 
+                                            if(mouse.button == Qt.LeftButton)
+                                            {
+                                                _nomPoste.text = nom;
+                                                _descriptionPoste.text = description;
+                                                app.setIdPosteTour(id);
+                                                tableauTours.model = app.fiche_poste_tour;
+                                                imageMarqueurPostesEtTours.z = 150;
+                                                nomBulle.z = 150;
+
+                                            }
+                                        }
+
+
+
+                                    }
+                                    Menu {
+                                        id: contextMenu
+
+                                        MenuItem {
+                                            text: qsTr("Supprimer")
+                                            onTriggered: {
+                                                app.rafraichirStatistiquePoste(id,nom);
+                                                if (app.getNombreDeTours() != 0 || app.getNombreDAffectations() !=0)
+                                                {
+                                                    Fonctions.afficherFenetreSupprimerPoste(id);
+                                                }
+                                                else
+                                                {
+                                                    app.supprimerPoste(id);
+                                                }
+
+                                            }
                                         }
                                     }
                                 }
+
+
+
 
                             }
                         }
@@ -953,56 +958,9 @@ ApplicationWindow { // Fenetre principale
                         // model: app.fiche_poste_tour
                     }
 
-
-
-                    Rectangle { // Exemple d'ajout
-                        anchors.top : tableauTours.bottom
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.topMargin: 25
-                        anchors.bottomMargin: 25
-                        anchors.margins: 15
-                        border.color: "black"
-                        radius: 5
-                        // border.width:1
-
-                        // color:"#ecf0f1"
-
-                        //anchors.horizontalCenter: parent.horizontalCenter
-
-                        Rectangle {
-                            height: _ajouterUnPoste.height
-                            width: _ajouterUnPoste.width
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            Label {
-
-                                id: _ajouterUnPoste
-                                styleColor: "white"
-                                anchors.top: parent.top
-                                anchors.topMargin: -_ajouterUnPoste.height /2
-                                text: " Ajouter un tour "
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-                        }
-                    }
-
-
-
                 }
 
-                Image {
-                    id: corbeille
-                    width: 45
-                    height:65
 
-                    anchors.topMargin: 5
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 25
-                    anchors.left: descriptionPoste.left
-                    anchors.leftMargin: (-(corbeille.width+100))
-                    source: "corbeille.png"
-                }
 
 
 

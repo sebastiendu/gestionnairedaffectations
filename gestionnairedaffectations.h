@@ -53,6 +53,7 @@ public:
     Q_INVOKABLE void insererPoste(QString,QString,float,float);
     Q_INVOKABLE void supprimerPoste(int);
     Q_INVOKABLE void rafraichirStatistiquePoste(int n, QString nom);
+    Q_INVOKABLE void modifierPositionPoste(float x,float y);
 
     //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
 

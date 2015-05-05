@@ -323,6 +323,35 @@ void GestionnaireDAffectations::insererPoste(QString poste, QString description,
     planCompletChanged();
 }
 
+void GestionnaireDAffectations::modifierPositionPoste(float ancienX,float ancienY) {
+
+
+    if(ancienX == ratioX && ancienY == ratioY)
+    {
+        qDebug() << "Pas de requetes, la position n'a pas changée";
+    }
+    else
+    {
+        QSqlQuery query;
+        query.prepare("UPDATE poste SET posx= :newx , posy = :newy WHERE id = :id");
+        query.bindValue(":newx",ratioX);
+        query.bindValue(":newy",ratioY);
+        query.bindValue(":id",m_id_poste);
+
+        query.exec();
+        qDebug() << query.lastError().text();
+
+
+        // A SUPPRIMER UNE FOIS DEBUGGER
+        query = m_planComplet->query(); // <
+        query.bindValue(0,idEvenement()); // <
+        query.exec(); // <
+        m_planComplet->setQuery(query); // <
+        planCompletChanged(); // <
+    }
+
+}
+
 
 void GestionnaireDAffectations::supprimerPoste(int id){
 
