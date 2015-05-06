@@ -124,10 +124,6 @@ ApplicationWindow { // Fenetre principale
                 onTriggered: app.genererCarteBenevoles();
             }
             MenuItem {
-                text: qsTr("\"Liste Montage\" et \"Liste Demontage\"")
-                onTriggered: app.genererListeMontageDemontage();
-            }
-            MenuItem {
                 text: qsTr("Tableau de remplissage")
                 onTriggered: app.genererTableauRemplissage();
             }

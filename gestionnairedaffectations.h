@@ -48,10 +48,10 @@ public:
 
     Q_INVOKABLE void genererFichesDePostes();
     Q_INVOKABLE void genererCarteBenevoles();
-    Q_INVOKABLE void genererListeMontageDemontage();
     Q_INVOKABLE void genererTableauRemplissage();
     Q_INVOKABLE void genererFichesProblemes();
     Q_INVOKABLE void genererExportGeneral();
+    int age(QDate dateDeNaissance,QDate dateRepere);
  //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
 
 signals:
@@ -70,6 +70,7 @@ signals:
 
 public slots:
     void mettreAJourModelPlan();
+
 
 private:
         QSqlDatabase db;
