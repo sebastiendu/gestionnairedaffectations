@@ -261,19 +261,37 @@ Item {
             }
         }
 
+        Button {
+            id: _boutonEnvoyer
+            anchors.top: blockListePosteTour.bottom
+            anchors.topMargin: blockFichePoste.height/3
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            text : "→"
+        }
+
+        Button {
+            id: _boutonRecevoir
+            anchors.top: _boutonEnvoyer.bottom
+            anchors.topMargin: 10
+            anchors.left: parent.left
+            text : "←"
+             anchors.leftMargin: 10
+        }
+
 
 
         RectangleTitre {
             id: blockFichePoste
             anchors.top: blockListePosteTour.bottom
-            anchors.left: parent.left
+            anchors.left: _boutonEnvoyer.right
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 30
             anchors.topMargin: 15
             anchors.leftMargin: 10
             anchors.rightMargin: 10
-            titre: "Liste des affectés"
+            titre: ""
 
 
             /*Text {
@@ -294,7 +312,7 @@ Item {
                 anchors.topMargin: 20
                 clip: true
                 spacing: 5
-                delegate: Text { text: "<b><font color='red'> X </font></b>" +prenom_personne + " " + nom_personne ;}
+                delegate: Text { text: prenom_personne + " " + nom_personne ;}
             }
             ScrollBar {
                 flickable : listePersonnesInscritesBenevoles
