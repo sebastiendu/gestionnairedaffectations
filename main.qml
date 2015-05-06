@@ -619,7 +619,6 @@ ApplicationWindow { // Fenetre principale
                     onValueChanged: {
                         app.heure = new Date(value);
                         listeDesTours.model = app.planCourant;
-                        bulleinformative.y = -1000;
                         leRepeater.model = app.planCourant;
                         app.setIdPoste(-1)
                         app.setIdTour(-1)
@@ -692,8 +691,7 @@ ApplicationWindow { // Fenetre principale
             title : "Postes & Tours"
 
             Rectangle {
-                id:rectTest
-                objectName: "recTest"
+
                 color: "white"
                 Image {
                     id: planPosteEtTours
@@ -739,7 +737,7 @@ ApplicationWindow { // Fenetre principale
 
                                 Fonctions.afficherFenetreNouveauPoste();
 
-                               // Fonctions.createSpriteObjects(rectangleBordurePlan, mouse.x, mouse.y)
+                                // Fonctions.createSpriteObjects(rectangleBordurePlan, mouse.x, mouse.y)
                             }
 
                             cursorShape: Qt.CrossCursor
@@ -891,7 +889,7 @@ ApplicationWindow { // Fenetre principale
 
                     Label {
                         id : _nom
-                        text: "Nom:"
+                        text: "Poste:"
                         anchors.top: parent.top
                         anchors.left: parent.left
 
@@ -935,10 +933,11 @@ ApplicationWindow { // Fenetre principale
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.top:_descriptionPoste.bottom
                         anchors.topMargin: 10
+                        TableViewColumn{ role: "id_tour"  ; title: "id" ; width:(3*(tableauTours.width/10)); visible: true;delegate: nombre}
                         TableViewColumn{ role: "debut"  ; title: "Debut du tour" ; width:(3*(tableauTours.width/10))}
                         TableViewColumn{ role: "fin" ; title: "Fin du tour" ;width:(3*(tableauTours.width/10))}
-                        TableViewColumn{ role: "min"  ; title: "Nb. min" ;width:(tableauTours.width/5)}
-                        TableViewColumn{ role: "max" ; title: "Nb. max" ;width:(tableauTours.width/5)}
+                        TableViewColumn{ role: "min"  ; title: "Nb. min" ;width:(tableauTours.width/5); delegate: nombre}
+                        TableViewColumn{ role: "max" ; title: "Nb. max" ;width:(tableauTours.width/5); delegate: nombre}
 
                         itemDelegate: Component {
 
@@ -946,13 +945,13 @@ ApplicationWindow { // Fenetre principale
 
                                 id: caseCourante
 
-                                Text {
+                                /*Text {
                                     width: parent.width
                                     anchors.margins: 4
                                     anchors.left: parent.left
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: styleData.value !== undefined ? styleData.value : ""
-                                    color: styleData.textColor
+                                    color: styleData.hasActiveFocus  ? "blue" : "black"
                                     anchors.horizontalCenter: parent.horizontalCenter
                                 }
                                 MouseArea
@@ -963,10 +962,39 @@ ApplicationWindow { // Fenetre principale
 
                                          Fonctions.afficherFenetreAjouterTour(styleData.role, styleData.value);
                                      }
-                                 }
+
+
+                                 } */
+
+                                TextInput {
+                                    text: Fonctions.datePourTours(styleData.value)
+                                    color: selectByMouse ? "red" : "black"
+                                    onAccepted: console.log(styleData.value + styleData.row.id)
+                                }
+
+
+                                // TODO : - ERREUR :  Property 'getMonth' of object  is not a function
+                                // TODO : - ENREGISTRER DANS LA BASE LES INFORMATION
+                                // TODO : - RECHARGER LE MODEL AVEC ORDER BY
+                                // TODO : - RECUPERER LE ID CORRECTEMENT
+
 
                             }
 
+                        }
+
+                        Component {
+                            id: nombre
+
+                            Item {
+                                TextInput
+                                {
+                                    id: nouveauNombre
+                                    anchors.fill: parent
+                                    text: styleData.value
+                                    onAccepted: console.log(styleData.value + " " +nouveauNombre.text)
+                                }
+                            }
                         }
 
                     }
