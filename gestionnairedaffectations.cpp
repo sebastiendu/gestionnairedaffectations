@@ -35,6 +35,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_affectations = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
     m_fiche_poste_tour = new SqlQueryModel;
+    m_poste_et_tour = new SqlQueryModel;
     m_planComplet = new SqlQueryModel;
     m_plan = new QSortFilterProxyModel(this);
 
@@ -149,6 +150,11 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_planComplet->setQuery(query);
 
+        query.prepare("select * from poste_et_tour where id_evenement= :evt ORDER BY nom ASC;");
+        query.bindValue(":id_evenement",idEvenement());
+        query.exec();
+        m_poste_et_tour->setQuery(query);
+
 
     } else {
         qDebug() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
@@ -204,6 +210,11 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.bindValue(0,idEvenement());
     query.exec();
     m_planComplet->setQuery(query);
+
+    query = m_poste_et_tour->query();
+    query.bindValue(0,idEvenement());
+    query.exec();
+    m_poste_et_tour->setQuery(query);
 
     query.prepare("select debut, fin from evenement where id=?");
     query.addBindValue(idEvenement());

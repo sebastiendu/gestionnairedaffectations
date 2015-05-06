@@ -14,8 +14,10 @@
         <file>parametres_de_connexion.qml</file>
         <file>nouveauPoste.qml</file>
         <file>supprimerPoste.qml</file>
-        <file>rectangleTitre.qml</file>
+        <file>RectangleTitre.qml</file>
         <file>CalendrierTour.qml</file>
         <file>test.qml</file>
+        <file>AffectationsListe.qml</file>
+        <file>Trait.qml</file>
     </qresource>
 </RCC>

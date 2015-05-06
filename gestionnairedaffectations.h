@@ -29,7 +29,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* affectations MEMBER m_affectations NOTIFY affectationsChanged)
     Q_PROPERTY(QSortFilterProxyModel* planCourant MEMBER m_plan NOTIFY planChanged)
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
-
+    Q_PROPERTY(SqlQueryModel* poste_et_tour MEMBER m_poste_et_tour NOTIFY posteEtTourChanged)
 
 
 
@@ -85,7 +85,7 @@ signals:
     void tourChanged();
     void fiche_posteTourChanged();
     void affectationsChanged();
-
+    void posteEtTourChanged();
 
 public slots:
     void mettreAJourModelPlan();
@@ -110,6 +110,7 @@ private:
     std::map<int,Poste> listeDePoste;
     QSortFilterProxyModel *m_plan;
     SqlQueryModel *m_planComplet;
+    SqlQueryModel *m_poste_et_tour;
 
     // Variables Temporaires necessaires pour transmettre des informations d'une fenetre QML à une autre
     float ratioX = -1; // Stocke temporairement la position x cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )

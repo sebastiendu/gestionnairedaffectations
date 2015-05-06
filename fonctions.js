@@ -6,7 +6,7 @@ var bulleClique = false;
 
 
 
-function dateFR(dateRecu) {
+function dateBarreStatut(dateRecu) {
     var heure;
     var minutes;
     var numeroMois = dateRecu.getMonth() + 1;
@@ -42,7 +42,7 @@ function afficherBulleInformative(rectangle,bulle,x,y)
     bulle.y = y;
 }
 
-function datePourTours(dateRecu) {
+function dateFR(dateRecu) {
     var heure;
     var minutes;
     var numeroMois = dateRecu.getMonth() + 1;
