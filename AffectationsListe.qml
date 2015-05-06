@@ -65,6 +65,7 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 z:3
+
                 Text {
                     anchors.top: parent.top
                     anchors.left: parent.left
@@ -166,7 +167,7 @@ Item {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.margins: 10
-            onEditingFinished: app.planComplet.setFilterFixedString(text);
+            onEditingFinished: app.poste_et_tour.setFilterFixedString(text);
             placeholderText: "Poste et tours Recherche"
 
         }

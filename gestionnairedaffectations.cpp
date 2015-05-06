@@ -35,7 +35,8 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_affectations = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
     m_fiche_poste_tour = new SqlQueryModel;
-    m_poste_et_tour = new SqlQueryModel;
+    m_poste_et_tour_sql = new SqlQueryModel;
+    m_poste_et_tour = new QSortFilterProxyModel(this);
     m_planComplet = new SqlQueryModel;
     m_plan = new QSortFilterProxyModel(this);
 
@@ -153,7 +154,10 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.prepare("select * from poste_et_tour where id_evenement= :evt ORDER BY nom, debut ASC;");
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
-        m_poste_et_tour->setQuery(query);
+        m_poste_et_tour_sql->setQuery(query);
+        m_poste_et_tour->setSourceModel(m_poste_et_tour_sql);
+        m_poste_et_tour->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        m_poste_et_tour->setFilterKeyColumn(-1);
 
 
     } else {
@@ -211,10 +215,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_planComplet->setQuery(query);
 
-    query = m_poste_et_tour->query();
+    query = m_poste_et_tour_sql->query();
     query.bindValue(0,idEvenement());
     query.exec();
-    m_poste_et_tour->setQuery(query);
+    m_poste_et_tour_sql->setQuery(query);
 
     query.prepare("select debut, fin from evenement where id=?");
     query.addBindValue(idEvenement());
