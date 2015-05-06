@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
 
+
 import "fonctions.js" as Fonctions
 
 Item {
@@ -185,22 +186,45 @@ Item {
                 id: listePoste
                 anchors.fill: parent
                 model: app.poste_et_tour
-                delegate: Text {
+                delegate:
+                    Rectangle {
+                    height : 13
+                    z:1
+                    width: parent.width
+                    Text {
+                        id: informationsTour
                     anchors.left: parent.left
                     anchors.leftMargin: 20;
                     text: Fonctions.dateFR(debut) + " → " + Fonctions.dateFR(fin) + "    " +
                           nombre_affectations + "/" +max  + "    " + "(min: " + min + ", max: " + max +")"
 
-                     MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            console.log(id_tour);
-                            app.setIdAffectation(id_tour);
-                            listePersonnesInscritesBenevoles.model = app.affectations;
-                            listePoste.currentIndex = index
 
-                        }
+                }
+
+                    ProgressBarAffectation {
+                        anchors.left: informationsTour.right
+                        anchors.top: informationsTour.top
+                        anchors.topMargin: 2 // Pour etre centré au milieu verticalement
+                        anchors.leftMargin: 10
+                        width: 100
+                        height: 8
+                        valeurmin: min
+                        valeurmax: max
+                        valeur: nombre_affectations
+
                     }
+
+                    MouseArea {
+                       anchors.fill: parent
+                       onClicked: {
+                           console.log(id_tour);
+                           app.setIdAffectation(id_tour);
+                           listePersonnesInscritesBenevoles.model = app.affectations;
+                           listePoste.currentIndex = index
+                           blockFichePoste.titre = " <h2> " + nom + " </h2> "
+
+                       }
+                   }
                 }
 
 
@@ -209,7 +233,7 @@ Item {
                 section.delegate: sectionHeading
 
                 clip: true
-                highlight: Rectangle { color: "blue"; radius: 5; opacity: 0.5; width: listePoste.width ; height:13 ;y: listePoste.currentItem.y}
+                highlight: Rectangle { z:5; color: "blue"; radius: 5; opacity: 0.5; width: listePoste.width ; height:13 ;y: listePoste.currentItem.y}
                 highlightFollowsCurrentItem: false
                 focus: true
 
@@ -225,12 +249,11 @@ Item {
                 id: sectionHeading
                 Rectangle {
                     width: parent.width
-
-                    height: 13
+                    height: 15
                     color: "lightsteelblue"
 
                     Text {
-                        text: section
+                        text: " " + section
                         font.bold: true
                     }
                 }
@@ -249,18 +272,16 @@ Item {
             anchors.topMargin: 15
             anchors.leftMargin: 10
             anchors.rightMargin: 10
-
             titre: "Liste des affectés"
 
-            Text {
-                id: _listeDesAffectes
-                anchors.fill: parent
+
+            /*Text {
+                id: _nomDuPoste
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.top: parent.top
-                anchors.topMargin: 10
-                //text: (listePersonnesInscritesBenevoles.count > 0 )? "<u>Liste des affectés </u>" : ""
-            }
+                anchors.topMargin: 1
+            } */
 
             ListView {
 
@@ -268,11 +289,14 @@ Item {
                 anchors.fill: parent
                 anchors.left: parent.left
                 anchors.leftMargin: 30
-                anchors.top: _listeDesAffectes.bottom
-                anchors.topMargin: 30
-
+                anchors.top: parent.top
+                anchors.topMargin: 20
+                clip: true
                 spacing: 5
-                delegate: Text { text: prenom_personne + " " + nom_personne ;}
+                delegate: Text { text: "<b><font color='red'> X </font></b>" +prenom_personne + " " + nom_personne ;}
+            }
+            ScrollBar {
+                flickable : listePersonnesInscritesBenevoles
             }
 
 

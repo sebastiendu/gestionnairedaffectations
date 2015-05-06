@@ -150,7 +150,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_planComplet->setQuery(query);
 
-        query.prepare("select * from poste_et_tour where id_evenement= :evt ORDER BY nom ASC;");
+        query.prepare("select * from poste_et_tour where id_evenement= :evt ORDER BY nom, debut ASC;");
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_poste_et_tour->setQuery(query);

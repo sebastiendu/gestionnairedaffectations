@@ -19,5 +19,6 @@
         <file>test.qml</file>
         <file>AffectationsListe.qml</file>
         <file>Trait.qml</file>
+        <file>ProgressBarAffectation.qml</file>
     </qresource>
 </RCC>

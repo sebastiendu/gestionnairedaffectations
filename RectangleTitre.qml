@@ -24,7 +24,7 @@ Item {
                 styleColor: "white"
                 anchors.top: parent.top
                 anchors.topMargin: -_ajouterUnPoste.height /2
-                text: " " + titre + " "
+                text: "   " + titre + "   "
                 anchors.horizontalCenter: parent.horizontalCenter
             }
         }
