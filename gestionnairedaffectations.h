@@ -51,7 +51,11 @@ public:
     Q_INVOKABLE void genererTableauRemplissage();
     Q_INVOKABLE void genererFichesProblemes();
     Q_INVOKABLE void genererExportGeneral();
+
     int age(QDate dateDeNaissance,QDate dateRepere);
+    void faireUnRetourALaLigne(QProcess* unPandoc);
+    void afficherEntete(QProcess* unPandoc, QSqlQuery uneQuery);
+    bool terminerGenerationEtat(QProcess* unPandoc, QTemporaryFile *unFichier);
  //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
 
 signals:

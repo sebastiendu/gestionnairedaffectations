@@ -292,70 +292,76 @@ void GestionnaireDAffectations::mettreAJourModelPlan(){
 
 void GestionnaireDAffectations::genererFichesDePostes()
 {
-    QTemporaryFile f("etatXXXXXX.odt");
-    f.open();
+    // FICHIER //
+    QTemporaryFile* f = new QTemporaryFile("Fiches_De_Postes_XXXXXX");
+    f->open();
+    qDebug("reussi !");
+    // REQUETE //
     QSqlQuery query;
     query.prepare("select * from fiche_de_poste_benevoles_par_tour where id_evenement= :evt");
     query.bindValue(":evt",idEvenement());
     query.exec();
 
+    // PANDOC //
     QProcess* pandoc = new QProcess(this);
     pandoc->setProgram("pandoc");
     QStringList arguments;
-    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f.fileName() << "-";
+    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f->fileName() << "-";
     pandoc->setArguments(arguments);
     pandoc->start();
     pandoc->waitForStarted();
 
+    // INITIALISATIONS //
     int id_poste = -2;
-    int id_tour = -1;
+    int id_tourPrecedent = -1;
+    QString dateTourCourant = QString("-1");
+    QString dateTourPrecedent = QString("-2");
 
-    query.next();
-
-    pandoc->write("\n# Evenement : ");
-    pandoc->write(query.record().value("nom_evenement").toString().toUtf8());
-    pandoc->write("\n\n");
-
-    query.previous();
+    // TRAITEMENTS //
+    afficherEntete(pandoc,query);
 
     while (query.next())
     {
         if (query.record().value("id_poste").toInt() != id_poste)
         {
-            (id_poste!=-2?pandoc->write("\n -------- \n"):id_poste=id_poste);
+            dateTourCourant = "-1";  // On réinitialise les deux variables à des valeurs différentes pour
+            dateTourPrecedent = "-2";// l'affichage de la date
+            //(id_poste!=-2?pandoc->write("\n -------- \n"):id_poste=id_poste);
             id_poste = query.record().value("id_poste").toInt();
+            id_tourPrecedent = -1;
 
-            id_tour = -1;
 
-
-            pandoc->write("\n\n## Poste : ");
+            pandoc->write("\n\n"); // Pour forcer la fin du tableau
+            faireUnRetourALaLigne(pandoc);
+            pandoc->write("\n### ");
             pandoc->write(query.record().value("nom_poste").toString().toUtf8());
             pandoc->write("\n\n");
         }
 
-        if (query.record().value("id_tour").toInt() != id_tour)
+        if (query.record().value("id_tour").toInt() != id_tourPrecedent)
         {
-            id_tour = query.record().value("id_tour").toInt();
+            id_tourPrecedent = query.record().value("id_tour").toInt();
 
+            dateTourCourant = query.record().value("debut_tour").toDateTime().toString("dMMYYYY");
 
-            if (query.record().value("debut_tour").toDateTime().toString("d") == query.record().value("fin_tour").toDateTime().toString("d"))
+            if (dateTourCourant != dateTourPrecedent)
             {
-                pandoc->write("\n\n### Tour : Le ");
-                pandoc->write(query.record().value("debut_tour").toDateTime().toString("d/MM/yyyy").toUtf8());
-                pandoc->write(" de ");
-                pandoc->write(query.record().value("debut_tour").toDateTime().toString("H:mm").toUtf8());
-                pandoc->write(" à ");
-                pandoc->write(query.record().value("fin_tour").toDateTime().toString("H:mm").toUtf8());
+                dateTourPrecedent = dateTourCourant;
+                pandoc->write("\n\n"); // Pour forcer la fin du tableau
+                faireUnRetourALaLigne(pandoc);
+                pandoc->write("\n\n##       ");
+                pandoc->write(query.record().value("debut_tour").toDateTime().toString("dddd d MMMM yyyy").toUtf8());
                 pandoc->write("\n\n");
+                //pandoc->write(" de ")
             }
-            else
-            {
-                pandoc->write("\n\n### Tour : Du ");
-                pandoc->write(query.record().value("debut_tour").toDateTime().toString("d/MM/yyyy H:mm").toUtf8());
-                pandoc->write(" au ");
-                pandoc->write(query.record().value("fin_tour").toDateTime().toString("d/MM/yyyy H:mm").toUtf8());
-                pandoc->write("\n\n");
-            }
+            pandoc->write("\n\n "); // PAS TOUCHER A CA ... //
+            pandoc->write(" \n\n ");// CA MARCHE ...     //
+            pandoc->write("              ● ");
+            pandoc->write(query.record().value("debut_tour").toDateTime().toString("H:mm").toUtf8());
+            pandoc->write(" → ");
+            pandoc->write(query.record().value("fin_tour").toDateTime().toString("H:mm").toUtf8());
+            pandoc->write("\n\n");
+
             pandoc->write("Nom|Prénom|Portable\n");
             pandoc->write("---|---|---\n");
         }
@@ -364,16 +370,17 @@ void GestionnaireDAffectations::genererFichesDePostes()
         pandoc->write("|");
         pandoc->write(query.record().value("prenom_personne").toString().toUtf8());
         pandoc->write("|");
-        pandoc->write(query.record().value("portable").toString().toUtf8());
+        pandoc->write(QString("").append(query.record().value("portable").toString()).toUtf8());
         pandoc->write("\n");
     }
+
     pandoc->closeWriteChannel();
     pandoc->waitForFinished();
 
     qDebug() << pandoc->readAll();
 
     QProcess* lowriter = new QProcess(this);
-    lowriter->start("lowriter", QStringList() << f.fileName());
+    lowriter->start("lowriter", QStringList() << f->fileName());
     lowriter->waitForFinished();
 
     qDebug() << lowriter->readAll();
@@ -383,68 +390,66 @@ void GestionnaireDAffectations::genererFichesDePostes()
 
 void GestionnaireDAffectations::genererCarteBenevoles()
 {
-    QTemporaryFile f("Carte_de_benevoles_XXXXXX.odt");
-    f.open();
+    // FICHIER //
+    QTemporaryFile* f = new QTemporaryFile("Carte_de_benevoles_XXXXXX.odt");
+    f->open();
+
+    // REQUETE //
     QSqlQuery query;
     query.prepare("select * from carte_de_benevole_inscriptions_postes where id_evenement= :evt");
     query.bindValue(":evt",idEvenement());
     query.exec();
 
+    // PANDOC //
     QProcess* pandoc = new QProcess(this);
     pandoc->setProgram("pandoc");
     QStringList arguments;
-    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f.fileName() << "-";
+    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f->fileName() << "-";
     pandoc->setArguments(arguments);
     pandoc->start();
     pandoc->waitForStarted();
 
+    // INITIALISATIONS //
     int id_personne = -2;
     QString jourCourant = "-2";
 
-    query.next();
+    // TRAITEMENTS //
+    afficherEntete(pandoc,query);
 
-    pandoc->write("\n# Evenement : ");
-    pandoc->write(query.record().value("nom_evenement").toString().toUtf8());
-    pandoc->write("\n\n");
-
-    query.previous();
 
     while (query.next())
     {
-       if (query.record().value("id_personne").toInt() != id_personne)
-       {
-           (id_personne!=-2?pandoc->write("\n -------- \n"):id_personne=id_personne);
-           id_personne = query.record().value("id_personne").toInt();
+        if (query.record().value("id_personne").toInt() != id_personne)
+        {
+            id_personne = query.record().value("id_personne").toInt();
 
-           jourCourant = "-1";
+            jourCourant = "-1";
 
-           pandoc->write("\n\n# Bénévole : ");
-           pandoc->write(query.record().value("nom_personne").toString().toUtf8());
-           pandoc->write(" ");
-           pandoc->write(query.record().value("prenom_personne").toString().toUtf8());
-           pandoc->write("\n");
+            pandoc->write("\n\n"); // Pour forcer la fin du tableau
+            pandoc->write("\n\n#");
+            pandoc->write(query.record().value("nom_personne").toString().toUtf8());
+            pandoc->write(" ");
+            pandoc->write(query.record().value("prenom_personne").toString().toUtf8());
+            pandoc->write("\n");
 
-           if (query.record().value("domicile").toString().toUtf8() != "")
-           {
-           pandoc->write("Domicile : ");
-           pandoc->write(query.record().value("domicile").toString().toUtf8());
+            if (query.record().value("domicile").toString().toUtf8() != "")
+            {
+                pandoc->write(QString("[").append(query.record().value("domicile").toString()).append("]").append("(callto:").append(query.record().value("portable").toString()).append(")\n\n").toUtf8());
 
+                if (query.record().value("portable").toString().toUtf8() != "")
+                {
+                    pandoc->write(" | ");
+                }
+            }
             if (query.record().value("portable").toString().toUtf8() != "")
             {
-               pandoc->write(" | ");
+                pandoc->write(QString("[").append(query.record().value("portable").toString()).append("]").append("(callto:").append(query.record().value("portable").toString()).append(")\n\n").toUtf8());
+                pandoc->write("\n\n");
             }
-           }
-           if (query.record().value("portable").toString().toUtf8() != "")
-           {
-
-             pandoc->write("Portable : ");
-             pandoc->write(query.record().value("portable").toString().toUtf8());
-             pandoc->write("\n\n");
-           }
-           else
-           {
-             pandoc->write("\n\n");
-           }
+            else
+            {
+                pandoc->write("\n\n");
+            }
         }
 
         if (query.record().value("debut_tour").toDateTime().toString("d") != jourCourant)
@@ -452,8 +457,8 @@ void GestionnaireDAffectations::genererCarteBenevoles()
             pandoc->write("\n");
             jourCourant = query.record().value("debut_tour").toDateTime().toString("d");
 
-            pandoc->write("## Le : ");
-            pandoc->write(query.record().value("debut_tour").toDateTime().toString("d/MM/yyyy").toUtf8());
+            pandoc->write("##");
+            pandoc->write(query.record().value("debut_tour").toDateTime().toString("dddd d MMMM yyyy").toUtf8());
             pandoc->write("\n");
             pandoc->write("Poste|Debut|Fin\n");
             pandoc->write("---|---|---\n");
@@ -470,13 +475,14 @@ void GestionnaireDAffectations::genererCarteBenevoles()
     pandoc->closeWriteChannel();
     pandoc->waitForFinished();
 
+
     qDebug() << pandoc->readAll();
 
     QProcess* lowriter = new QProcess(this);
-    lowriter->start("lowriter", QStringList() << f.fileName());
+    lowriter->start("lowriter", QStringList() << f->fileName());
     lowriter->waitForFinished();
 
-    qDebug(f.fileName().toUtf8());
+    qDebug(f->fileName().toUtf8());
 
     qDebug() << lowriter->readAll();
 }
@@ -484,20 +490,20 @@ void GestionnaireDAffectations::genererCarteBenevoles()
 void GestionnaireDAffectations::genererTableauRemplissage()
 {
     // FICHIER //
-    QTemporaryFile f("tableauRemplissageXXXXXX.odt"); // Création d'un nom de fichier temporaire
-    f.open(); // Ouverture du fichier
+    QTemporaryFile* f = new QTemporaryFile("Tableau_De_Remplissage_XXXXXX.odt");
+    f->open();
 
-    // REQIETE //
+    // REQUETE //
     QSqlQuery query; // Création d'une requete
     query.prepare("select * from tableau_de_remplissage where id_evenement= :evt"); // Alimentation de la requete
     query.bindValue(":evt",idEvenement()); // Affectation des parametres de la requete
     query.exec(); //Execution de la requete
 
-        // PANDOC //
+    // PANDOC //
     QProcess* pandoc = new QProcess(this); // Mise en place de la commande pandoc
     pandoc->setProgram("pandoc");
     QStringList arguments; // Définition des arguments de la commande pandoc
-    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f.fileName() << "-";
+    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f->fileName() << "-";
     pandoc->setArguments(arguments);
     pandoc->start();
     pandoc->waitForStarted();
@@ -510,252 +516,188 @@ void GestionnaireDAffectations::genererTableauRemplissage()
     QString jourCourant;
     QString nomPosteCourant;
     QString lieuEvenementCourant;
+
     // calcul de la différence entre le nb de participants inscrits et nb necessaire
     int difference, nbAffectationCourant, minNecessaireCourant, maxNecessaireCourant, idPosteCourant; // calcul de la différence entre le nb de participants inscrits et nb necessaire
 
-
-    if (query.next()) // Si la requete n'a pas rendu de résultat vide, alors :
-    {
-        pandoc->write("#");
-        nomEvenementCourant = query.record().value("nom_evenement").toString();
-        pandoc->write(nomEvenementCourant.toUtf8());
-        pandoc->write("\n\n");
-
-        pandoc->write("###");
-        lieuEvenementCourant = query.record().value("lieu_evenement").toString();
-        pandoc->write(lieuEvenementCourant.toUtf8());
-        pandoc->write("\n\n");
-
-        pandoc->write("###");
-        pandoc->write("Du ");
-
-        if (query.record().value("debut_evenement").toDateTime().toString("d") == "1")
-        {
-           pandoc->write(query.record().value("debut_evenement").toDateTime().toString("d").toUtf8());
-           pandoc->write("er ");
-           pandoc->write(query.record().value("debut_evenement").toDateTime().toString("MMMM yyyy").toUtf8());
-        }
-
-        else
-        {
-           pandoc->write(query.record().value("debut_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
-        }
-
-        pandoc->write(" au ");
-
-        if (query.record().value("fin_evenement").toDateTime().toString("d") == "1") // Si la date est le "1" alors on suffixe par "-er"
-        {
-            pandoc->write(query.record().value("fin_evenement").toDateTime().toString("d").toUtf8());
-            pandoc->write("er ");
-            pandoc->write(query.record().value("fin_evenement").toDateTime().toString("MMMM yyyy").toUtf8());
-
-        }
-
-        else
-        {
-            pandoc->write(query.record().value("fin_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
-        }
-
-        pandoc->write("\n\n");
-
-        query.previous(); // Ne pas oublier la première ligne
-    }
+    afficherEntete(pandoc,query);
+    query.previous(); // Ne pas oublier la première ligne
 
     while (query.next())
     {
         nbAffectationCourant = query.record().value("nombre_affectations").toInt();
         minNecessaireCourant = query.record().value("min").toInt();
         maxNecessaireCourant = query.record().value("max").toInt();
-    idPosteCourant = query.record().value("id_poste").toInt();
-    jourCourant = query.record().value("debut_tour").toDateTime().toString("d/MM");
-    nomPosteCourant = query.record().value("nom_poste").toString();
+        idPosteCourant = query.record().value("id_poste").toInt();
+        jourCourant = query.record().value("debut_tour").toDateTime().toString("d/MM");
+        nomPosteCourant = query.record().value("nom_poste").toString();
 
-       if (jourCourant != jourRequetePrecedente)
-       {
-           jourRequetePrecedente = jourCourant;
-           idPostePrecedent = -1; // On réinitialise pour ne pas l'oublier
-           pandoc->write("\n\n##");
-           pandoc->write(query.record().value("debut_tour").toDateTime().toString("d MMMM yyyy").toUtf8());
-           pandoc->write("\n");
-           pandoc->write("Tour|Poste|Min|Max|Inscrits|Remplissage\n");
-           pandoc->write("---|---|---|---|---|---\n");
-       }
+        if (jourCourant != jourRequetePrecedente)
+        {
+            jourRequetePrecedente = jourCourant;
+            idPostePrecedent = -1; // On réinitialise pour ne pas l'oublier
+            pandoc->write("\n\n##");
+            pandoc->write(query.record().value("debut_tour").toDateTime().toString("d MMMM yyyy").toUtf8());
+            pandoc->write("\n");
+            pandoc->write("Tour|Poste|Min|Max|Inscrits|Remplissage\n");
+            pandoc->write("---|---|---|---|---|---\n");
+        }
 
-       // Colonne Tour
-           pandoc->write(query.record().value("debut_tour").toDateTime().toString("H:mm").toUtf8());
-           pandoc->write(" → ");
-           pandoc->write(query.record().value("fin_tour").toDateTime().toString("H:mm").toUtf8());
-           pandoc->write("|");
+        // Colonne Tour
+        pandoc->write(query.record().value("debut_tour").toDateTime().toString("H:mm").toUtf8());
+        pandoc->write(" → ");
+        pandoc->write(query.record().value("fin_tour").toDateTime().toString("H:mm").toUtf8());
+        pandoc->write("|");
 
         // Colonne Poste
-       if(idPosteCourant != idPostePrecedent)
-       {
-           idPostePrecedent = idPosteCourant;
-           pandoc->write(nomPosteCourant.toUtf8());
-       }
-       else
-       {
-           pandoc->write("-");
-       }
+        if(idPosteCourant != idPostePrecedent)
+        {
+            idPostePrecedent = idPosteCourant;
+            pandoc->write(nomPosteCourant.toUtf8());
+        }
+        else
+        {
+            pandoc->write("-");
+        }
 
-           pandoc->write("|");
+        pandoc->write("|");
 
-       //Colonne Min
-           if (minNecessaireCourant > nbAffectationCourant)
-           {
+        //Colonne Min
+        if (minNecessaireCourant > nbAffectationCourant)
+        {
             pandoc->write("**");
             pandoc->write(QString().setNum(minNecessaireCourant).toUtf8());
             pandoc->write("**");
-           }
+        }
 
-           else
-               pandoc->write(QString().setNum(minNecessaireCourant).toUtf8());
+        else
+            pandoc->write(QString().setNum(minNecessaireCourant).toUtf8());
 
-           pandoc->write("|");
+        pandoc->write("|");
 
-       //Colonne Max
-           if (maxNecessaireCourant < nbAffectationCourant)
-           {
-               pandoc->write("**");
-               pandoc->write(QString().setNum(maxNecessaireCourant).toUtf8());
-               pandoc->write("**");
-           }
-           else
-                pandoc->write(QString().setNum(maxNecessaireCourant).toUtf8());
+        //Colonne Max
+        if (maxNecessaireCourant < nbAffectationCourant)
+        {
+            pandoc->write("**");
+            pandoc->write(QString().setNum(maxNecessaireCourant).toUtf8());
+            pandoc->write("**");
+        }
+        else
+            pandoc->write(QString().setNum(maxNecessaireCourant).toUtf8());
 
-           pandoc->write("|");
+        pandoc->write("|");
 
 
-       //Colonne Nombre d'inscrits
-           if (nbAffectationCourant < minNecessaireCourant || nbAffectationCourant > maxNecessaireCourant)
-           {
-               pandoc->write("**");
-               pandoc->write(QString().setNum(nbAffectationCourant).toUtf8());
-               pandoc->write("**");
-           }
+        //Colonne Nombre d'inscrits
+        if (nbAffectationCourant < minNecessaireCourant || nbAffectationCourant > maxNecessaireCourant)
+        {
+            pandoc->write("**");
+            pandoc->write(QString().setNum(nbAffectationCourant).toUtf8());
+            pandoc->write("**");
+        }
 
-           else
-               pandoc->write(QString().setNum(nbAffectationCourant).toUtf8());
+        else
+            pandoc->write(QString().setNum(nbAffectationCourant).toUtf8());
 
-           pandoc->write("|");
+        pandoc->write("|");
 
-       // Colone manque
-           QString rondNoir = QString("●");
-           QString rondBlanc = QString("○");
-           QString etatRemplissage = QString("null");
+        // Colone manque
+        QString rondNoir = QString("●");
+        QString rondBlanc = QString("○");
+        QString etatRemplissage = QString("null");
 
-           if (nbAffectationCourant >= minNecessaireCourant && nbAffectationCourant <= maxNecessaireCourant)
-           {
-               etatRemplissage = "ok";
-           }
+        if (nbAffectationCourant >= minNecessaireCourant && nbAffectationCourant <= maxNecessaireCourant)
+        {
+            etatRemplissage = "ok";
+        }
 
-           else if (nbAffectationCourant < minNecessaireCourant)
-           {
-              etatRemplissage = "manque";
-              difference = (minNecessaireCourant-nbAffectationCourant);
-           }
+        else if (nbAffectationCourant < minNecessaireCourant)
+        {
+            etatRemplissage = "manque";
+            difference = (minNecessaireCourant-nbAffectationCourant);
+        }
 
-           else if (nbAffectationCourant > maxNecessaireCourant)
-           {
-               etatRemplissage = "trop";
-               difference = (maxNecessaireCourant);
+        else if (nbAffectationCourant > maxNecessaireCourant)
+        {
+            etatRemplissage = "trop";
+            difference = (maxNecessaireCourant);
 
-           }
+        }
 
-           if (etatRemplissage == "ok")
-           {
-               if (nbAffectationCourant < 10)
-               {
-                   for (int i = 0 ; i < nbAffectationCourant ; i++)
-                      pandoc->write(rondNoir.toUtf8());
-               }
-               else
-               {
-                   for (int i = 0 ; i < 10 ; i++)
-                      pandoc->write(rondNoir.toUtf8());
-               }
-           }
+        if (etatRemplissage == "ok")
+        {
+            if (nbAffectationCourant < 10)
+            {
+                for (int i = 0 ; i < nbAffectationCourant ; i++)
+                    pandoc->write(rondNoir.toUtf8());
+            }
+            else
+            {
+                for (int i = 0 ; i < 10 ; i++)
+                    pandoc->write(rondNoir.toUtf8());
+            }
+        }
 
-           else if (etatRemplissage == "manque")
-           {
-               if (minNecessaireCourant < 10)
-               {
-                   for (int i = 0; i< nbAffectationCourant ; i++)
-                        pandoc->write(rondNoir.toUtf8());
+        else if (etatRemplissage == "manque")
+        {
+            if (minNecessaireCourant < 10)
+            {
+                for (int i = 0; i< nbAffectationCourant ; i++)
+                    pandoc->write(rondNoir.toUtf8());
 
-                   for (int j = nbAffectationCourant ; j < minNecessaireCourant ; j++)
-                        pandoc->write(rondBlanc.toUtf8());
-               }
+                for (int j = nbAffectationCourant ; j < minNecessaireCourant ; j++)
+                    pandoc->write(rondBlanc.toUtf8());
+            }
 
-               else if (minNecessaireCourant >= 10)
-               {
-                   int nbRondsNoirs = nbAffectationCourant * 10 / minNecessaireCourant;
-                   for (int i = 0 ; i < nbRondsNoirs ; i++)
-                       pandoc->write(rondNoir.toUtf8());
+            else if (minNecessaireCourant >= 10)
+            {
+                int nbRondsNoirs = nbAffectationCourant * 10 / minNecessaireCourant;
+                for (int i = 0 ; i < nbRondsNoirs ; i++)
+                    pandoc->write(rondNoir.toUtf8());
 
-                   for (int j = nbRondsNoirs ; j < 10 ; j++)
-                       pandoc->write(rondBlanc.toUtf8());
-               }
+                for (int j = nbRondsNoirs ; j < 10 ; j++)
+                    pandoc->write(rondBlanc.toUtf8());
+            }
 
-           }
+        }
 
-           else if (etatRemplissage == "trop")
-           {
-                if (maxNecessaireCourant < 10)
-                {
-                    for (int i = 0; i < maxNecessaireCourant ; i++)
-                        pandoc->write(rondNoir.toUtf8());
+        else if (etatRemplissage == "trop")
+        {
+            if (maxNecessaireCourant < 10)
+            {
+                for (int i = 0; i < maxNecessaireCourant ; i++)
+                    pandoc->write(rondNoir.toUtf8());
 
-                    for (int j = maxNecessaireCourant ; j < nbAffectationCourant ; j++)
-                         pandoc->write("**#**");
+                for (int j = maxNecessaireCourant ; j < nbAffectationCourant ; j++)
+                    pandoc->write("**#**");
 
-                }
+            }
 
-                   else if (maxNecessaireCourant >= 10)
-                   {
-                       int nbRondsNoirs = maxNecessaireCourant * 10 / minNecessaireCourant;
-                       int nbDieses = nbAffectationCourant / maxNecessaireCourant;
-                       (nbDieses == 0?nbDieses=1:nbDieses=nbDieses); // Si l'arrondi est fait en dessous, on s'assure d'avoir au moins un diese
+            else if (maxNecessaireCourant >= 10)
+            {
+                int nbRondsNoirs = maxNecessaireCourant * 10 / minNecessaireCourant;
+                int nbDieses = nbAffectationCourant / maxNecessaireCourant;
+                (nbDieses == 0?nbDieses=1:nbDieses=nbDieses); // Si l'arrondi est fait en dessous, on s'assure d'avoir au moins un diese
 
-                       for (int i = 0 ; i < 10-nbDieses ; i++)
-                           pandoc->write(rondNoir.toUtf8());
+                for (int i = 0 ; i < 10-nbDieses ; i++)
+                    pandoc->write(rondNoir.toUtf8());
 
-                       for (int j = 0 ; j < nbDieses ; j++)
-                           pandoc->write("**#**");
-                   }
-              }
-           pandoc->write("\n");
+                for (int j = 0 ; j < nbDieses ; j++)
+                    pandoc->write("**#**");
+            }
+        }
+        pandoc->write("\n");
     } // Fin du parcours
 
-    pandoc->closeWriteChannel();
-    pandoc->waitForFinished();
-
-    qDebug() << pandoc->readAll();
-
-    QProcess* lowriter = new QProcess(this);
-    lowriter->start("lowriter", QStringList() << f.fileName());
-    lowriter->waitForFinished();
-
-    qDebug() << lowriter->readAll();
+    terminerGenerationEtat(pandoc,f);
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 void GestionnaireDAffectations::genererFichesProblemes()
 {
     // FICHIER //
-    QTemporaryFile f("Fiche_a_problemes_XXXXXX.odt");
-    f.open();
+
+    QTemporaryFile* f = new QTemporaryFile("Fiche_a_problemes_XXXXXX.odt");
+    f->open();
 
     // REQUETE //
     QSqlQuery query;
@@ -767,7 +709,7 @@ void GestionnaireDAffectations::genererFichesProblemes()
     QProcess* pandoc = new QProcess(this);
     pandoc->setProgram("pandoc");
     QStringList arguments;
-    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f.fileName() << "-";
+    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f->fileName() << "-";
     pandoc->setArguments(arguments);
     pandoc->start();
     pandoc->waitForStarted();
@@ -794,51 +736,8 @@ void GestionnaireDAffectations::genererFichesProblemes()
     QDate dateDebutEvenement;
     QDate dateNaissancePersonneCourant;
 
-    if (query.next()) // Si la requete n'a pas rendu de résultat vide, alors :
-    {
-        pandoc->write("#");
-        nomEvenementCourant = query.record().value("nom_evenement").toString();
-        pandoc->write(nomEvenementCourant.toUtf8());
-        pandoc->write(" — ");
+    afficherEntete(pandoc,query);
 
-        lieuEvenementCourant = query.record().value("lieu_evenement").toString();
-        pandoc->write(lieuEvenementCourant.toUtf8());
-        pandoc->write(" — ");
-
-
-        pandoc->write("Du ");
-
-        if (query.record().value("debut_evenement").toDateTime().toString("d") == "1")
-        {
-           pandoc->write(query.record().value("debut_tour").toDateTime().toString("d").toUtf8());
-           pandoc->write("er ");
-           pandoc->write(query.record().value("debut_tour").toDateTime().toString("MMMM yyyy").toUtf8());
-        }
-
-        else
-        {
-           pandoc->write(query.record().value("debut_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
-        }
-
-        pandoc->write(" au ");
-
-        if (query.record().value("fin_evenement").toDateTime().toString("d") == "1") // Si la date est le "1" alors on suffixe par "-er"
-        {
-            pandoc->write(query.record().value("fin_tour").toDateTime().toString("d").toUtf8());
-            pandoc->write("er ");
-            pandoc->write(query.record().value("fin_tour").toDateTime().toString("MMMM yyyy").toUtf8());
-
-        }
-
-        else
-        {
-            pandoc->write(query.record().value("fin_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
-        }
-
-        pandoc->write("\n\n");
-
-        query.previous(); // Ne pas oublier la première ligne
-    }
     while (query.next())
     {
 
@@ -858,7 +757,8 @@ void GestionnaireDAffectations::genererFichesProblemes()
         typePostePersonneCourant = query.record().value("type_poste").toString();
         commentairePersonneCourant = query.record().value("commentaire_disponibilite").toString();
 
-        pandoc->write("###");
+        faireUnRetourALaLigne(pandoc);
+        pandoc->write("\n###");
         pandoc->write(nomPersonneCourant.toUtf8());
 
         if (prenomPersonneCourant != "")
@@ -868,91 +768,66 @@ void GestionnaireDAffectations::genererFichesProblemes()
 
         if (adressePersonneCourant != "")
         {
-            pandoc->write(QString("* Adresse :").toUtf8());
+            /*pandoc->write(QString("* Adresse :").toUtf8());
             pandoc->write(QString("\n\n").toUtf8());
-            pandoc->write(QString("          ").append(adressePersonneCourant).toUtf8());
-            pandoc->write(QString("\n").toUtf8());
-            pandoc->write(QString("          ").append(codePostalPersonneCourant).append(" ").append(villePersonneCourant).toUtf8());
+            pandoc->write(QString("          ").append(adressePersonneCourant).toUtf8());*/
+            //pandoc->write("###");
+            pandoc->write(adressePersonneCourant.toUtf8());
+            pandoc->write(QString("\n\n").toUtf8());
+            pandoc->write(codePostalPersonneCourant.append(" ").append(villePersonneCourant).toUtf8());
             pandoc->write("\n\n");
         }
         if (portablePersonneCourant != "")
-            pandoc->write(QString("* ").append("[").append(portablePersonneCourant).append("]").append("(callto:").append(portablePersonneCourant).append(")\n\n").toUtf8());
+            pandoc->write(QString("").append(QString("[").append(portablePersonneCourant).append("]").append("(callto:").append(portablePersonneCourant).append(")\n\n")).toUtf8());
 
         if (domicilePersonneCourant != "")
-            pandoc->write(QString("* ").append("[").append(domicilePersonneCourant).append("]").append("(callto:").append(domicilePersonneCourant).append(")\n\n").toUtf8());
+            pandoc->write(QString("").append(QString("[").append(domicilePersonneCourant).append("]").append("(callto:").append(domicilePersonneCourant).append(")\n\n")).toUtf8());
 
         if (emailPersonneCourant != "")
-            pandoc->write(QString("* Adresse de courriel : ").append("[").append(emailPersonneCourant).append("]").append("(mailto:").append(emailPersonneCourant).append(")\n\n").toUtf8());
-
-
+            pandoc->write(QString("").append(QString("[").append(emailPersonneCourant).append("]").append("(mailto:").append(emailPersonneCourant).append(")\n\n")).toUtf8());
 
         if (!dateNaissancePersonneCourant.isNull())
         {
             QDate dateNais = query.record().value("date_naissance").toDate();
             QDate dateRepere = query.record().value("debut_evenement").toDate();
             int agePersonneCourant = age(dateNais,dateRepere);
-            /*bool avant;
-            dateDebutEvenement = query.record().value("debut_evenement").toDate();
-            dateNaissancePersonneCourant = query.record().value("date_naissance").toDate();
 
-            if (dateDebutEvenement.month() > dateNaissancePersonneCourant.month())
-            {
-                avant = true;
-            }
-            else if (dateDebutEvenement.month() < dateNaissancePersonneCourant.month())
-            {
-                avant = false;
-            }
-            else if(dateDebutEvenement.month() == dateNaissancePersonneCourant.month())
-            {
-                if (dateDebutEvenement.day() >= dateNaissancePersonneCourant.day())
-                {
-                    avant = true;
-                }
-                else if (dateDebutEvenement.day() < dateNaissancePersonneCourant.day())
-                    avant = false;
-            }
-            agePersonneCourant = dateDebutEvenement.year() - dateNaissancePersonneCourant.year();
-            (avant?agePersonneCourant=agePersonneCourant:agePersonneCourant--);*/
 
-            pandoc->write(QString("* ").toUtf8());
+            pandoc->write(QString("                    ● ").toUtf8());
+
             pandoc->write(QString().setNum(agePersonneCourant).toUtf8());
+
             pandoc->write(QString(" ans ").toUtf8());
+
             pandoc->write(QString(" (né(e) le ").toUtf8());
+
             pandoc->write(dateNaissancePersonneCourant.toString("d/MM/yyyy)").toUtf8());
+
             pandoc->write(QString("\n\n").toUtf8());
+
         }
 
 
         if (professionPersonneCourant != "")
-            pandoc->write(QString("* Profession : ").append(professionPersonneCourant).append("\n\n").toUtf8());
+            pandoc->write(QString("                    ● Profession : ").append(professionPersonneCourant).append("\n\n").toUtf8());
 
         if (competencesPersonneCourant != "")
-            pandoc->write(QString("* Competences : ").append(competencesPersonneCourant).append("\n\n").toUtf8());
+            pandoc->write(QString("                    ● Competences : ").append(competencesPersonneCourant).append("\n\n").toUtf8());
 
         if (languesPersonneCourant != "")
-            pandoc->write(QString("* Langues: ").append(languesPersonneCourant).append("\n\n").toUtf8());
+            pandoc->write(QString("                    ● Langues: ").append(languesPersonneCourant).append("\n\n").toUtf8());
 
         if (amisPersonneCourant != "")
-            pandoc->write(QString("* Affinités : ").append(amisPersonneCourant).append("\n\n").toUtf8());
+            pandoc->write(QString("                    ● Affinités : ").append(amisPersonneCourant).append("\n\n").toUtf8());
 
         if (typePostePersonneCourant != "")
-            pandoc->write(QString("* Type de poste souhaité : ").append(typePostePersonneCourant).append("\n\n").toUtf8());
+            pandoc->write(QString("                    ● Type de poste souhaité : ").append(typePostePersonneCourant).append("\n\n").toUtf8());
 
         if (commentairePersonneCourant != "")
-            pandoc->write(QString("* Commentaire : ").append(commentairePersonneCourant).append("\n\n").toUtf8());
+            pandoc->write(QString("                    ● Commentaire : ").append(commentairePersonneCourant).append("\n\n").toUtf8());
     }
 
-    pandoc->closeWriteChannel();
-    pandoc->waitForFinished();
-
-    qDebug() << pandoc->readAll();
-
-    QProcess* lowriter = new QProcess(this);
-    lowriter->start("lowriter", QStringList() << f.fileName());
-    lowriter->waitForFinished();
-
-    qDebug() << lowriter->readAll();
+    terminerGenerationEtat(pandoc,f);
 }
 
 
@@ -970,8 +845,9 @@ void GestionnaireDAffectations::genererFichesProblemes()
 void GestionnaireDAffectations::genererExportGeneral()
 {
     // FICHIER //
-    QTemporaryFile f("Export_General_XXXXXX.odt");
-    f.open();
+    QTemporaryFile* f;
+    f->setFileTemplate("Export_General_XXXXXX.odt");
+    f->open();
 
     // REQUETE //
     QSqlQuery query;
@@ -983,7 +859,7 @@ void GestionnaireDAffectations::genererExportGeneral()
     QProcess* pandoc = new QProcess(this);
     pandoc->setProgram("pandoc");
     QStringList arguments;
-    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f.fileName() << "-";
+    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f->fileName() << "-";
     pandoc->setArguments(arguments);
     pandoc->start();
     pandoc->waitForStarted();
@@ -1015,22 +891,19 @@ void GestionnaireDAffectations::genererExportGeneral()
         pandoc->write(" — ");
 
         lieuEvenementCourant = query.record().value("lieu_evenement").toString();
-        pandoc->write(lieuEvenementCourant.toUtf8());
-        pandoc->write(" \n");
-
-
-        pandoc->write("#Du ");
+        pandoc->write(lieuEvenementCourant.append("\n\n").toUtf8());
+        pandoc->write("Du ");
 
         if (query.record().value("debut_evenement").toDateTime().toString("d") == "1")
         {
-           pandoc->write(query.record().value("debut_tour").toDateTime().toString("d").toUtf8());
-           pandoc->write("er ");
-           pandoc->write(query.record().value("debut_tour").toDateTime().toString("MMMM yyyy").toUtf8());
+            pandoc->write(query.record().value("debut_tour").toDateTime().toString("d").toUtf8());
+            pandoc->write("er ");
+            pandoc->write(query.record().value("debut_tour").toDateTime().toString("MMMM yyyy").toUtf8());
         }
 
         else
         {
-           pandoc->write(query.record().value("debut_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
+            pandoc->write(query.record().value("debut_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
         }
 
         pandoc->write(" au ");
@@ -1047,10 +920,17 @@ void GestionnaireDAffectations::genererExportGeneral()
         {
             pandoc->write(query.record().value("fin_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
         }
-
+        pandoc->write("#\n\n");
+        pandoc->write("-------------------\n");
+        pandoc->write(" \n");
+        pandoc->write("\n\n\n\n");
+        pandoc->write("\n");
+        pandoc->write("\n");
+        pandoc->write("\n");
+        pandoc->write("\n");
         pandoc->write("\n");
         pandoc->write("#");
-        pandoc->write("                        Bénévoles");
+        pandoc->write("                   Personnes disponibles");
         pandoc->write("\n");
         pandoc->write("\n");
         pandoc->write("\n");
@@ -1060,7 +940,7 @@ void GestionnaireDAffectations::genererExportGeneral()
 
 
 
-    while (query.next())
+    /*while (query.next())
     {
         nomPersonneCourant = query.record().value("nom_personne").toString();
         prenomPersonneCourant = query.record().value("prenom_personne").toString();
@@ -1093,33 +973,59 @@ void GestionnaireDAffectations::genererExportGeneral()
             pandoc->write(portablePersonneCourant.toUtf8());
             if (portablePersonneCourant != "" && emailPersonneCourant!= "")
                 pandoc->write(" - ");
-            pandoc->write(" - ");
+            pandoc->write(emailPersonneCourant.toUtf8());
             pandoc->write("\n\n");
 
-            pandoc->write("Poste|Tour\n");
-            pandoc->write("---|---\n");
+            if (postePersonneCourant != "")
+            {
+                pandoc->write("Poste|Tour\n");
+                pandoc->write("---|---\n");
+            }
+            else
+            {
+                pandoc->write("Age|Profession|Competences|Langues|Poste souhaité|Affinités|Commentaire\n");
+                pandoc->write("---|---|---|---|---|---|---\n");
+            }
         }
-
-        pandoc->write(postePersonneCourant.toUtf8());
-        pandoc->write("|");
-
-        if (query.record().value("debut_tour").toDateTime().toString("d/MM") != "")
+        if (postePersonneCourant != "")
         {
-            pandoc->write("Le ");
-            pandoc->write(query.record().value("debut_tour").toDateTime().toString("d/MM").toUtf8());
-            pandoc->write(" ");
-            pandoc->write(debutTourPersonneCourant.toUtf8());
-            pandoc->write("→");
-            pandoc->write(finTourPersonneCourant.toUtf8());
+            pandoc->write(postePersonneCourant.toUtf8());
+            pandoc->write("|");
+
+            if (query.record().value("debut_tour").toDateTime().toString("d/MM") != "")
+            {
+                pandoc->write("Le ");
+                pandoc->write(query.record().value("debut_tour").toDateTime().toString("d/MM").toUtf8());
+                pandoc->write(" ");
+                pandoc->write(debutTourPersonneCourant.toUtf8());
+                pandoc->write("→");
+                pandoc->write(finTourPersonneCourant.toUtf8());
+
+            }
+            else
+                pandoc->write(" ");
+
+            pandoc->write("\n");
 
         }
         else
-            pandoc->write(" ");
-
-        pandoc->write("\n");
-
-
-    }
+        {
+            query.record().value("date_naissance").toDate().isNull()?pandoc->write(" "):pandoc->write(QString().setNum(age(query.record().value("date_naissance").toDate(),query.record().value("debut_evenement").toDate())).toUtf8());
+            pandoc->write("|");
+            pandoc->write(query.record().value("profession").toString().toUtf8());
+            pandoc->write("|");
+            pandoc->write(query.record().value("competences").toString().toUtf8());
+            pandoc->write("|");
+            pandoc->write(query.record().value("langues").toString().toUtf8());
+            pandoc->write("|");
+            pandoc->write(query.record().value("type_poste").toString().toUtf8());
+            pandoc->write("|");
+            pandoc->write(query.record().value("liste_amis").toString().toUtf8());
+            pandoc->write("|");
+            pandoc->write(query.record().value("commentaire_disponibilite").toString().toUtf8());
+            pandoc->write("\n");
+        }
+    }*/
 
     // Deuxieme requete //
     QSqlQuery query2;
@@ -1133,7 +1039,7 @@ void GestionnaireDAffectations::genererExportGeneral()
     QString jourRequetePrecedent = QString("0");
 
     QString posteRequeteCourant = QString("0");
-    QString posteRequetePrecedent = QString("-1");
+    //QString posteRequetePrecedent = QString("-1");
 
     int idTourCourant=-1;
     int idTourPrecedent=-2;
@@ -1147,54 +1053,41 @@ void GestionnaireDAffectations::genererExportGeneral()
     pandoc->write("\n");
     pandoc->write("#");
     pandoc->write("                         Tours \n\n");
-    qDebug("Avant le while");
     while (query2.next())
     {
-        qDebug("Apres le while");
-        jourRequeteCourant = query2.record().value("debut_tour").toDateTime().toString("d/MM");
+        jourRequeteCourant = query2.record().value("debut_tour").toDateTime().toString("dddd d MMMM yyyy");
         if (jourRequeteCourant != jourRequetePrecedent)
         {
-            qDebug("Dans le premier If");
             jourRequetePrecedent = jourRequeteCourant;
-            pandoc->write("\n \n \n");
+            pandoc->write("\n");
             pandoc->write("\n");
             pandoc->write("#");
             pandoc->write("  Le ");
             pandoc->write(jourRequeteCourant.toUtf8());
-            pandoc->write("\n\n");
+            pandoc->write("\n");
         }
-
-        posteRequeteCourant = query2.record().value("nom_poste").toString();
-        if (posteRequeteCourant != posteRequetePrecedent)
-        {
-            qDebug("Dans le Deuxieme IF");
-            posteRequetePrecedent = posteRequeteCourant;
-            pandoc->write("\n\n");
-            pandoc->write("\n\n");
-            pandoc->write("###");
-            pandoc->write("       ");
-            pandoc->write(posteRequeteCourant.toUtf8());
-            pandoc->write("\n\n");
-        }
-
         idTourCourant = query2.record().value("id_tour").toInt();
         if (idTourCourant != idTourPrecedent)
         {
             idTourPrecedent = idTourCourant;
-            qDebug("Dans le troisieme IF");
+            posteRequeteCourant = query2.record().value("nom_poste").toString();
             debutTourCourant = query2.record().value("debut_tour").toDateTime().toString("H:mm");
             finTourCourant = query2.record().value("fin_tour").toDateTime().toString("H:mm");
-            pandoc->write("\n\n");
+
+            pandoc->write("\n");
+            pandoc->write("\n");
             pandoc->write("###");
-            pandoc->write("          • ");
+            pandoc->write("       ");
+            pandoc->write(posteRequeteCourant.toUtf8());
+            pandoc->write(" ");
             pandoc->write(debutTourCourant.toUtf8());
             pandoc->write("→");
             pandoc->write(finTourCourant.toUtf8());
-            pandoc->write("\n\n");
+            pandoc->write("\n");
+            pandoc->write("\n");
             pandoc->write("Nom|Prenom|Domicile|Portable|Mail|Age\n");
             pandoc->write("---|---|---|---|---|---\n");
         }
-        qDebug("Apres les if");
 
         nomPersonneCourant = query2.record().value("nom_personne").toString(); // Initialisé dans le premier etat
         prenomPersonneCourant = query2.record().value("prenom_personne").toString(); // Initialisé dans le premier etat
@@ -1204,18 +1097,18 @@ void GestionnaireDAffectations::genererExportGeneral()
         int agePersonneCourant = -1;
 
         if (!query2.record().value("date_naissance").toDate().isNull())
-           agePersonneCourant = age(query2.record().value("date_naissance").toDate(),query2.record().value("debut_evenement").toDate());
+            agePersonneCourant = age(query2.record().value("date_naissance").toDate(),query2.record().value("debut_evenement").toDate());
 
 
         pandoc->write(nomPersonneCourant.toUtf8());
         pandoc->write("|");
         pandoc->write(prenomPersonneCourant.toUtf8());
         pandoc->write("|");
-        pandoc->write(domicilePersonneCourant.toUtf8());
+        pandoc->write(QString("").append(QString("[").append(domicilePersonneCourant).append("]").append("(callto:").append(domicilePersonneCourant).append(")")).toUtf8());
         pandoc->write("|");
-        pandoc->write(portablePersonneCourant.toUtf8());
+        pandoc->write(QString("").append(QString("[").append(portablePersonneCourant).append("]").append("(callto:").append(portablePersonneCourant).append(")")).toUtf8());
         pandoc->write("|");
-        pandoc->write(mailPersonneCourant.toUtf8());
+        pandoc->write(QString("").append(QString("[").append(mailPersonneCourant).append("]").append("(mailto:").append(mailPersonneCourant).append(")")).toUtf8());
         pandoc->write("|");
         if (agePersonneCourant != -1)
             pandoc->write(QString().setNum(agePersonneCourant).toUtf8());
@@ -1223,17 +1116,8 @@ void GestionnaireDAffectations::genererExportGeneral()
             pandoc->write(" ");
         pandoc->write("\n");
     }
-    qDebug("Après la bouclette");
-    pandoc->closeWriteChannel();
-    pandoc->waitForFinished();
 
-    qDebug() << pandoc->readAll();
-
-    QProcess* lowriter = new QProcess(this);
-    lowriter->start("lowriter", QStringList() << f.fileName());
-    lowriter->waitForFinished();
-
-    qDebug() << lowriter->readAll();
+    terminerGenerationEtat(pandoc,f);
 }
 
 int GestionnaireDAffectations::age(QDate dateDeNaissance,QDate dateRepere)
@@ -1261,4 +1145,72 @@ int GestionnaireDAffectations::age(QDate dateDeNaissance,QDate dateRepere)
     (avant?ageCourant=ageCourant:ageCourant--);
 
     return ageCourant;
+}
+
+void GestionnaireDAffectations::faireUnRetourALaLigne(QProcess* unPandoc)
+{
+    unPandoc->write(" \n\n ");
+}
+
+void GestionnaireDAffectations::afficherEntete(QProcess* unPandoc, QSqlQuery uneQuery)
+{
+    if (uneQuery.next())
+    {
+    unPandoc->write("#");
+    unPandoc->write(uneQuery.record().value("nom_evenement").toString().toUtf8());
+    unPandoc->write(" — ");
+
+    unPandoc->write(uneQuery.record().value("lieu_evenement").toString().toUtf8());
+    unPandoc->write("\n\n");
+
+    unPandoc->write("###");
+    unPandoc->write("Du ");
+
+    if (uneQuery.record().value("debut_evenement").toDateTime().toString("d") == "1")
+    {
+        unPandoc->write(uneQuery.record().value("debut_evenement").toDateTime().toString("d").toUtf8());
+        unPandoc->write("er ");
+        unPandoc->write(uneQuery.record().value("debut_evenement").toDateTime().toString("MMMM yyyy").toUtf8());
+    }
+
+    else
+    {
+        unPandoc->write(uneQuery.record().value("debut_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
+    }
+
+
+    unPandoc->write(" au ");
+
+
+    if (uneQuery.record().value("fin_evenement").toDateTime().toString("d") == "1") // Si la date est le "1" alors on suffixe par "-er"
+    {
+        unPandoc->write(uneQuery.record().value("fin_evenement").toDateTime().toString("d").toUtf8());
+        unPandoc->write("er ");
+        unPandoc->write(uneQuery.record().value("fin_evenement").toDateTime().toString("MMMM yyyy").toUtf8());
+
+    }
+
+    else
+    {
+        unPandoc->write(uneQuery.record().value("fin_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
+    }
+
+    unPandoc->write("\n\n");
+    }
+}
+
+bool GestionnaireDAffectations::terminerGenerationEtat(QProcess* unPandoc, QTemporaryFile* unFichier)
+{
+    unPandoc->closeWriteChannel();
+    unPandoc->waitForFinished();
+
+    qDebug() << unPandoc->readAll();
+
+    QProcess* lowriter = new QProcess(this);
+    lowriter->start("lowriter", QStringList() << unFichier->fileName());
+    lowriter->waitForFinished();
+
+    qDebug() << lowriter->readAll();
+
+    return true;
 }
