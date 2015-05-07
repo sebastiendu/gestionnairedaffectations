@@ -3,7 +3,9 @@ var component;
 var sprite;
 var numeroMarqueur = 0;
 var bulleClique = false;
-
+var jourPrecedent= 0;
+var moisPrecedent = 0;
+var anneePrecedente = 0;
 
 
 function dateBarreStatut(dateRecu) {
@@ -29,18 +31,6 @@ function dateBarreStatut(dateRecu) {
 
 }
 
-function afficherBulleInformative(rectangle,bulle,x,y)
-{
-    console.log ( "-----" );
-    console.log(x);
-    console.log(rectangle.x);
-    console.log(rectangle.width);
-    console.log(rectangle.width + rectangle.x)
-    if((x + 45 + bulle.width) > (rectangle.x + rectangle.width)) bulle.x = ( x - bulle.width);
-    else bulle.x = (x+45);
-
-    bulle.y = y;
-}
 
 function dateFR(dateRecu) {
     var heure;
@@ -62,6 +52,63 @@ function dateFR(dateRecu) {
 
 
     return dateRecu.getDate()+"/"+numeroMois+"/"+dateRecu.getFullYear()+" "+heure+"h"+minutes;
+
+}
+
+function dateTour(debut,fin) {
+
+    var minutesDebut;
+    var minutesFin;
+    var heureDebut;
+    var heureFin;
+
+    var nomMois = [
+        "Janvier", "Fevrier", "Mars",
+        "Avril", "Mai", "Juin", "Juillet",
+        "Aout", "Septembre", "Octobre",
+        "Novembre", "Decembre"
+    ];
+
+    var numeroJourDebut = debut.getDate();
+    var numeroMoisDebut = debut.getMonth();
+    var numeroAnneeDebut = debut.getFullYear();
+
+    var numeroJourFin = fin.getDate();
+    var numeroMoisFin = fin.getMonth();
+    var numeroAnneeFin = fin.getFullYear();
+
+
+    if(debut.getHours() < 10) heureDebut = "0"+debut.getHours();
+    else heureDebut = debut.getHours();
+    if(debut.getMinutes() < 10) minutesDebut = "0"+debut.getMinutes();
+    else minutesDebut = debut.getMinutes();
+
+    if(fin.getHours() < 10) heureFin = "0"+fin.getHours();
+    else heureFin = fin.getHours();
+    if(fin.getMinutes() < 10) minutesFin = "0"+fin.getMinutes();
+    else minutesFin = fin.getMinutes();
+
+
+
+    if( (numeroJourDebut == numeroJourFin || (numeroJourDebut==numeroJourFin+1 && heureDebut > heureFin )) && numeroMoisDebut == numeroMoisFin && numeroAnneeDebut == numeroAnneeFin)
+    {
+        if( (anneePrecedente != 0 && jourPrecedent != 0 && moisPrecedent != 0) && (numeroJourDebut==jourPrecedent && moisPrecedent==numeroMoisDebut && anneePrecedente==numeroAnneeDebut))
+        {
+                return "\t  \t" + heureDebut+"h"+minutesDebut+ " à "+heureFin+"h"+minutesFin+ " \t ";
+        }
+         else   {
+            anneePrecedente = numeroAnneeDebut;
+            moisPrecedent = numeroMoisDebut;
+            jourPrecedent = numeroJourDebut;
+            return "Le "+numeroJourDebut+" "+nomMois[numeroMoisDebut]+ " " + numeroAnneeDebut +" de " + "\t" + heureDebut+"h"+minutesDebut+ " à "+heureFin+"h"+minutesFin+ " \t ";
+        }
+    }
+    else
+    {
+        return "Du "+numeroJourDebut+" "+nomMois[numeroMoisDebut]+ " " + numeroAnneeDebut +" " + heureDebut+"h"+minutesDebut+ " au  "+ numeroJourFin+" "+nomMois[numeroMoisFin]+ " " + numeroAnneeFin +" "  +heureFin+"h"+minutesFin+ " ";
+    }
+
+
 
 }
 

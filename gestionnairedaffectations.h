@@ -56,6 +56,8 @@ public:
     Q_INVOKABLE void modifierPositionPoste(float x,float y);
     Q_INVOKABLE void modifierTourDebut(QDateTime debut, QDateTime ancien);
     Q_INVOKABLE void modifierTourFin(QDateTime fin, QDateTime ancien);
+    Q_INVOKABLE void desaffecterBenevole();
+    Q_INVOKABLE void affecterBenevole();
     //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
 
 
@@ -105,6 +107,7 @@ private:
     int m_id_disponibilite;
     int m_id_poste;
     int m_id_tour;
+    int m_id_affectation;
     QDateTime m_heureMin, m_heureMax, m_heure;
     Settings *m_settings;
     std::map<int,Poste> listeDePoste;

@@ -1046,6 +1046,7 @@ ApplicationWindow { // Fenetre principale
                                 onClicked: {
                                     listeDesDisponibles.currentIndex = index
                                     app.setIdDisponibilite(id_disponibilite)
+
                                     //  Fonction à appeller lorsque une personne est cliquée
                                 }
                             }

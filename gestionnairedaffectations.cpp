@@ -262,20 +262,22 @@ void GestionnaireDAffectations::setIdTour(int id) {
 }
 
 void GestionnaireDAffectations::setIdAffectation(int id) {
+    m_id_affectation = id;
     QSqlQuery query = m_affectations->query();
     query.bindValue(":tour", id);
     query.exec();
     m_affectations->setQuery(query);
-    qDebug() << "Id de l'affectation changé en: " << id;
+    qDebug() << "setIdAffectation: " << id;
 }
 
 
-void GestionnaireDAffectations::setIdDisponibilite(int id) { // A quoi sert cette fonction ?
+void GestionnaireDAffectations::setIdDisponibilite(int id) {
     m_id_disponibilite = id;
     QSqlQuery query = m_fiche_benevole->query(); //On demande la fiche d'un bénévole ayant un id precis
     query.bindValue(0, m_id_disponibilite); // Cet id correspond à l'id passé en parametre
     query.exec();
     m_fiche_benevole->setQuery(query);
+    qDebug() << "setIdDisponibilite: " << id;
 }
 
 void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTime debut, QDateTime fin, QString lieu, int id_evenement_precedent) {
@@ -383,6 +385,71 @@ void GestionnaireDAffectations::supprimerPoste(int id){
     m_planComplet->setQuery(query);
 
     planCompletChanged();
+}
+
+void GestionnaireDAffectations::desaffecterBenevole(){
+
+    QSqlQuery query;
+    qDebug() << "1";
+    query.prepare("DELETE FROM affectation WHERE id_disponibilite = :id_disponibilite;");
+    qDebug() << "2";
+    query.bindValue(":id_disponibilite",m_id_disponibilite);
+    query.exec();
+    qDebug() << "3";
+    qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
+
+    query = m_affectations->query();
+    qDebug() << "4";
+    query.bindValue(":tour",m_id_affectation);
+    query.bindValue(":id_evenement",idEvenement());
+    query.exec();
+    qDebug() << "5";
+    m_affectations->setQuery(query);
+    qDebug() << "6";
+
+    query = m_poste_et_tour_sql->query();
+    query.bindValue(":id_evenement",idEvenement());
+    query.exec();
+
+    m_poste_et_tour_sql->setQuery(query);
+    m_poste_et_tour->setSourceModel(m_poste_et_tour_sql);
+    m_poste_et_tour->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_poste_et_tour->setFilterKeyColumn(-1);
+
+    qDebug() << "m_id_disponibilite: " + m_id_disponibilite;
+    qDebug() << "m_id_tour: " + m_id_affectation;
+
+}
+
+void GestionnaireDAffectations::affecterBenevole(){
+
+    QSqlQuery query;
+
+    query.prepare("INSERT INTO affectation (id_disponibilite, id_tour,date_et_heure_proposee ,statut,commentaire) VALUES (:id_disponibilite, :id_tour, :date, :statut, :commentaire)");
+    query.bindValue(":id_disponibilite",m_id_disponibilite);
+    query.bindValue(":id_tour",m_id_affectation);
+    query.bindValue(":date","2014-10-01 00:00:00");
+    query.bindValue(":statut","proposee");
+    query.bindValue(":commentaire","test");
+    query.exec();
+
+    qDebug() << "INSERT INTO affectation (id_disponibilite, id_tour,date_et_heure_proposee ,statut,commentaire) VALUES ("<< m_id_disponibilite << "," << m_id_affectation << ",'2014-10-01 00:00:00','proposee','test')";
+    qDebug() << query.lastError().text();
+    query = m_affectations->query();
+
+    query.bindValue(":tour",m_id_affectation);
+    query.bindValue(":id_evenement",idEvenement());
+    query.exec();
+    m_affectations->setQuery(query);
+
+    query = m_poste_et_tour_sql->query();
+    query.bindValue(":id_evenement",idEvenement());
+    query.exec();
+
+    m_poste_et_tour_sql->setQuery(query);
+    m_poste_et_tour->setSourceModel(m_poste_et_tour_sql);
+    m_poste_et_tour->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_poste_et_tour->setFilterKeyColumn(-1);
 }
 
 void GestionnaireDAffectations::modifierTourDebut(QDateTime debut, QDateTime ancienDebut) {

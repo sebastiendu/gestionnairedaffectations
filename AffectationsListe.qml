@@ -58,6 +58,7 @@ Item {
             anchors.right: parent.right
             anchors.left: parent.left
             clip: true
+            spacing : 10
 
 
             delegate: Rectangle { // Corresponds au block contenant le nom... La  ListView contient donc plusieurs de ces blocks
@@ -69,16 +70,17 @@ Item {
                 Text {
                     anchors.top: parent.top
                     anchors.left: parent.left
-                    anchors.right: parent.horizontalCenter
+                    anchors.leftMargin: 20
+                    width: parent.width * 0.70
                     text: prenom_personne + ' ' + nom_personne
-                    horizontalAlignment: Text.Center
+                    horizontalAlignment: Text.Left
                 }
                 Text {
                     anchors.top: parent.top
-                    anchors.left: parent.horizontalCenter
                     anchors.right: parent.right
                     text: nombre_affectations
-                    horizontalAlignment: Text.Center
+                    horizontalAlignment: Text.Left
+                    width: parent.width * 0.3
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -139,6 +141,7 @@ Item {
                     Text { text: '\t' + email }
                     Text { text: 'Âge :\t' + age + " ans" }
                     Text { text: 'Profession :\t' + profession }
+                    Text { text: 'Id DISPO :\t' + id_disponibilite } // A ENKLEVER
                     Text {
                         text: 'Compétences : ' + competences
                         wrapMode: Text.WordWrap
@@ -148,6 +151,11 @@ Item {
                         text: 'Commentaire : ' + commentaire_personne
                         wrapMode: Text.WordWrap
                         width: parent.width}
+                    Text {
+                        text: 'Disponibilite : ' + commentaire_disponibilite
+                        wrapMode: Text.WordWrap
+                        width: parent.width}
+
                 }
             }
         }
@@ -178,8 +186,8 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.margins: 10
-            height: parent.height * 0.5
-            border.color: "black"
+            anchors.bottom: parent.verticalCenter
+          //  border.color: "black"
 
 
             ListView {
@@ -187,8 +195,10 @@ Item {
                 id: listePoste
                 anchors.fill: parent
                 model: app.poste_et_tour
+                spacing : 2
                 delegate:
                     Rectangle {
+
                     height : 13
                     z:1
                     width: parent.width
@@ -196,8 +206,8 @@ Item {
                         id: informationsTour
                     anchors.left: parent.left
                     anchors.leftMargin: 20;
-                    text: Fonctions.dateFR(debut) + " → " + Fonctions.dateFR(fin) + "    " +
-                          nombre_affectations + "/" +max  + "    " + "(min: " + min + ", max: " + max +")"
+                    text: Fonctions.dateTour(debut,fin) +
+                          nombre_affectations + "/" +max  + "\t" + "(min: " + min + ", max: " + max +") \t"
 
 
                 }
@@ -218,8 +228,9 @@ Item {
                     MouseArea {
                        anchors.fill: parent
                        onClicked: {
-                           console.log(id_tour);
-                           app.setIdAffectation(id_tour);
+                           console.log("id tour: " + id_tour);
+
+                           app.setIdAffectation(id_tour); 
                            listePersonnesInscritesBenevoles.model = app.affectations;
                            listePoste.currentIndex = index
                            blockFichePoste.titre = " <h2> " + nom + " </h2> "
@@ -268,6 +279,14 @@ Item {
             anchors.left: parent.left
             anchors.leftMargin: 10
             text : "→"
+            onClicked : {
+                console.log("Cliqué");
+                app.affecterBenevole();
+                app.setIdDisponibilite(-1)
+                listePersonnesInscritesBenevoles.model = app.affectations;
+                listePoste.model = app.poste_et_tour;
+
+            }
         }
 
         Button {
@@ -277,6 +296,15 @@ Item {
             anchors.left: parent.left
             text : "←"
              anchors.leftMargin: 10
+             onClicked: {
+                // _boutonRecevoir.checkable = false
+                 app.desaffecterBenevole();
+                 app.setIdDisponibilite(-1)
+                 listePersonnesInscritesBenevoles.model = app.affectations;
+                 listePoste.model = app.poste_et_tour;
+                // _boutonRecevoir.checkable = true
+
+             }
         }
 
 
@@ -312,7 +340,27 @@ Item {
                 anchors.topMargin: 20
                 clip: true
                 spacing: 5
-                delegate: Text { text: prenom_personne + " " + nom_personne ;}
+                delegate: Text {
+                    text: prenom_personne + " " + nom_personne
+                    font.bold: true
+                    color: (statut_affectation == "acceptee" ||statut_affectation ==  "validee") ? "green" : (statut_affectation == "rejetee" || statut_affectation=="annulee") ? "red" : "orange"
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked : {
+                            listePersonnesInscritesBenevoles.currentIndex = index;
+                            console.log("id_disponibilte: " + id_disponibilite)
+                            app.setIdDisponibilite(id_disponibilite);
+
+
+                        }
+                    }
+                }
+
+                // Petit bug ,lorsque aucun n'est cliqué le surlignage reste sur le 1er champs
+               // highlight: Rectangle { id: rectangleSurligneBenevole; z:5; color: "blue"; radius: 5; opacity: 0.5; width: listePersonnesInscritesBenevoles.width ; height:13 ;y: listePersonnesInscritesBenevoles.currentItem.y}
+                highlightFollowsCurrentItem: false
+                focus: true
+
             }
             ScrollBar {
                 flickable : listePersonnesInscritesBenevoles
