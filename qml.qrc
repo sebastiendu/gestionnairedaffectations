@@ -9,7 +9,6 @@
         <file>marqueur.qml</file>
         <file>marqueurs/rouge_brillant.png</file>
         <file>marqueurs/rouge.png</file>
-        <file>inscrireUnBenevole.qml</file>
         <file>ScrollBar.qml</file>
         <file>parametres_de_connexion.qml</file>
         <file>nouveauPoste.qml</file>
@@ -20,5 +19,10 @@
         <file>AffectationsListe.qml</file>
         <file>Trait.qml</file>
         <file>ProgressBarAffectation.qml</file>
+        <file>PosteEtTour.qml</file>
+        <file>CandidatureAValider.qml</file>
+        <file>InscrireBenevole.qml</file>
+        <file>AffectationPlan.qml</file>
+        <file>SoumettreAffectation.qml</file>
     </qresource>
 </RCC>
