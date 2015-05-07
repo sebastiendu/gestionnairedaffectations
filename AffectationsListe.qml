@@ -222,7 +222,7 @@ Item {
                         valeurmin: min
                         valeurmax: max
                         valeur: nombre_affectations
-
+                        couleurDefinie: ( nombre_affectations_proposees != 0 ) ? "orange" : ""
                     }
 
                     MouseArea {
@@ -338,6 +338,7 @@ Item {
                 anchors.leftMargin: 30
                 anchors.top: parent.top
                 anchors.topMargin: 20
+
                 clip: true
                 spacing: 5
                 delegate: Text {
