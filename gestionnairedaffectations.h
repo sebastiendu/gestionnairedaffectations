@@ -50,6 +50,7 @@ public:
     Q_INVOKABLE void setIdAffectation(int);
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
     Q_INVOKABLE void selectionnerMarqueur();
+
     Q_INVOKABLE void insererPoste(QString,QString,float,float);
     Q_INVOKABLE void supprimerPoste(int);
     Q_INVOKABLE void rafraichirStatistiquePoste(int n, QString nom);
@@ -71,6 +72,21 @@ public:
     Q_INVOKABLE QString getNomPoste();
 
 
+
+    Q_INVOKABLE void ajouterUnPoste(Poste);
+    Q_INVOKABLE void supprimerUnPoste(int);
+
+    Q_INVOKABLE void genererFichesDePostes();
+    Q_INVOKABLE void genererCarteBenevoles();
+    Q_INVOKABLE void genererTableauRemplissage();
+    Q_INVOKABLE void genererFichesProblemes();
+    Q_INVOKABLE void genererExportGeneral();
+
+    int age(QDate dateDeNaissance,QDate dateRepere);
+    void faireUnRetourALaLigne(QProcess* unPandoc);
+    void afficherEntete(QProcess* unPandoc, QSqlQuery uneQuery);
+    bool terminerGenerationEtat(QProcess* unPandoc, QTemporaryFile *unFichier);
+ //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
 
 signals:
     void heureChanged();

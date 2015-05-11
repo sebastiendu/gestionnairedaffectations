@@ -259,7 +259,7 @@ Item {
                 anchors.topMargin: 10
                 selectionMode: SelectionMode.SingleSelection
                 itemDelegate :editableDelegate
-                TableViewColumn{ role: "id_tour"  ; title: "id" ; width:(3*(tableauTours.width/10)); visible: true;delegate: nombre}
+                TableViewColumn{ role: "id_tour"  ; title: "id" ; width:(3*(tableauTours.width/10)); visible: true;delegate: id_tour}
                 TableViewColumn{ role: "debut"  ; title: "Debut du tour" ; width:(3*(tableauTours.width/10));delegate: debut}
                 TableViewColumn{ role: "fin" ; title: "Fin du tour" ;width:(3*(tableauTours.width/10)); delegate: fin}
                 TableViewColumn{ role: "min"  ; title: "Nb. min" ;width:(tableauTours.width/5); delegate: nombre}
@@ -354,6 +354,41 @@ Item {
 
                         TextInput
                         {
+                            id: nouveauNombre
+                            anchors.fill: parent
+                            text: styleData.value
+                            // activeFocusOnPress: false
+                            //   selectByMouse: true
+                            onAccepted: console.log(styleData.value + " " +nouveauNombre.text)
+
+                        }
+
+                        MouseArea {
+                            id: zoneSelection
+                            anchors.fill: parent
+                            onClicked: {
+                                console.log("clic");
+                                tableauTours.selection.clear();
+                                tableauTours.selection.select(styleData.row );
+
+                                nouveauNombre.forceActiveFocus();
+
+                            }
+                        }
+
+                    }
+                }
+
+                Component {
+                    id: id_tour
+
+                    Item {
+
+
+
+                        TextInput
+                        {
+                            property int idDuTour: 0
                             id: nouveauNombre
                             anchors.fill: parent
                             text: styleData.value

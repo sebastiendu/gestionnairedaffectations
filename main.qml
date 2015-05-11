@@ -123,23 +123,19 @@ ApplicationWindow { // Fenetre principale
             }
             MenuItem {
                 text: qsTr("Carte de bénévole / Inscription postes")
-                onTriggered: console.log("A faire");
-            }
-            MenuItem {
-                text: qsTr("\"Liste Montage\" et \"Liste Demontage\"")
-                onTriggered: console.log("A faire");
+                onTriggered: app.genererCarteBenevoles();
             }
             MenuItem {
                 text: qsTr("Tableau de remplissage")
-                onTriggered: console.log("A faire");
+                onTriggered: app.genererTableauRemplissage();
             }
             MenuItem {
                 text: qsTr("Fiches à problèmes")
-                onTriggered: console.log("A faire");
+                onTriggered: app.genererFichesProblemes();
             }
             MenuItem {
                 text: qsTr("Export général")
-                onTriggered: console.log("A faire");
+                onTriggered: app.genererExportGeneral();
             }
         }
 
