@@ -257,50 +257,51 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top:_descriptionPoste.bottom
                 anchors.topMargin: 10
+                selectionMode: SelectionMode.SingleSelection
+                itemDelegate :editableDelegate
                 TableViewColumn{ role: "id_tour"  ; title: "id" ; width:(3*(tableauTours.width/10)); visible: true;delegate: nombre}
-                TableViewColumn{ role: "debut"  ; title: "Debut du tour" ; width:(3*(tableauTours.width/10))}
-                TableViewColumn{ role: "fin" ; title: "Fin du tour" ;width:(3*(tableauTours.width/10))}
+                TableViewColumn{ role: "debut"  ; title: "Debut du tour" ; width:(3*(tableauTours.width/10));delegate: debut}
+                TableViewColumn{ role: "fin" ; title: "Fin du tour" ;width:(3*(tableauTours.width/10)); delegate: fin}
                 TableViewColumn{ role: "min"  ; title: "Nb. min" ;width:(tableauTours.width/5); delegate: nombre}
                 TableViewColumn{ role: "max" ; title: "Nb. max" ;width:(tableauTours.width/5); delegate: nombre}
 
-                itemDelegate: Component {
+
+
+                // TODO : - ERREUR :  Property 'getMonth' of object  is not a function
+                // TODO : - ENREGISTRER DANS LA BASE LES INFORMATION
+                // TODO : - RECHARGER LE MODEL AVEC ORDER BY
+                // TODO : - RECUPERER LE ID CORRECTEMENT
+
+
+                Component {
+                    id: debut
 
                     Item {
 
-                        id: caseCourante
-
-                        /*Text {
-                            width: parent.width
-                            anchors.margins: 4
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: styleData.value !== undefined ? styleData.value : ""
-                            color: styleData.hasActiveFocus  ? "blue" : "black"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
-                        MouseArea
-                         {
-                             anchors.fill: parent
-                             onDoubleClicked: {
-                                 console.log(styleData.row + ":" + styleData.role + styleData.value);
-
-                                 Fonctions.afficherFenetreAjouterTour(styleData.role, styleData.value);
-                             }
-
-
-                         } */
-
                         TextInput {
+                            id: inputDate
+                            anchors.fill: parent
                             text: Fonctions.dateFR(styleData.value)
-                            color: selectByMouse ? "red" : "black"
-                            onAccepted: console.log(styleData.value + styleData.row.id)
+                            onAccepted: console.log("debut: "+styleData.value +  styleData.row.id_tour  + styleData.id_tour+ " " + id_tour.value + " " + id.value)
+
+
+                        }
+
+                         MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                console.log("clic");
+                                tableauTours.selection.clear();
+                                tableauTours.selection.select(styleData.row );
+                                inputDate.positionAt(mouseX,mouseY);
+                                inputDate.forceActiveFocus();
+                                //  inputDate.color = "white"
+
+                            }
                         }
 
 
-                        // TODO : - ERREUR :  Property 'getMonth' of object  is not a function
-                        // TODO : - ENREGISTRER DANS LA BASE LES INFORMATION
-                        // TODO : - RECHARGER LE MODEL AVEC ORDER BY
-                        // TODO : - RECUPERER LE ID CORRECTEMENT
+
 
 
                     }
@@ -308,16 +309,73 @@ Item {
                 }
 
                 Component {
+                    id: fin
+
+                    Item {
+
+
+                        TextInput {
+                            id: inputDate
+                            anchors.fill: parent
+                            text: Fonctions.dateFR(styleData.value)
+                            onAccepted: console.log("fin: " + styleData.value + " " + inputDate.text + " " + styleData.role + " " + styleData.row + " " + styleData.column)
+
+
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                console.log("clic");
+                                tableauTours.selection.clear();
+                                tableauTours.selection.select(styleData.row );
+                                inputDate.positionAt(mouseX,mouseY);
+                                inputDate.forceActiveFocus();
+                                //  inputDate.color = "white"
+
+                            }
+                        }
+
+
+
+
+                    }
+
+                }
+
+
+
+                Component {
                     id: nombre
 
                     Item {
+
+
+
                         TextInput
                         {
                             id: nouveauNombre
                             anchors.fill: parent
                             text: styleData.value
+                            // activeFocusOnPress: false
+                            //   selectByMouse: true
                             onAccepted: console.log(styleData.value + " " +nouveauNombre.text)
+
                         }
+
+                        MouseArea {
+                            id: zoneSelection
+                            anchors.fill: parent
+                            onClicked: {
+                                console.log("clic");
+                                tableauTours.selection.clear();
+                                tableauTours.selection.select(styleData.row );
+
+                                nouveauNombre.forceActiveFocus();
+
+                            }
+                        }
+
                     }
                 }
 

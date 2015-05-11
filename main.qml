@@ -227,6 +227,18 @@ ApplicationWindow { // Fenetre principale
 
         }
 
+        Tab {
+            id: emploiDuTemps
+            title: "Emploi du temps"
+            anchors.fill: parent
+
+
+            Q_EmploiDuTemps {
+
+            }
+
+        }
+
 
         Tab {
             id: soumettreAffectations

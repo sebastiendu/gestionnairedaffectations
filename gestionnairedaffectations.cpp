@@ -452,25 +452,25 @@ void GestionnaireDAffectations::affecterBenevole(){
     m_poste_et_tour->setFilterKeyColumn(-1);
 }
 
-void GestionnaireDAffectations::modifierTourDebut(QDateTime debut, QDateTime ancienDebut) {
+void GestionnaireDAffectations::modifierTourDebut(QDateTime debut, int id) {
 
     QSqlQuery query;
-    query.prepare("UPDATE tour SET debut = :debut WHERE id_poste = :poste AND debut = :anciendebut");
+    query.prepare("UPDATE tour SET debut = :debut WHERE id_poste = :poste AND id = :id");
     query.bindValue(":poste",m_id_poste);
     query.bindValue(":debut",debut);
-        query.bindValue(":anciendebut",ancienDebut);
+        query.bindValue(":id",id);
     query.exec();
     qDebug() << query.lastError().text();
 
 }
 
-void GestionnaireDAffectations::modifierTourFin(QDateTime fin, QDateTime ancienFin) {
+void GestionnaireDAffectations::modifierTourFin(QDateTime fin, int id) {
 
     QSqlQuery query;
-    query.prepare("UPDATE tour SET fin = :fin WHERE id_poste = :poste AND fin= :ancienfin");
+    query.prepare("UPDATE tour SET fin = :fin WHERE id_poste = :poste AND id = :id");
     query.bindValue(":poste",m_id_poste);
     query.bindValue(":fin",fin);
-    query.bindValue(":ancienfin",ancienFin);
+    query.bindValue(":id",id);
 
     query.exec();
     qDebug() << query.lastError().text();
