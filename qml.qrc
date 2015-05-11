@@ -16,13 +16,13 @@
         <file>RectangleTitre.qml</file>
         <file>CalendrierTour.qml</file>
         <file>test.qml</file>
-        <file>AffectationsListe.qml</file>
+        <file>Q_AffectationsListe.qml</file>
         <file>Trait.qml</file>
         <file>ProgressBarAffectation.qml</file>
-        <file>PosteEtTour.qml</file>
-        <file>CandidatureAValider.qml</file>
-        <file>InscrireBenevole.qml</file>
-        <file>AffectationPlan.qml</file>
-        <file>SoumettreAffectation.qml</file>
+        <file>Q_PosteEtTour.qml</file>
+        <file>Q_CandidatureAValider.qml</file>
+        <file>Q_InscrireBenevole.qml</file>
+        <file>Q_AffectationPlan.qml</file>
+        <file>Q_SoumettreAffectation.qml</file>
     </qresource>
 </RCC>

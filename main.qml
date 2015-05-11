@@ -159,30 +159,16 @@ ApplicationWindow { // Fenetre principale
 
 
 
-
-
-
-
-
-
-        // ===================================================================
-        // =======================ONGLET POSTES ET TOURS =====================
-        // ===================================================================
-
         Tab {
             id: postesEtTours
             title : "Postes & Tours"
 
 
-            PosteEtTour{
+            Q_PosteEtTour{
 
             }
         }
 
-
-        //===========================================================================
-        //========================ONGLET SOLICITER ==================================
-        //===========================================================================
 
         Tab {
             id: solliciterAnciensBenevoles
@@ -196,50 +182,38 @@ ApplicationWindow { // Fenetre principale
             }
         }
 
-        //===========================================================================
-        //=====================ONGLET CANDIDATURE A VALIDER =========================
-        //===========================================================================
 
         Tab {
             id: candidaturesAValider
             title : "Candidature à valider"
             anchors.fill: parent
-            CandidatureAValider {
+            Q_CandidatureAValider {
 
             }
 
         }
 
-        //===========================================================================
-        //=====================   ONGLET INSCRIRE BENEVOLE ==========================
-        //===========================================================================
         Tab {
             id:inscrireBenevole
             title: "Inscrire un bénévole"
 
-            InscrireBenevole {
+            Q_InscrireBenevole {
 
             }
         }
 
-        // =====================================================================
-        // ===================== ONGLET AFFECTATIONS PLAN ======================
-        // =====================================================================
 
         Tab {
             id: carte
             title: "Affectations (Plan)"
 
 
-            AffectationPlan {
+            Q_AffectationPlan {
                 anchors.fill: parent
             }
 
         }
 
-        //===========================================================================
-        //=====================ONGLET AFFECTATION LISTE =============================
-        //===========================================================================
 
         Tab {
             id: affectationsListe
@@ -247,21 +221,18 @@ ApplicationWindow { // Fenetre principale
             anchors.fill: parent
 
 
-            AffectationsListe {
+            Q_AffectationsListe {
 
             }
 
         }
 
-        //===========================================================================
-        //=====================ONGLET SOUMETTRE AFFECTATION==========================
-        //===========================================================================
 
         Tab {
             id: soumettreAffectations
             title: "Soumettre affectations"
 
-            SoumettreAffectation {
+            Q_SoumettreAffectation {
 
             }
         }
