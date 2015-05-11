@@ -73,9 +73,6 @@ public:
 
 
 
-    Q_INVOKABLE void ajouterUnPoste(Poste);
-    Q_INVOKABLE void supprimerUnPoste(int);
-
     Q_INVOKABLE void genererFichesDePostes();
     Q_INVOKABLE void genererCarteBenevoles();
     Q_INVOKABLE void genererTableauRemplissage();

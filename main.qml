@@ -119,7 +119,7 @@ ApplicationWindow { // Fenetre principale
             title: qsTr("&Générer Etat")
             MenuItem {
                 text: qsTr("Fiche de postes / Bénévoles par tours")
-                onTriggered: console.log("A faire");
+                onTriggered: app.genererFichesDePostes();
             }
             MenuItem {
                 text: qsTr("Carte de bénévole / Inscription postes")

@@ -1,5 +1,6 @@
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlRecord>
 #include <QtQml>
 #include <QtDebug>
 #include <QQuickView>
