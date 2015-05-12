@@ -13,150 +13,148 @@
  */
 import QtQuick 2.0
 
+import "variables.js" as Variables
+
 Item {
     id:root
 
-    property variant model
-    signal timeSlotClicked (int day, int timeslot)
+
+    Rectangle {
+
+        id: blockParent
 
 
-    /* Week - row containing 7 days: */
-    Row {
         anchors.fill: parent
-        spacing: 1
+        anchors.top: parent.top
+        anchors.left:parent.left
 
-        Repeater {
-            model: root.model
-            id: dayrepeater
 
-            /* Day - Column containing 7 timeslots: */
-            Rectangle {
-                id: dayColumn
-                width: root.width / 7
-                height: root.height
-                opacity: 0
+        ListView {
+            id: listeDebut
 
-                //label:
-                Rectangle {
-                    id: daylabelContainer
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: daylabel.paintedHeight
-                    color: "#888"
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: 5
+            model: debut
+            height: 13
+            delegate: Text {
 
-                    Text {
-                        id: daylabel
-                        anchors.top: parent.top
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: day.toUpperCase()
-                        color: "white"
+                text: date
+                height: 13
+                Component.onCompleted: {
+                    console.log("Debut chargé") ;
+                    Variables.setDebut(date);
+                    console.log(Variables.getDebut());
 
+                    if(Variables.getFin()!="" && Variables.getDebut()!="")
+                    {
+                        listeHeures.append({"heure": "15h20"});
+                        ajouterHoraires(Variables.getDebut(), Variables.getFin());
                     }
-                }
 
-                //--------------------------
-                //-------Animation effects:
+                    function ajouterHoraires(debut, fin)
+                    {
 
+                        Variables.heureCourante = debut;
+                        var i=0
 
-                /** Fancy opacity animation that triggers the
-                    next column too at about the halfway point. */
-                SequentialAnimation {
-                    id: animate
-                    PropertyAnimation {
-                        target: dayColumn;
-                        from:0; to: 0.6; property: "opacity"
-                        duration: 50
-                    }
-                    ScriptAction { script: showNext() }
-                    PropertyAnimation {
-                        target: dayColumn;
-                        to: 1; property: "opacity"
-                        duration: 100
-                    }
-                }
-
-                /** shows this column */
-                function show() {
-                    animate.start()
-                }
-
-                /** shows the next column in the repeater */
-                function showNext() {
-                    if(index < 6) {
-                        dayrepeater.itemAt(index+1).show();
-                    }
-                }
-
-                /** hides this column */
-                function hide() {
-                    opacity = 0
-                }
-
-
-                //-------------------
-                //---Time slots:
-
-                Column {
-                    anchors.top: daylabelContainer.bottom
-                    anchors.bottom: parent.bottom
-                    anchors.topMargin: 1
-                    width: parent.width
-                    spacing: 1
-
-                    Repeater {
-                        model: dayModel
-
-                        /* Two-hour time slot that can be clicked */
-                        Rectangle {
-                            id: timeslot
-                            width: parent.width
-                            height: parent.height / 7
-                            color: timeslotArea.containsMouse ? "#EEE" : "#BBB"
-                            clip: true
-
-                            MouseArea {
-                                id: timeslotArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                enabled: parent.visible
-
-                                //when clicked, indicate day and slot by their Repeater indices:
-                                onClicked: timeSlotClicked(day, index)
-                            }
-
-                            //hour label
-                            Text {
-                                text: hour
-                                color: "#666"
-                            }
-
-                            //event description
-                            Text {
-                                text: dayEvent
-                                anchors.centerIn: parent
-                                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                                width: parent.width
-                            }
+                        while(i++<10)// while(heureCourante<fin)
+                        {
+                            Variables.heureCourante.setHours ( Variables.heureCourante.getHours() + 1 );
+                            console.log(Variables.heureCourante);
                         }
                     }
+                }
+            }
 
+
+        }
+
+        Rectangle {
+            id: blockEmploiTemps
+            anchors.top: listeDebut.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 50
+            ListView {
+                id: chargement
+                anchors.fill: parent
+                model: listeHeures
+                delegate: Text {
+                    text: heure
+                    height: 13
                 }
             }
         }
-    }
 
-    // functions for fancy animations:
 
-    function show() {
-        dayrepeater.itemAt(0).show();
-        visible = true
-    }
+        ListView {
+            id: listeFin
+            anchors.top : blockEmploiTemps.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            spacing: 5
+            model: fin
+            delegate: Text {
+                text: date
+                height: 13
 
-    function hide() {
-        for (var i=0; i<7; i++) {
-            dayrepeater.itemAt(i).hide();
+                Component.onCompleted: {
+                    console.log("Fin chargé") ;
+                    Variables.setFin(date);
+                    console.log(Variables.getFin());
+
+                    if(Variables.getFin()!="" && Variables.getDebut()!="")
+                    {
+                        listeHeures.append({"heure": "15h20"});
+                        ajouterHoraires(Variables.getDebut(), Variables.getFin());
+                    }
+                }
+            }
+            height: 13
+
         }
-        visible = false
+
+
+        ListModel {
+            id: debut
+
+            ListElement {
+                date: "13/11/2014 9h00"
+            }
+
+        }
+
+        ListModel {
+            id: fin
+
+            ListElement {
+                date: "15/11/2014 17h00"
+            }
+
+        }
+
+        ListModel {
+            id: listeHeures
+        }
+
+
+        function ajouterHoraires(debut, fin)
+        {
+
+            Variables.heureCourante = debut;
+            i=0
+
+            while(i++<10)// while(heureCourante<fin)
+            {
+                heureCourante.setHours ( heureCourante.getHours() + 1 );
+                console.log(heureCourante);
+            }
+        }
+
+
     }
+
 }

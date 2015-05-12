@@ -30,6 +30,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QSortFilterProxyModel* planCourant MEMBER m_plan NOTIFY planChanged)
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
     Q_PROPERTY(QSortFilterProxyModel* poste_et_tour MEMBER m_poste_et_tour NOTIFY posteEtTourChanged)
+    Q_PROPERTY(SqlQueryModel* horaires MEMBER m_horaires NOTIFY horaireChanged)
 
 
 
@@ -83,7 +84,7 @@ public:
     void faireUnRetourALaLigne(QProcess* unPandoc);
     void afficherEntete(QProcess* unPandoc, QSqlQuery uneQuery);
     bool terminerGenerationEtat(QProcess* unPandoc, QTemporaryFile *unFichier);
- //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
+    //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
 
 signals:
     void heureChanged();
@@ -101,6 +102,7 @@ signals:
     void fiche_posteTourChanged();
     void affectationsChanged();
     void posteEtTourChanged();
+    void horaireChanged();
 
 public slots:
     void mettreAJourModelPlan();
@@ -127,6 +129,7 @@ private:
     QSortFilterProxyModel *m_plan;
     SqlQueryModel *m_planComplet;
     SqlQueryModel *m_poste_et_tour_sql;
+    SqlQueryModel *m_horaires;
     QSortFilterProxyModel *m_poste_et_tour;
 
     // Variables Temporaires necessaires pour transmettre des informations d'une fenetre QML à une autre

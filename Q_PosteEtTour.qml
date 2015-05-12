@@ -282,7 +282,7 @@ Item {
                             id: inputDate
                             anchors.fill: parent
                             text: Fonctions.dateFR(styleData.value)
-                            onAccepted: console.log("debut: "+styleData.value +  styleData.row.id_tour  + styleData.id_tour+ " " + id_tour.value + " " + id.value)
+                            onAccepted: console.log("debut: "+styleData.value +  styleData.row.id_tour  + styleData.id_tour+ " " + id_tour.value)
 
 
                         }
@@ -318,7 +318,7 @@ Item {
                             id: inputDate
                             anchors.fill: parent
                             text: Fonctions.dateFR(styleData.value)
-                            onAccepted: console.log("fin: " + styleData.value + " " + inputDate.text + " " + styleData.role + " " + styleData.row + " " + styleData.column)
+                            onAccepted: console.log("fin: " + styleData.value + " " + inputDate.text + " " + styleData.role + " " + idDuTour)
 
 
                         }
@@ -349,9 +349,6 @@ Item {
                     id: nombre
 
                     Item {
-
-
-
                         TextInput
                         {
                             id: nouveauNombre
@@ -372,6 +369,7 @@ Item {
                                 tableauTours.selection.select(styleData.row );
 
                                 nouveauNombre.forceActiveFocus();
+                                console.log(tableauTours.model.get(0).id_tour)
 
                             }
                         }
