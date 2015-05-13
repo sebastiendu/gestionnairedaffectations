@@ -443,6 +443,7 @@ Item {
                 anchors.topMargin: 5
                 onClicked: {
                     app.insererTour(tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"fin"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"min"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"max"))
+                    tableauTours.selection.select(tableauTours.rowCount-1);
             }
             }
 
