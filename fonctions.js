@@ -52,7 +52,7 @@ function dateFR(dateRecu) {
 
 
 
-    return dateRecu.getDate()+"/"+numeroMois+"/"+dateRecu.getFullYear()+" "+heure+"h"+minutes;
+    return dateRecu.getDate()+"/"+numeroMois+"/"+dateRecu.getFullYear()+" "+heure+":"+minutes;
 
 }
 
@@ -127,7 +127,7 @@ function dateEmploiDuTemps(date) {
     if(date.getMinutes() < 10) minutes = "0"+date.getMinutes(); // pour afficher 07h05 au lieu de 07h5
     else minutes = date.getMinutes();
 
-    if(jourPrecedentEmploiDuTemps == date.getDate() || heure== "00")
+    if(jourPrecedentEmploiDuTemps == date.getDate() )
     {
         console.log("Courant: " + jourPrecedentEmploiDuTemps+" "+heure+"h"+minutes )
         jourPrecedentEmploiDuTemps = date.getDate();
@@ -161,7 +161,7 @@ function couleurCercle(statut){
         return "orange";
 }
 
-function heure(dateRecu) {
+function heureMinutes(dateRecu) {
     var heure;
     var minutes;
 
@@ -183,6 +183,8 @@ function heure(dateRecu) {
     return heure+"h"+minutes;
 
 }
+
+
 
 
 
@@ -210,8 +212,19 @@ function afficherFenetreSupprimerPoste() {
     window.open() // On ouvre la fenetre d'ajout du nouveau poste
 }
 
+function afficherFenetreErreurDateTour(erreur) {
+    var component = Qt.createComponent("ErreurDateTour.qml")
+    if( component.status !== Component.Ready )
+    {
+        if( component.status === Component.Error )
+            console.debug("Error:"+ component.errorString() );
+        return;
+    }
+    var window = component.createObject(gestionDesAffectations, {"erreur":erreur})
+    window.open() // On ouvre la fenetre d'ajout du nouveau poste
+}
 
-function afficherFenetreAjouterTour(champ, valeur) {
+function afficherFenetreAjouterTour(champ, valeur,idtour,h,m) {
     var component = Qt.createComponent("CalendrierTour.qml")
     if( component.status !== Component.Ready )
     {
@@ -219,7 +232,7 @@ function afficherFenetreAjouterTour(champ, valeur) {
             console.debug("Error:"+ component.errorString() );
         return;
     }
-    var window = component.createObject(gestionDesAffectations, {"champ":champ, "valeur": valeur})
+    var window = component.createObject(gestionDesAffectations, {"champ":champ, "valeur": valeur, "idtour": idtour, "heureRecu":h,"minutesRecu":m })
     window.show() // On ouvre la fenetre d'ajout du nouveau poste
 }
 

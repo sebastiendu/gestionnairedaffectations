@@ -252,6 +252,22 @@ Item {
             }
 
             TableView {
+
+                Connections {
+                    target: app
+                    onFinChanged: {
+                        tableauTours.model = app.fiche_poste_tour;
+                    }
+                    onDebutChanged: {
+                        tableauTours.model = app.fiche_poste_tour;
+                    }
+
+                    onErreurDansLaDate: {
+                        Fonctions.afficherFenetreErreurDateTour(erreur);
+
+                    }
+                }
+
                 id: tableauTours
                 width:parent.width *0.95
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -278,28 +294,26 @@ Item {
 
                     Item {
 
-                        TextInput {
+                        Text {
                             id: inputDate
-                            anchors.fill: parent
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            width: parent.width*0.7
                             text: Fonctions.dateFR(styleData.value)
-                            onAccepted: console.log("debut: "+styleData.value +  styleData.row.id_tour  + styleData.id_tour+ " " + id_tour.value)
-
-
                         }
 
-                         MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                console.log("clic");
-                                tableauTours.selection.clear();
-                                tableauTours.selection.select(styleData.row );
-                                inputDate.positionAt(mouseX,mouseY);
-                                inputDate.forceActiveFocus();
-                                //  inputDate.color = "white"
-
-                            }
+                        Button {
+                            id: boutonCalendrier
+                            anchors.top: parent.top
+                            anchors.topMargin: 1
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 1
+                            anchors.right: parent.right
+                            anchors.rightMargin: parent.width*0.05
+                            width: parent.width*0.15
+                            text: "v"
+                            onClicked : { Fonctions.afficherFenetreAjouterTour("debut",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id_tour"),styleData.value.getHours(),styleData.value.getMinutes())}
                         }
-
 
 
 
@@ -314,26 +328,25 @@ Item {
                     Item {
 
 
-                        TextInput {
+                        Text {
                             id: inputDate
-                            anchors.fill: parent
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            width: parent.width*0.7
                             text: Fonctions.dateFR(styleData.value)
-                            onAccepted: console.log("fin: " + styleData.value + " " + inputDate.text + " " + styleData.role + " " + idDuTour)
-
-
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                console.log("clic");
-                                tableauTours.selection.clear();
-                                tableauTours.selection.select(styleData.row );
-                                inputDate.positionAt(mouseX,mouseY);
-                                inputDate.forceActiveFocus();
-                                //  inputDate.color = "white"
-
-                            }
+                        Button {
+                            id: boutonCalendrier
+                            anchors.top: parent.top
+                            anchors.topMargin: 1
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 1
+                            anchors.right: parent.right
+                            anchors.rightMargin: parent.width*0.05
+                            width: parent.width*0.15
+                            text: "v"
+                            onClicked : { Fonctions.afficherFenetreAjouterTour("fin",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id_tour"),styleData.value.getHours(),styleData.value.getMinutes())}
                         }
 
 
@@ -356,7 +369,10 @@ Item {
                             text: styleData.value
                             // activeFocusOnPress: false
                             //   selectByMouse: true
-                            onAccepted: console.log(styleData.value + " " +nouveauNombre.text)
+                            onAccepted: {
+
+                                console.log(styleData.value + " " +nouveauNombre.text)
+                            }
 
                         }
 

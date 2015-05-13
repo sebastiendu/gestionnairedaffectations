@@ -136,7 +136,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_horaires->setQuery(query);
 
-        query.prepare("select * from poste_et_tour where id_poste= :poste ;");
+        query.prepare("select * from poste_et_tour where id_poste= :poste ORDER BY debut ASC;");
         query.bindValue(":poste",m_id_poste);
         query.exec();
         m_fiche_poste_tour->setQuery(query);
@@ -1390,28 +1390,71 @@ void GestionnaireDAffectations::affecterBenevole(){
     m_poste_et_tour->setFilterKeyColumn(-1);
 }
 
-void GestionnaireDAffectations::modifierTourDebut(QDateTime debut, int id) {
+void GestionnaireDAffectations::modifierTourDebut(QDateTime date, int heure, int minutes, int id) {
+
+    QDateTime dateEtHeure;
+    qDebug() << "C++" << date;
 
     QSqlQuery query;
+
+    dateEtHeure = date.addSecs(heure*3600 + minutes*60);
+
+    qDebug() << "C++" << dateEtHeure;
+
     query.prepare("UPDATE tour SET debut = :debut WHERE id_poste = :poste AND id = :id");
     query.bindValue(":poste",m_id_poste);
-    query.bindValue(":debut",debut);
-        query.bindValue(":id",id);
+    query.bindValue(":debut",dateEtHeure);
+    query.bindValue(":id",id);
+
+    if(query.exec())
+    {
+    query = m_fiche_poste_tour->query();
+    query.bindValue(":poste", m_id_poste);
     query.exec();
-    qDebug() << query.lastError().text();
+    m_fiche_poste_tour->setQuery(query);
+
+    debutChanged();
+    }
+    else
+    {
+            qDebug() << query.lastError().text();
+            erreurDansLaDate(query.lastError().text());
+    }
+
 
 }
 
-void GestionnaireDAffectations::modifierTourFin(QDateTime fin, int id) {
+void GestionnaireDAffectations::modifierTourFin(QDateTime date, int heure, int minutes, int id) {
+
+    QDateTime dateEtHeure;
+    qDebug() << "C++" << date;
 
     QSqlQuery query;
+
+    dateEtHeure = date.addSecs(heure*3600 + minutes*60);
+
+    qDebug() << "C++" << dateEtHeure;
+
     query.prepare("UPDATE tour SET fin = :fin WHERE id_poste = :poste AND id = :id");
     query.bindValue(":poste",m_id_poste);
-    query.bindValue(":fin",fin);
+    query.bindValue(":fin",dateEtHeure);
     query.bindValue(":id",id);
 
+    if(query.exec())
+    {
+
+    query = m_fiche_poste_tour->query();
+    query.bindValue(":poste", m_id_poste);
     query.exec();
-    qDebug() << query.lastError().text();
+    m_fiche_poste_tour->setQuery(query);
+
+    finChanged();
+    }
+    else
+    {
+            qDebug() << query.lastError().text();
+            erreurDansLaDate(query.lastError().text());
+    }
 
 }
 

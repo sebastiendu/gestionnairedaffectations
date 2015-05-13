@@ -26,5 +26,7 @@
         <file>Q_SoumettreAffectation.qml</file>
         <file>Q_EmploiDuTemps.qml</file>
         <file>variables.js</file>
+        <file>DatePicker.qml</file>
+        <file>ErreurDateTour.qml</file>
     </qresource>
 </RCC>

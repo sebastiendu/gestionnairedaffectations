@@ -12,6 +12,13 @@
  * kind of assumed to be a Timekeeper object.
  */
 import QtQuick 2.0
+import QtQuick 2.3
+import QtQuick.Window 2.2
+import QtQuick.Controls 1.2
+import fr.ldd.qml 1.0
+import QtWebKit 3.0
+import QtQuick.Controls.Styles 1.2
+import QtGraphicalEffects 1.0
 
 import "variables.js" as Variables
 import "fonctions.js" as Fonctions
@@ -19,7 +26,8 @@ import "fonctions.js" as Fonctions
 Item {
     id:root
 
-
+// DateTimePicker { }
+/*
     Rectangle {
 
         id: blockParent
@@ -46,6 +54,7 @@ Item {
                 delegate: Text {
                     //text: Fonctions.dateEmploiDuTemps(heure)
                     text: Fonctions.dateEmploiDuTemps(heure)+" \t \t "+Fonctions.dateFR(heure)
+                    // Si heure = 00 ou debut nom du jour sinon heure seule
                     height: 13
                 }
             }
@@ -128,6 +137,6 @@ Item {
 
 
 
-    }
+    } */
 
 }

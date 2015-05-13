@@ -370,7 +370,7 @@ Item  {
 
                     Text {
                         id: _horaire
-                        text: '<b><h2>' + Fonctions.heure(debut) + " - " + Fonctions.heure(fin) + "</h2></b><br>"
+                        text: '<b><h2>' + Fonctions.heureMinutes(debut) + " - " + Fonctions.heureMinutes(fin) + "</h2></b><br>"
                         wrapMode: Text.Wrap
                         width: fichePoste.width
                         horizontalAlignment: Text.AlignHCenter
@@ -510,7 +510,7 @@ Item  {
                         anchors.fill:parent
                         color: "transparent"
                         Text {
-                            text: Fonctions.heure(app.heure)
+                            text: Fonctions.heureMinutes(app.heure)
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
                     }
