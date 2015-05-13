@@ -1070,24 +1070,24 @@ void GestionnaireDAffectations::genererExportGeneral()
 
 
 
-            pandoc->write(postePersonneCourant.toUtf8());
-            pandoc->write("|");
+        pandoc->write(postePersonneCourant.toUtf8());
+        pandoc->write("|");
 
-            if (query.record().value("debut_tour").toDateTime().toString("d/MM") != "")
-            {
-                pandoc->write("Le ");
-                pandoc->write(query.record().value("debut_tour").toDateTime().toString("d/MM").toUtf8());
-                pandoc->write(" ");
-                pandoc->write(debutTourPersonneCourant.toUtf8());
-                pandoc->write("→");
-                pandoc->write(finTourPersonneCourant.toUtf8());
+        if (query.record().value("debut_tour").toDateTime().toString("d/MM") != "")
+        {
+            pandoc->write("Le ");
+            pandoc->write(query.record().value("debut_tour").toDateTime().toString("d/MM").toUtf8());
+            pandoc->write(" ");
+            pandoc->write(debutTourPersonneCourant.toUtf8());
+            pandoc->write("→");
+            pandoc->write(finTourPersonneCourant.toUtf8());
 
-            }
+        }
 
-            else
-                pandoc->write(" ");
+        else
+            pandoc->write(" ");
 
-            pandoc->write("\n");
+        pandoc->write("\n");
 
 
     }
@@ -1249,46 +1249,46 @@ void GestionnaireDAffectations::afficherEntete(QProcess* unPandoc, QSqlQuery une
 {
     if (uneQuery.next())
     {
-    unPandoc->write("#");
-    unPandoc->write(uneQuery.record().value("nom_evenement").toString().toUtf8());
-    unPandoc->write(" — ");
+        unPandoc->write("#");
+        unPandoc->write(uneQuery.record().value("nom_evenement").toString().toUtf8());
+        unPandoc->write(" — ");
 
-    unPandoc->write(uneQuery.record().value("lieu_evenement").toString().toUtf8());
-    unPandoc->write("\n\n");
+        unPandoc->write(uneQuery.record().value("lieu_evenement").toString().toUtf8());
+        unPandoc->write("\n\n");
 
-    unPandoc->write("###");
-    unPandoc->write("Du ");
+        unPandoc->write("###");
+        unPandoc->write("Du ");
 
-    if (uneQuery.record().value("debut_evenement").toDateTime().toString("d") == "1")
-    {
-        unPandoc->write(uneQuery.record().value("debut_evenement").toDateTime().toString("d").toUtf8());
-        unPandoc->write("er ");
-        unPandoc->write(uneQuery.record().value("debut_evenement").toDateTime().toString("MMMM yyyy").toUtf8());
-    }
+        if (uneQuery.record().value("debut_evenement").toDateTime().toString("d") == "1")
+        {
+            unPandoc->write(uneQuery.record().value("debut_evenement").toDateTime().toString("d").toUtf8());
+            unPandoc->write("er ");
+            unPandoc->write(uneQuery.record().value("debut_evenement").toDateTime().toString("MMMM yyyy").toUtf8());
+        }
 
-    else
-    {
-        unPandoc->write(uneQuery.record().value("debut_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
-    }
-
-
-    unPandoc->write(" au ");
+        else
+        {
+            unPandoc->write(uneQuery.record().value("debut_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
+        }
 
 
-    if (uneQuery.record().value("fin_evenement").toDateTime().toString("d") == "1") // Si la date est le "1" alors on suffixe par "-er"
-    {
-        unPandoc->write(uneQuery.record().value("fin_evenement").toDateTime().toString("d").toUtf8());
-        unPandoc->write("er ");
-        unPandoc->write(uneQuery.record().value("fin_evenement").toDateTime().toString("MMMM yyyy").toUtf8());
+        unPandoc->write(" au ");
 
-    }
 
-    else
-    {
-        unPandoc->write(uneQuery.record().value("fin_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
-    }
+        if (uneQuery.record().value("fin_evenement").toDateTime().toString("d") == "1") // Si la date est le "1" alors on suffixe par "-er"
+        {
+            unPandoc->write(uneQuery.record().value("fin_evenement").toDateTime().toString("d").toUtf8());
+            unPandoc->write("er ");
+            unPandoc->write(uneQuery.record().value("fin_evenement").toDateTime().toString("MMMM yyyy").toUtf8());
 
-    unPandoc->write("\n\n");
+        }
+
+        else
+        {
+            unPandoc->write(uneQuery.record().value("fin_evenement").toDateTime().toString("d MMMM yyyy").toUtf8());
+        }
+
+        unPandoc->write("\n\n");
     }
 }
 
@@ -1408,21 +1408,23 @@ void GestionnaireDAffectations::modifierTourDebut(QDateTime date, int heure, int
 
     if(query.exec())
     {
-    query = m_fiche_poste_tour->query();
-    query.bindValue(":poste", m_id_poste);
-    query.exec();
-    m_fiche_poste_tour->setQuery(query);
+        query = m_fiche_poste_tour->query();
+        query.bindValue(":poste", m_id_poste);
+        query.exec();
+        m_fiche_poste_tour->setQuery(query);
 
-    debutChanged();
+        debutChanged();
     }
     else
     {
-            qDebug() << query.lastError().text();
-            erreurDansLaDate(query.lastError().text());
+        qDebug() << query.lastError().text();
+        erreurBD(query.lastError().text());
     }
 
 
 }
+
+
 
 void GestionnaireDAffectations::modifierTourFin(QDateTime date, int heure, int minutes, int id) {
 
@@ -1443,21 +1445,103 @@ void GestionnaireDAffectations::modifierTourFin(QDateTime date, int heure, int m
     if(query.exec())
     {
 
-    query = m_fiche_poste_tour->query();
-    query.bindValue(":poste", m_id_poste);
-    query.exec();
-    m_fiche_poste_tour->setQuery(query);
+        query = m_fiche_poste_tour->query();
+        query.bindValue(":poste", m_id_poste);
+        query.exec();
+        m_fiche_poste_tour->setQuery(query);
 
-    finChanged();
+        finChanged();
     }
     else
     {
-            qDebug() << query.lastError().text();
-            erreurDansLaDate(query.lastError().text());
+        qDebug() << query.lastError().text();
+        erreurBD(query.lastError().text());
     }
 
 }
 
+void GestionnaireDAffectations::modifierTourMinMax(QString type, int nombre, int id) {
+
+    QSqlQuery query;
+
+    if(type == "min" || type == "max")
+    {
+        if(type == "min")
+        {
+            query.prepare("UPDATE tour SET min = :nombre WHERE id_poste = :poste AND id = :id");
+        }
+        else
+        {
+            query.prepare("UPDATE tour SET max = :nombre WHERE id_poste = :poste AND id = :id");
+        }
+
+        query.bindValue(":poste",m_id_poste);
+        query.bindValue(":nombre",nombre);
+        query.bindValue(":id",id);
+
+        if(!query.exec())
+        {
+            qDebug() << query.lastError().text();
+            erreurBD(query.lastError().text());
+        }
+        else {
+            query = m_poste_et_tour_sql->query();
+            query.bindValue(0,idEvenement());
+            query.exec();
+            m_poste_et_tour_sql->setQuery(query);
+        }
+
+    }
+    else {
+        qDebug() << "Erreur venant du developpeur";
+    }
+
+}
+
+void GestionnaireDAffectations::insererTour(QDateTime dateFinPrecedente, int min,int max){
+
+    QDateTime dateQuatreHeuresApres;
+    dateQuatreHeuresApres = dateFinPrecedente.addSecs(4*3600);
+
+    QSqlQuery query;
+    query.prepare("INSERT INTO tour (id_poste, debut, fin, min, max) VALUES (:id_poste, :debut, :fin, :min, :max);");
+    query.bindValue(":id_poste",m_id_poste);
+    query.bindValue(":debut",dateFinPrecedente);
+    query.bindValue(":fin",dateQuatreHeuresApres);
+    query.bindValue(":min",min);
+    query.bindValue(":max",max);
+
+    if(!query.exec())
+    {
+            qDebug() << query.lastError().text();
+    }
+    else {
+        query = m_fiche_poste_tour->query();
+        query.bindValue(":poste", m_id_poste);
+        query.exec();
+        m_fiche_poste_tour->setQuery(query);
+
+        finChanged();
+    }
+
+}
+
+void GestionnaireDAffectations::supprimerTour(int id){
+
+    QSqlQuery query;
+
+    query.prepare("DELETE FROM tour WHERE id = :id;");
+    query.bindValue(":id",id);
+    query.exec();
+    qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
+
+    query = m_fiche_poste_tour->query();
+    query.bindValue(0,m_id_poste);
+    query.exec();
+    m_fiche_poste_tour->setQuery(query);
+
+    finChanged();
+}
 
 float GestionnaireDAffectations::getRatioX() { return this->ratioX ; }
 float GestionnaireDAffectations::getRatioY() { return this->ratioY ;}

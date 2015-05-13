@@ -262,31 +262,29 @@ Item {
                         tableauTours.model = app.fiche_poste_tour;
                     }
 
-                    onErreurDansLaDate: {
-                        Fonctions.afficherFenetreErreurDateTour(erreur);
+                    onErreurBD: {
+                        Fonctions.afficherFenetreErreurBD(erreur);
 
                     }
                 }
 
                 id: tableauTours
                 width:parent.width *0.95
+                height: parent.height * 0.40
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top:_descriptionPoste.bottom
                 anchors.topMargin: 10
                 selectionMode: SelectionMode.SingleSelection
-                itemDelegate :editableDelegate
-                TableViewColumn{ role: "id_tour"  ; title: "id" ; width:(3*(tableauTours.width/10)); visible: true;delegate: id_tour}
-                TableViewColumn{ role: "debut"  ; title: "Debut du tour" ; width:(3*(tableauTours.width/10));delegate: debut}
-                TableViewColumn{ role: "fin" ; title: "Fin du tour" ;width:(3*(tableauTours.width/10)); delegate: fin}
-                TableViewColumn{ role: "min"  ; title: "Nb. min" ;width:(tableauTours.width/5); delegate: nombre}
-                TableViewColumn{ role: "max" ; title: "Nb. max" ;width:(tableauTours.width/5); delegate: nombre}
+                TableViewColumn{ role: "id_tour"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:(3*(tableauTours.width/10))-1; visible: false;delegate: id_tour}
+                TableViewColumn{ role: "debut"  ; title: "Debut du tour" ;  horizontalAlignment: Text.AlignHCenter; width:(4*(tableauTours.width/10))-1;delegate: debut}
+                TableViewColumn{ role: "fin" ; title: "Fin du tour" ; horizontalAlignment: Text.AlignHCenter;width:(4*(tableauTours.width/10))-1; delegate: fin}
+                TableViewColumn{ role: "min"  ; title: "Min" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/10)-1; delegate: nombre}
+                TableViewColumn{ role: "max" ; title: "Max" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/10)-1; delegate: nombre}
 
 
 
                 // TODO : - ERREUR :  Property 'getMonth' of object  is not a function
-                // TODO : - ENREGISTRER DANS LA BASE LES INFORMATION
-                // TODO : - RECHARGER LE MODEL AVEC ORDER BY
-                // TODO : - RECUPERER LE ID CORRECTEMENT
+
 
 
                 Component {
@@ -298,7 +296,7 @@ Item {
                             id: inputDate
                             anchors.top: parent.top
                             anchors.left: parent.left
-                            width: parent.width*0.7
+                            anchors.leftMargin: 10
                             text: Fonctions.dateFR(styleData.value)
                         }
 
@@ -308,8 +306,8 @@ Item {
                             anchors.topMargin: 1
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: 1
-                            anchors.right: parent.right
-                            anchors.rightMargin: parent.width*0.05
+                            anchors.left: inputDate.right
+                            anchors.leftMargin: parent.width*0.05
                             width: parent.width*0.15
                             text: "v"
                             onClicked : { Fonctions.afficherFenetreAjouterTour("debut",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id_tour"),styleData.value.getHours(),styleData.value.getMinutes())}
@@ -332,7 +330,7 @@ Item {
                             id: inputDate
                             anchors.top: parent.top
                             anchors.left: parent.left
-                            width: parent.width*0.7
+                            anchors.leftMargin: 10
                             text: Fonctions.dateFR(styleData.value)
                         }
 
@@ -342,8 +340,8 @@ Item {
                             anchors.topMargin: 1
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: 1
-                            anchors.right: parent.right
-                            anchors.rightMargin: parent.width*0.05
+                            anchors.left: inputDate.right
+                            anchors.leftMargin: parent.width*0.05
                             width: parent.width*0.15
                             text: "v"
                             onClicked : { Fonctions.afficherFenetreAjouterTour("fin",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id_tour"),styleData.value.getHours(),styleData.value.getMinutes())}
@@ -369,9 +367,16 @@ Item {
                             text: styleData.value
                             // activeFocusOnPress: false
                             //   selectByMouse: true
-                            onAccepted: {
+                            horizontalAlignment: TextInput.AlignHCenter
 
-                                console.log(styleData.value + " " +nouveauNombre.text)
+                            onEditingFinished:  {
+                                if(styleData.value != nouveauNombre.text)
+                                {
+                                    app.modifierTourMinMax(styleData.role, nouveauNombre.text, tableauTours.model.getDataFromModel(styleData.row,"id_tour"))
+                                    console.log("On enregistre");
+                                }
+                                else
+                                    console.log("On enregistre pas")
                             }
 
                         }
@@ -383,7 +388,7 @@ Item {
                                 console.log("clic");
                                 tableauTours.selection.clear();
                                 tableauTours.selection.select(styleData.row );
-
+                                console.log(styleData.role);
                                 nouveauNombre.forceActiveFocus();
                                 console.log(tableauTours.model.getDataFromModel(styleData.row,"id_tour"))
 
@@ -402,7 +407,7 @@ Item {
 
                         TextInput
                         {
-                            property int idDuTour: 0
+                            //property int idDuTour: 0
                             id: nouveauNombre
                             anchors.fill: parent
                             text: styleData.value
@@ -436,7 +441,9 @@ Item {
                 anchors.top: tableauTours.bottom
                 anchors.right: _btnSupprimerTour.left
                 anchors.topMargin: 5
-                onClicked: { Fonctions.afficherFenetreAjouterTour() }
+                onClicked: {
+                    app.insererTour(tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"fin"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"min"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"max"))
+            }
             }
 
             Button {
@@ -446,6 +453,9 @@ Item {
                 anchors.right: parent.right
                 anchors.topMargin: 5
                 anchors.rightMargin: 15
+                onClicked: {
+                    app.supprimerTour(tableauTours.model.getDataFromModel(tableauTours.currentRow,"id_tour"));
+                }
             }
 
 

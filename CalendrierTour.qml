@@ -6,7 +6,7 @@ Window {
     id: ajouterTour
     title: "Ajouter un Tour"
     width: 300
-    height: date.height + heure.height
+    height: date.height + heure.height + heure.anchors.topMargin
     modality: Qt.WindowModal
     property string champ: ""
     property string valeur: ""
@@ -14,40 +14,41 @@ Window {
     property int heureRecu: 0
     property int minutesRecu : 0
 
-                    Calendar {
-                        id: date
-                        width: 300
-                        height: 300
-                        selectedDate: valeur
-                    }
+    Calendar {
+        id: date
+        width: 300
+        height: 300
+        selectedDate: valeur
+    }
 
 
-                    SpinBox {
-                        id: heure
-                        value: heureRecu
-                        maximumValue: 23
-                        suffix: " heure"
-                        anchors.top: date.bottom
-                        anchors.left: parent.left
-                        width: parent.width /2
-                    }
+    SpinBox {
+        id: heure
+        value: heureRecu
+        maximumValue: 23
+        suffix: " heure"
+        anchors.top: date.bottom
+        anchors.topMargin: 20
+        anchors.left: parent.left
+        width: parent.width /2
+    }
 
-                    SpinBox {
-                        id: minute
-                        value: minutesRecu
-                        maximumValue: 59
-                        suffix: " minutes"
-                        anchors.top: date.bottom
-                        anchors.right: parent.right
-                        width: parent.width /2
+    SpinBox {
+        id: minute
+        value: minutesRecu
+        maximumValue: 59
+        suffix: " minutes"
+        anchors.top: date.bottom
+        anchors.topMargin: 20
+        anchors.right: parent.right
+        width: parent.width /2
 
-                    }
+    }
 
 
     onClosing: {
-       if(champ == "debut") app.modifierTourDebut(date.selectedDate, heure.value, minute.value, idtour);
-       else if(champ == "fin") app.modifierTourFin(date.selectedDate, heure.value, minute.value, idtour);
-
+        if(champ == "debut") app.modifierTourDebut(date.selectedDate, heure.value, minute.value, idtour);
+        else if(champ == "fin") app.modifierTourFin(date.selectedDate, heure.value, minute.value, idtour);
     }
 
 }

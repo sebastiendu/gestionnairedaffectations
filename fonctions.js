@@ -34,8 +34,11 @@ function dateBarreStatut(dateRecu) {
 
 
 function dateFR(dateRecu) {
+    if(dateRecu == "") return "" // Bug courant, permet de patcher les warnings qui s'affolent dans la console
+
     var heure;
     var minutes;
+
     var numeroMois = dateRecu.getMonth() + 1;
 
     // ==== On affiche l'heure correctement====//
@@ -212,8 +215,8 @@ function afficherFenetreSupprimerPoste() {
     window.open() // On ouvre la fenetre d'ajout du nouveau poste
 }
 
-function afficherFenetreErreurDateTour(erreur) {
-    var component = Qt.createComponent("ErreurDateTour.qml")
+function afficherFenetreErreurBD(erreur) {
+    var component = Qt.createComponent("ErreurBD.qml")
     if( component.status !== Component.Ready )
     {
         if( component.status === Component.Error )

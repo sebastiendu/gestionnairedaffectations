@@ -58,6 +58,9 @@ public:
     Q_INVOKABLE void modifierPositionPoste(float x,float y);
     Q_INVOKABLE void modifierTourDebut(QDateTime date, int heure, int minutes, int id);
     Q_INVOKABLE void modifierTourFin(QDateTime date, int heure, int minutes, int id);
+    Q_INVOKABLE void modifierTourMinMax(QString type, int nombre, int id);
+    Q_INVOKABLE void insererTour(QDateTime dateFinPrecedente, int min,int max);
+    Q_INVOKABLE void supprimerTour(int id);
     Q_INVOKABLE void desaffecterBenevole();
     Q_INVOKABLE void affecterBenevole();
     //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
@@ -105,7 +108,7 @@ signals:
     void horaireChanged();
     void debutChanged();
     void finChanged();
-    void erreurDansLaDate(QString erreur);
+    void erreurBD(QString erreur);
 
 
 public slots:
