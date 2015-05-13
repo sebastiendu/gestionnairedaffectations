@@ -369,7 +369,7 @@ Item {
                                 tableauTours.selection.select(styleData.row );
 
                                 nouveauNombre.forceActiveFocus();
-                                console.log(tableauTours.model.get(0).id_tour)
+                                console.log(tableauTours.model.getDataFromModel(styleData.row,"id_tour"))
 
                             }
                         }

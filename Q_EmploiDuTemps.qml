@@ -14,6 +14,7 @@
 import QtQuick 2.0
 
 import "variables.js" as Variables
+import "fonctions.js" as Fonctions
 
 Item {
     id:root
@@ -29,130 +30,102 @@ Item {
         anchors.left:parent.left
 
 
-        ListView {
-            id: listeDebut
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            spacing: 5
-            model: debut
-            height: 13
-            delegate: Text {
-
-                text: date
-                height: 13
-                Component.onCompleted: {
-                    console.log("Debut chargé") ;
-                    Variables.setDebut(date);
-                    console.log(Variables.getDebut());
-
-                    if(Variables.getFin()!="" && Variables.getDebut()!="")
-                    {
-                        listeHeures.append({"heure": "15h20"});
-                        ajouterHoraires(Variables.getDebut(), Variables.getFin());
-                    }
-
-                    function ajouterHoraires(debut, fin)
-                    {
-
-                        Variables.heureCourante = debut;
-                        var i=0
-
-                        while(i++<10)// while(heureCourante<fin)
-                        {
-                            Variables.heureCourante.setHours ( Variables.heureCourante.getHours() + 1 );
-                            console.log(Variables.heureCourante);
-                        }
-                    }
-                }
-            }
-
-
-        }
-
+        // Le rectangle contenant la liste des horaires
         Rectangle {
+
             id: blockEmploiTemps
-            anchors.top: listeDebut.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 50
+            anchors.fill: parent
+            clip: true
             ListView {
-                id: chargement
+                id: listeDesHeures
                 anchors.fill: parent
                 model: listeHeures
+                clip: true
+
                 delegate: Text {
-                    text: heure
+                    //text: Fonctions.dateEmploiDuTemps(heure)
+                    text: Fonctions.dateEmploiDuTemps(heure)+" \t \t "+Fonctions.dateFR(heure)
                     height: 13
                 }
             }
         }
 
 
-        ListView {
-            id: listeFin
-            anchors.top : blockEmploiTemps.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            spacing: 5
-            model: fin
-            delegate: Text {
-                text: date
-                height: 13
-
-                Component.onCompleted: {
-                    console.log("Fin chargé") ;
-                    Variables.setFin(date);
-                    console.log(Variables.getFin());
-
-                    if(Variables.getFin()!="" && Variables.getDebut()!="")
-                    {
-                        listeHeures.append({"heure": "15h20"});
-                        ajouterHoraires(Variables.getDebut(), Variables.getFin());
-                    }
-                }
-            }
-            height: 13
-
-        }
-
-
-        ListModel {
-            id: debut
-
-            ListElement {
-                date: "13/11/2014 9h00"
-            }
-
-        }
-
-        ListModel {
-            id: fin
-
-            ListElement {
-                date: "15/11/2014 17h00"
-            }
-
-        }
-
+        // Le model contenant les horaires
         ListModel {
             id: listeHeures
         }
 
 
-        function ajouterHoraires(debut, fin)
-        {
+        // L'item permettant de charger le début, puis de peupler la liste
+        Item {
+            id: chargeurDeDebut
 
-            Variables.heureCourante = debut;
-            i=0
+            Component.onCompleted: {
+                console.log("Debut chargé") ;
+                Variables.setDebut("ok");
 
-            while(i++<10)// while(heureCourante<fin)
-            {
-                heureCourante.setHours ( heureCourante.getHours() + 1 );
-                console.log(heureCourante);
+                if(Variables.getFin()!="" && Variables.getDebut()!="")
+                {
+                    ajouterHoraires();
+                }
+
+                function ajouterHoraires()
+                {
+
+                    var heureCourante = new Date(app.heureMin.getTime());
+                    var heureDeFin = new Date(app.heureMax.getTime());
+
+                    listeHeures.append({"heure": heureCourante}); // On met la 1ere heure en tete de liste
+
+                    while(heureCourante < heureDeFin)// while(heureCourante<fin)
+                    {
+                        heureCourante.setHours (heureCourante.getHours() + 1 );
+                        listeHeures.append({"heure": heureCourante});
+                    }
+
+                    listeHeures.append({"heure": heureDeFin});
+                }
             }
         }
+
+
+        // L'item permettant de charger la fin, puis de peupler la liste
+        Item {
+            id: chargeurDeFin
+            Component.onCompleted: {
+                console.log("Fin chargé") ;
+                Variables.setFin("ok");
+
+                if(Variables.getFin()!="" && Variables.getDebut()!="")
+                {
+                    ajouterHoraires();
+                }
+
+                function ajouterHoraires()
+                {
+
+                    var heureCourante = new Date(app.heureMin.getTime());
+                    var heureDeFin = new Date(app.heureMax.getTime());
+
+                    listeHeures.append({"heure": heureCourante}); // On met la 1ere heure en tete de liste
+
+                    while(heureCourante < heureDeFin)// while(heureCourante<fin)
+                    {
+                        heureCourante.setHours (heureCourante.getHours() + 1 );
+                        listeHeures.append({"heure": heureCourante});
+                    }
+
+                    listeHeures.append({"heure": heureDeFin});
+                }
+            }
+        }
+
+
+
+
+
 
 
     }

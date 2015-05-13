@@ -7,6 +7,7 @@ var jourPrecedent= 0;
 var moisPrecedent = 0;
 var anneePrecedente = 0;
 
+var jourPrecedentEmploiDuTemps = 0;
 
 function dateBarreStatut(dateRecu) {
     var heure;
@@ -108,6 +109,36 @@ function dateTour(debut,fin) {
         return "Du "+numeroJourDebut+" "+nomMois[numeroMoisDebut]+ " " + numeroAnneeDebut +" " + heureDebut+"h"+minutesDebut+ " au  "+ numeroJourFin+" "+nomMois[numeroMoisFin]+ " " + numeroAnneeFin +" "  +heureFin+"h"+minutesFin+ " ";
     }
 
+
+
+}
+
+function dateEmploiDuTemps(date) {
+
+    var heure;
+    var minutes;
+    var nomJour = [
+        "Lundi", "Mardi", "Mercredi",
+        "Jeudi", "Vendredi", "Samedi", "Dimanche"
+    ];
+
+    if(date.getHours() < 10) heure = "0"+date.getHours(); // pour afficher 07h00 au lieu de 7h00
+    else heure = date.getHours();
+    if(date.getMinutes() < 10) minutes = "0"+date.getMinutes(); // pour afficher 07h05 au lieu de 07h5
+    else minutes = date.getMinutes();
+
+    if(jourPrecedentEmploiDuTemps == date.getDate() || heure== "00")
+    {
+        console.log("Courant: " + jourPrecedentEmploiDuTemps+" "+heure+"h"+minutes )
+        jourPrecedentEmploiDuTemps = date.getDate();
+        return "\t "+heure+"h"+minutes;
+    }
+    else
+    {
+        console.log(jourPrecedentEmploiDuTemps+"!="+date.getDate())
+        jourPrecedentEmploiDuTemps = date.getDate()
+        return nomJour[date.getDay()]+" "+date.getDate()+ "/"+ (date.getMonth()+1);
+    }
 
 
 }
