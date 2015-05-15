@@ -60,6 +60,9 @@ Item {
             }
         }
 
+        // SELECT distinct * FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE t.debut < '2014-11-15 12:30:00+01' AND t.fin > '2014-11-15 12:30:00+01' or t.debut is null;
+        // Pour récuperer les postes sans rien
+
 
         // Le model contenant les horaires
         ListModel {

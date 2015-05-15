@@ -6,10 +6,11 @@
 #include <QDateTime>
 #include <QSortFilterProxyModel>
 #include "settings.h"
-#include "poste.h"
+//#include "poste.h"
 #include <map>
 #include <plan.h>
-
+#include <QProcess>
+#include <QTemporaryFile>
 
 class GestionnaireDAffectations : public QGuiApplication
 {
@@ -114,7 +115,7 @@ signals:
     void affectationsChanged();
     void posteEtTourChanged();
     void horaireChanged();
-    void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours est modifié
+    void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours es t
     void erreurBD(QString erreur);
 
 
@@ -139,7 +140,6 @@ private:
     int m_id_affectation;
     QDateTime m_heureMin, m_heureMax, m_heure;
     Settings *m_settings;
-    std::map<int,Poste> listeDePoste;
     QSortFilterProxyModel *m_plan;
     SqlQueryModel *m_planComplet;
     SqlQueryModel *m_poste_et_tour_sql;

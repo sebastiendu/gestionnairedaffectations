@@ -5,9 +5,7 @@ QT += qml quick sql
 SOURCES += main.cpp \
     sqlquerymodel.cpp \
     gestionnairedaffectations.cpp \
-    settings.cpp \
-    poste.cpp \
-    plan.cpp
+    settings.cpp
 
 RESOURCES += qml.qrc
 
@@ -28,6 +26,4 @@ OTHER_FILES += \
 HEADERS += \
     sqlquerymodel.h \
     gestionnairedaffectations.h \
-    settings.h \
-    poste.h \
-    plan.h
+    settings.h

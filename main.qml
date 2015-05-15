@@ -172,9 +172,7 @@ ApplicationWindow { // Fenetre principale
 
             Rectangle {
                 color: "yellow"
-                Plan {
 
-                }
             }
         }
 

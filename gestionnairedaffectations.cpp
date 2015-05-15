@@ -5,9 +5,7 @@
 #include <QtDebug>
 #include <QQuickView>
 #include "gestionnairedaffectations.h"
-#include <map>
-#include "poste.h"
-#include <plan.h>
+
 
 
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
@@ -20,7 +18,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     qmlRegisterType<Settings>("fr.ldd.qml", 1, 0, "Settings");
     qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
     qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
-    qmlRegisterType<Plan>("fr.ldd.qml", 1, 0, "Plan");
+
 
     m_settings = new Settings;
 
