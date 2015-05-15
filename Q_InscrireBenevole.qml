@@ -246,6 +246,8 @@ Item {
                                      _numPortableBenevole.text, _numDomicileBenevole.text, _professionBenevole.text,
                                      _datenaissanceBenevole.text, _languesBenevole.text, _competencesBenevole.text,
                                      _commentaireBenevole.text );
+
+                // strdate et strfdate
             }
         }
 

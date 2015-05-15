@@ -394,7 +394,7 @@ void GestionnaireDAffectations::modifierNomPoste(QString nom) {
         query.bindValue(":id",m_id_poste);
         query.exec();
 
-        qDebug() << query.lastError().text();
+        rechargerPlan();
 
 
 }
@@ -649,6 +649,8 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
 
 
     QSqlQuery query;
+    QDateTime dateNaiss;
+    dateNaiss.fromString(datenaissanceBenevole,"yyyy-MM-dd");
 
     query.prepare("INSERT INTO personne (nom ,prenom, adresse , code_postal,ville,portable,domicile,email ,date_naissance, profession ,competences,avatar,langues,commentaire) VALUES (nom = :nom ,prenom = :prenom, adresse = :adresse , code_postal = :code_postal,ville = :ville,portable = :portable,domicile = :domicile,email = :email ,date_naissance = :date_naissance, profession = :profession ,competences = :competences,avatar = :avatar,langues = :langues,commentaire = :commentaire)");
     query.bindValue(":nom",nomBenevole);
@@ -670,6 +672,7 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     qDebug() << query.lastQuery();
     qDebug() << query.lastError().text(); // On affiche l'erreur
     qDebug() << datenaissanceBenevole;
+    qDebug() << dateNaiss.toString();
 
     // Erreur de syntaxe pres de « ( »
 }
