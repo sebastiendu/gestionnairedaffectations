@@ -224,22 +224,28 @@ Item {
             anchors.leftMargin: parent.width * 0.40
         }
 
-        TextField {
+        TextArea {
             id: _commentaireBenevole
-            placeholderText: "Commentaire"
+
             anchors.top: _competencesBenevole.bottom
             anchors.topMargin:5
             anchors.left: l_competencesBenevole.right
+            height: 100;
         }
 
         Button {
             text: "Inscrire le bénévole"
             anchors.top: _commentaireBenevole.bottom
-            anchors.topMargin: 5
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
+            anchors.topMargin: 25
+
+            anchors.horizontalCenter: parent.horizontalCenter
+
             onClicked: { console.log("TODO: Faire la requete d'inscription (attendre modification de la base");
-                app.faireInscription(_nomBenevole.text, _prenomBenevole.text, _adresseBenevole.text, _codePostalBenevole.text, _communeBenevole.text,_courrielBenevole.text, _numero);
+                app.inscrireBenevole(_nomBenevole.text, _prenomBenevole.text, _adresseBenevole.text,
+                                     _codePostalBenevole.text, _communeBenevole.text,_courrielBenevole.text,
+                                     _numPortableBenevole.text, _numDomicileBenevole.text, _professionBenevole.text,
+                                     _datenaissanceBenevole.text, _languesBenevole.text, _competencesBenevole.text,
+                                     _commentaireBenevole.text );
             }
         }
 

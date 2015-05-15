@@ -58,6 +58,7 @@ public:
     Q_INVOKABLE void modifierPositionPoste(float x,float y);
     Q_INVOKABLE void modifierNomPoste(QString nom);
     Q_INVOKABLE void modifierDescriptionPoste(QString nom);
+    Q_INVOKABLE void rechargerPlan();
 
     Q_INVOKABLE void modifierTourDebut(QDateTime date, int heure, int minutes, int id);
     Q_INVOKABLE void modifierTourFin(QDateTime date, int heure, int minutes, int id);
@@ -66,7 +67,11 @@ public:
     Q_INVOKABLE void supprimerTour(int id);
     Q_INVOKABLE void desaffecterBenevole();
     Q_INVOKABLE void affecterBenevole();
-    //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
+    Q_INVOKABLE void inscrireBenevole(QString nomBenevole, QString prenomBenevole, QString adresseBenevole,
+                                      QString codePostalBenevole, QString communeBenevole, QString courrielBenevole,
+                                      QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
+                                      QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
+                                      QString commentaireBenevole);
 
 
     Q_INVOKABLE float getRatioX();
@@ -109,8 +114,7 @@ signals:
     void affectationsChanged();
     void posteEtTourChanged();
     void horaireChanged();
-    void debutChanged();
-    void finChanged();
+    void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours est modifié
     void erreurBD(QString erreur);
 
 

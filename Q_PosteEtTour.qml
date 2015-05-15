@@ -62,7 +62,7 @@ Item {
 
                         Fonctions.afficherFenetreNouveauPoste();
 
-                        // Fonctions.createSpriteObjects(rectangleBordurePlan, mouse.x, mouse.y)
+
                     }
 
                     cursorShape: Qt.CrossCursor
@@ -256,14 +256,29 @@ Item {
 
             }
 
+            Button {
+                id: _btnSauvegarderChangements
+                anchors.top: _descriptionPoste.bottom
+                anchors.topMargin: 5
+                anchors.right: parent.right
+                anchors.rightMargin: 15
+                //anchors.horizontalCenter: parent.horizontalCenter
+                text: "Enregistrer"
+                onClicked: {
+                     app.modifierNomPoste(_nomPoste.text)
+                     app.modifierDescriptionPoste(_descriptionPoste.text)
+                     app.rechargerPlan();
+                }
+
+
+            }
+
             TableView {
 
                 Connections {
                     target: app
-                    onFinChanged: {
-                        tableauTours.model = app.fiche_poste_tour;
-                    }
-                    onDebutChanged: {
+
+                    onTableauTourChanged: {
                         tableauTours.model = app.fiche_poste_tour;
                     }
 
@@ -277,8 +292,8 @@ Item {
                 width:parent.width *0.95
                 height: parent.height * 0.40
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top:_descriptionPoste.bottom
-                anchors.topMargin: 10
+                anchors.top:_btnSauvegarderChangements.bottom
+                anchors.topMargin: 25
                 selectionMode: SelectionMode.SingleSelection
                 TableViewColumn{ role: "id_tour"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:(3*(tableauTours.width/10))-1; visible: false;delegate: id_tour}
                 TableViewColumn{ role: "debut"  ; title: "Debut du tour" ;  horizontalAlignment: Text.AlignHCenter; width:(4*(tableauTours.width/10))-1;delegate: debut}

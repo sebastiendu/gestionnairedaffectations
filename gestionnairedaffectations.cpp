@@ -346,12 +346,7 @@ void GestionnaireDAffectations::insererPoste(QString poste, QString description,
     query.exec();
     qDebug() << query.lastError().text();
 
-    query = m_planComplet->query();
-    query.bindValue(0,idEvenement());
-    query.exec();
-    m_planComplet->setQuery(query);
-
-    planCompletChanged();
+    rechargerPlan();
 }
 
 void GestionnaireDAffectations::modifierPositionPoste(float ancienX,float ancienY) {
@@ -372,13 +367,6 @@ void GestionnaireDAffectations::modifierPositionPoste(float ancienX,float ancien
         query.exec();
         qDebug() << query.lastError().text();
 
-
-        // A SUPPRIMER UNE FOIS DEBUGGER
-        query = m_planComplet->query(); // <
-        query.bindValue(0,idEvenement()); // <
-        query.exec(); // <
-        m_planComplet->setQuery(query); // <
-        planCompletChanged(); // <
     }
 
 }
@@ -393,12 +381,8 @@ void GestionnaireDAffectations::supprimerPoste(int id){
     query.exec();
     qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
 
-    query = m_planComplet->query();
-    query.bindValue(0,idEvenement());
-    query.exec();
-    m_planComplet->setQuery(query);
-
-    planCompletChanged();
+    setIdPoste(-1);
+    rechargerPlan();
 }
 
 
@@ -412,12 +396,6 @@ void GestionnaireDAffectations::modifierNomPoste(QString nom) {
 
         qDebug() << query.lastError().text();
 
-        query = m_planComplet->query();
-        query.bindValue(0,idEvenement());
-        query.exec();
-        m_planComplet->setQuery(query);
-
-        planCompletChanged();
 
 }
 
@@ -433,6 +411,16 @@ void GestionnaireDAffectations::modifierDescriptionPoste(QString description) {
 
 }
 
+void GestionnaireDAffectations::rechargerPlan(){
+
+    QSqlQuery query;
+    query = m_planComplet->query();
+    query.bindValue(0,idEvenement());
+    query.exec();
+    m_planComplet->setQuery(query);
+
+    planCompletChanged();
+}
 
 void GestionnaireDAffectations::desaffecterBenevole(){
 
@@ -522,7 +510,7 @@ void GestionnaireDAffectations::modifierTourDebut(QDateTime date, int heure, int
         query.exec();
         m_fiche_poste_tour->setQuery(query);
 
-        debutChanged();
+        tableauTourChanged();
     }
     else
     {
@@ -559,7 +547,7 @@ void GestionnaireDAffectations::modifierTourFin(QDateTime date, int heure, int m
         query.exec();
         m_fiche_poste_tour->setQuery(query);
 
-        finChanged();
+        tableauTourChanged();
     }
     else
     {
@@ -630,7 +618,7 @@ void GestionnaireDAffectations::insererTour(QDateTime dateFinPrecedente, int min
         query.exec();
         m_fiche_poste_tour->setQuery(query);
 
-        finChanged();
+        tableauTourChanged();
     }
 
 }
@@ -649,8 +637,43 @@ void GestionnaireDAffectations::supprimerTour(int id){
     query.exec();
     m_fiche_poste_tour->setQuery(query);
 
-    finChanged();
+    tableauTourChanged();
 }
+
+void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString prenomBenevole, QString adresseBenevole,
+                                                 QString codePostalBenevole, QString communeBenevole, QString courrielBenevole,
+                                                 QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
+                                                 QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
+                                                 QString commentaireBenevole)
+{
+
+
+    QSqlQuery query;
+
+    query.prepare("INSERT INTO personne (nom ,prenom, adresse , code_postal,ville,portable,domicile,email ,date_naissance, profession ,competences,avatar,langues,commentaire) VALUES (nom = :nom ,prenom = :prenom, adresse = :adresse , code_postal = :code_postal,ville = :ville,portable = :portable,domicile = :domicile,email = :email ,date_naissance = :date_naissance, profession = :profession ,competences = :competences,avatar = :avatar,langues = :langues,commentaire = :commentaire)");
+    query.bindValue(":nom",nomBenevole);
+    query.bindValue(":prenom",prenomBenevole);
+    query.bindValue(":adresse",adresseBenevole);
+    query.bindValue(":code_postal",codePostalBenevole);
+    query.bindValue(":ville",communeBenevole);
+    query.bindValue(":portable",numPortableBenevole);
+    query.bindValue(":domicile",numDomicileBenevole);
+    query.bindValue(":email",courrielBenevole);
+    query.bindValue(":profession",professionBenevole);
+    query.bindValue(":date_naissance",datenaissanceBenevole);
+    query.bindValue(":competences",competencesBenevole);
+    query.bindValue(":avatar","a");
+    query.bindValue(":langues",languesBenevole);
+    query.bindValue(":commentaire",commentaireBenevole);
+    query.exec();
+
+    qDebug() << query.lastQuery();
+    qDebug() << query.lastError().text(); // On affiche l'erreur
+    qDebug() << datenaissanceBenevole;
+
+    // Erreur de syntaxe pres de « ( »
+}
+
 
 float GestionnaireDAffectations::getRatioX() { return this->ratioX ; }
 float GestionnaireDAffectations::getRatioY() { return this->ratioY ;}
