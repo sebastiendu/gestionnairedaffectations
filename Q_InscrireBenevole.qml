@@ -175,7 +175,7 @@ Item {
 
         TextField {
             id: _datenaissanceBenevole
-            placeholderText: "JJ/MM/AAAA"
+            placeholderText: "AAAA-MM-JJ"
             anchors.top: _professionBenevole.bottom
             anchors.topMargin:5
             anchors.left: l_datenaissanceBenevole.right

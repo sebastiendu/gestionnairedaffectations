@@ -146,6 +146,19 @@ function dateEmploiDuTemps(date) {
 
 }
 
+function nomJourEtDate (date)
+{
+
+    var nomJour = [
+        "Lundi", "Mardi", "Mercredi",
+        "Jeudi", "Vendredi", "Samedi", "Dimanche"
+    ];
+
+        return nomJour[date.getDay()]+" "+date.getDate()+ "/"+ (date.getMonth()+1);
+
+}
+
+
 function definirCouleurCercleNom (statut) {
     if(statut == "acceptee")
         return "green";
@@ -186,6 +199,7 @@ function heureMinutes(dateRecu) {
     return heure+"h"+minutes;
 
 }
+
 
 
 

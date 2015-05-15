@@ -26,8 +26,6 @@ import "fonctions.js" as Fonctions
 Item {
     id:root
 
-// DateTimePicker { }
-/*
     Rectangle {
 
         id: blockParent
@@ -53,8 +51,10 @@ Item {
 
                 delegate: Text {
                     //text: Fonctions.dateEmploiDuTemps(heure)
-                    text: Fonctions.dateEmploiDuTemps(heure)+" \t \t "+Fonctions.dateFR(heure)
+                   // text: Fonctions.dateEmploiDuTemps(heure)+" \t \t "+Fonctions.dateFR(heure)+"\t \t"+heure.getHours();
                     // Si heure = 00 ou debut nom du jour sinon heure seule
+
+                    text: (heure == Date(app.heureMin.getTime())) ? Fonctions.nomJourEtDate(heure)+"\t" + Fonctions.heureMinutes(heure) : (heure.getHours() == 0 )? Fonctions.nomJourEtDate(heure)+"\t" + Fonctions.heureMinutes(heure) : "\t \t" + Fonctions.heureMinutes(heure)
                     height: 13
                 }
             }
@@ -137,6 +137,6 @@ Item {
 
 
 
-    } */
+    }
 
 }

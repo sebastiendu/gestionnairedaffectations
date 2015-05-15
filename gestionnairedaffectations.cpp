@@ -652,7 +652,13 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     QDateTime dateNaiss;
     dateNaiss.fromString(datenaissanceBenevole,"yyyy-MM-dd");
 
-    query.prepare("INSERT INTO personne (nom ,prenom, adresse , code_postal,ville,portable,domicile,email ,date_naissance, profession ,competences,avatar,langues,commentaire) VALUES (nom = :nom ,prenom = :prenom, adresse = :adresse , code_postal = :code_postal,ville = :ville,portable = :portable,domicile = :domicile,email = :email ,date_naissance = :date_naissance, profession = :profession ,competences = :competences,avatar = :avatar,langues = :langues,commentaire = :commentaire)");
+
+    qDebug() << datenaissanceBenevole;
+    qDebug() << languesBenevole;
+    qDebug() << competencesBenevole;
+    qDebug() << commentaireBenevole;
+
+    query.prepare("INSERT INTO personne (nom ,prenom, adresse , code_postal,ville,portable,domicile,email ,date_naissance, profession ,competences,avatar,langues,commentaire) VALUES (:nom , :prenom, :adresse , :code_postal,:ville, :portable, :domicile, :email , :date_naissance,  :profession , :competences, :avatar, :langues, :commentaire)");
     query.bindValue(":nom",nomBenevole);
     query.bindValue(":prenom",prenomBenevole);
     query.bindValue(":adresse",adresseBenevole);
@@ -667,7 +673,10 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     query.bindValue(":avatar","a");
     query.bindValue(":langues",languesBenevole);
     query.bindValue(":commentaire",commentaireBenevole);
-    query.exec();
+    if(!query.exec())
+    {
+        erreurBD(query.lastError().text());
+    }
 
     qDebug() << query.lastQuery();
     qDebug() << query.lastError().text(); // On affiche l'erreur
