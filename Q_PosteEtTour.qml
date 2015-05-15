@@ -43,6 +43,7 @@ Item {
                     target: app
                     onPlanCompletChanged: {
                         repeaterPostesEtTours.model = app.planComplet;
+                        console.log("PlanCompletChanged");
                     }
                 }
 
@@ -228,6 +229,7 @@ Item {
                 anchors.rightMargin: 10
                 anchors.topMargin:5
                 anchors.left: _descriptionPoste.left
+                onEditingFinished: app.modifierNomPoste(_nomPoste.text)
 
             }
 
@@ -248,6 +250,9 @@ Item {
                 anchors.rightMargin:10
                 anchors.leftMargin: 10
                 height:parent.height/3
+
+
+
 
             }
 
