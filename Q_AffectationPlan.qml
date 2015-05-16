@@ -195,7 +195,7 @@ Item  {
             anchors.bottom: navigateurDeTemps.top
             anchors.bottomMargin: 0
             anchors.horizontalCenter: parent.horizontalCenter
-            source: "../plan.svg"
+            source: "image://plan/" + app.idEvenement
             z:3
 
             Rectangle {

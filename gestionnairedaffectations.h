@@ -14,7 +14,7 @@
 class GestionnaireDAffectations : public QGuiApplication
 {
     Q_OBJECT
-    Q_PROPERTY(int idEvenement READ idEvenement WRITE setIdEvenement)
+    Q_PROPERTY(int idEvenement READ idEvenement WRITE setIdEvenement NOTIFY idEvenementChanged)
     Q_PROPERTY(QDateTime heure MEMBER m_heure NOTIFY heureChanged)
     Q_PROPERTY(QDateTime heureMin MEMBER m_heureMin NOTIFY heureMinChanged)
     Q_PROPERTY(QDateTime heureMax MEMBER m_heureMax NOTIFY heureMaxChanged)
@@ -116,6 +116,7 @@ signals:
     void horaireChanged();
     void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours est modifié
     void erreurBD(QString erreur);
+    void idEvenementChanged();
 
 
 public slots:

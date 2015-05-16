@@ -1,13 +1,14 @@
 TEMPLATE = app
 
-QT += qml quick sql
+QT += qml quick sql svg
 
 SOURCES += main.cpp \
     sqlquerymodel.cpp \
     gestionnairedaffectations.cpp \
     settings.cpp \
     poste.cpp \
-    plan.cpp
+    plan.cpp \
+    plansvgimageprovider.cpp
 
 RESOURCES += qml.qrc
 
@@ -30,4 +31,5 @@ HEADERS += \
     gestionnairedaffectations.h \
     settings.h \
     poste.h \
-    plan.h
+    plan.h \
+    plansvgimageprovider.h

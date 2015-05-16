@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>plan.svg</file>
         <file>nouvelevenement.qml</file>
         <file>fonctions.js</file>
         <file>corbeille.png</file>

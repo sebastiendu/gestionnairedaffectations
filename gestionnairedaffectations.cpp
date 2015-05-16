@@ -182,6 +182,7 @@ int GestionnaireDAffectations::idEvenement() { // Retourne la valeur de la cle "
 void GestionnaireDAffectations::setIdEvenement(int id) {
     QSettings settings;
     settings.setValue("id_evenement", id);
+    emit idEvenementChanged();
 }
 
 void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
