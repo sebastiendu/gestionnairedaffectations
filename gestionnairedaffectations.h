@@ -6,10 +6,11 @@
 #include <QDateTime>
 #include <QSortFilterProxyModel>
 #include "settings.h"
-#include "poste.h"
+//#include "poste.h"
 #include <map>
 #include <plan.h>
-
+#include <QProcess>
+#include <QTemporaryFile>
 
 class GestionnaireDAffectations : public QGuiApplication
 {
@@ -31,6 +32,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
     Q_PROPERTY(QSortFilterProxyModel* poste_et_tour MEMBER m_poste_et_tour NOTIFY posteEtTourChanged)
     Q_PROPERTY(SqlQueryModel* horaires MEMBER m_horaires NOTIFY horaireChanged)
+    Q_PROPERTY(SqlQueryModel* etat_tour_heure MEMBER m_etat_tour_heure)
 
 
 
@@ -50,7 +52,7 @@ public:
     Q_INVOKABLE void setIdDisponibilite(int);
     Q_INVOKABLE void setIdAffectation(int);
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
-    Q_INVOKABLE void selectionnerMarqueur();
+
 
     Q_INVOKABLE void insererPoste(QString,QString,float,float);
     Q_INVOKABLE void supprimerPoste(int);
@@ -59,6 +61,8 @@ public:
     Q_INVOKABLE void modifierNomPoste(QString nom);
     Q_INVOKABLE void modifierDescriptionPoste(QString nom);
     Q_INVOKABLE void rechargerPlan();
+
+    Q_INVOKABLE void setHeureEtatTour(QDateTime heure);
 
     Q_INVOKABLE void modifierTourDebut(QDateTime date, int heure, int minutes, int id);
     Q_INVOKABLE void modifierTourFin(QDateTime date, int heure, int minutes, int id);
@@ -114,7 +118,7 @@ signals:
     void affectationsChanged();
     void posteEtTourChanged();
     void horaireChanged();
-    void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours est modifié
+    void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours es t
     void erreurBD(QString erreur);
     void idEvenementChanged();
 
@@ -140,12 +144,12 @@ private:
     int m_id_affectation;
     QDateTime m_heureMin, m_heureMax, m_heure;
     Settings *m_settings;
-    std::map<int,Poste> listeDePoste;
     QSortFilterProxyModel *m_plan;
     SqlQueryModel *m_planComplet;
     SqlQueryModel *m_poste_et_tour_sql;
     SqlQueryModel *m_horaires;
     QSortFilterProxyModel *m_poste_et_tour;
+    SqlQueryModel *m_etat_tour_heure;
 
     // Variables Temporaires necessaires pour transmettre des informations d'une fenetre QML à une autre
     float ratioX = -1; // Stocke temporairement la position x cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )

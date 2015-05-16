@@ -5,9 +5,7 @@
 #include <QtDebug>
 #include <QQuickView>
 #include "gestionnairedaffectations.h"
-#include <map>
-#include "poste.h"
-#include <plan.h>
+
 
 
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
@@ -20,7 +18,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     qmlRegisterType<Settings>("fr.ldd.qml", 1, 0, "Settings");
     qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
     qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
-    qmlRegisterType<Plan>("fr.ldd.qml", 1, 0, "Plan");
+
 
     m_settings = new Settings;
 
@@ -41,6 +39,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_planComplet = new SqlQueryModel;
     m_plan = new QSortFilterProxyModel(this);
     m_horaires = new SqlQueryModel;
+    m_etat_tour_heure = new SqlQueryModel;
 
     if(!m_settings->contains("database/databaseName")) {
         if(!m_settings->contains("database/hostName")) {
@@ -165,6 +164,14 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_poste_et_tour->setSourceModel(m_poste_et_tour_sql);
         m_poste_et_tour->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_poste_et_tour->setFilterKeyColumn(-1);
+
+        query.prepare("SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < :debut  AND fin > :fin) or t.debut is null AND id_evenement = :evt ORDER BY nom ;");
+        query.bindValue(":evt",idEvenement());
+        query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
+        query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
+        query.exec();
+
+        m_etat_tour_heure->setQuery(query);
 
 
     } else {
@@ -308,8 +315,16 @@ void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTim
     }
 }
 
-void GestionnaireDAffectations::selectionnerMarqueur() {
+void GestionnaireDAffectations::setHeureEtatTour(QDateTime heure) {
 
+    QSqlQuery query;
+    query.prepare("SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < :debut  AND fin > :fin) or t.debut is null AND id_evenement = :evt ORDER BY nom ;");
+    query.bindValue(":evt",idEvenement());
+    query.bindValue(":debut",heure);
+    query.bindValue(":fin",heure);
+    query.exec();
+
+    m_etat_tour_heure->setQuery(query);
 }
 
 void GestionnaireDAffectations::mettreAJourModelPlan(){

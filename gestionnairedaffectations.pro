@@ -6,8 +6,6 @@ SOURCES += main.cpp \
     sqlquerymodel.cpp \
     gestionnairedaffectations.cpp \
     settings.cpp \
-    poste.cpp \
-    plan.cpp \
     plansvgimageprovider.cpp
 
 RESOURCES += qml.qrc
@@ -30,6 +28,4 @@ HEADERS += \
     sqlquerymodel.h \
     gestionnairedaffectations.h \
     settings.h \
-    poste.h \
-    plan.h \
     plansvgimageprovider.h
