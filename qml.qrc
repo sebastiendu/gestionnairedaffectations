@@ -6,8 +6,6 @@
         <file>corbeille.png</file>
         <file>personne.png</file>
         <file>marqueur.qml</file>
-        <file>marqueurs/rouge_brillant.png</file>
-        <file>marqueurs/rouge.png</file>
         <file>ScrollBar.qml</file>
         <file>parametres_de_connexion.qml</file>
         <file>nouveauPoste.qml</file>
