@@ -8,7 +8,6 @@
 #include "settings.h"
 //#include "poste.h"
 #include <map>
-#include <plan.h>
 #include <QProcess>
 #include <QTemporaryFile>
 
