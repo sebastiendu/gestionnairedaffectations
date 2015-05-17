@@ -77,6 +77,7 @@ public:
                                       QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
                                       QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
                                       QString commentaireBenevole);
+    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees);
 
 
     Q_INVOKABLE float getRatioX();

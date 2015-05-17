@@ -61,6 +61,40 @@ ApplicationWindow { // Fenetre principale
     }
 
     Action {
+        id: parametresDeCourriel
+        text: qsTr("Paramètres de courriel")
+        tooltip: "Définir les paramètres d'envoi des messages de courriel par lot"
+        onTriggered: parametresCourriel.open()
+    }
+    Dialog {
+        id: parametresCourriel
+        modality: Qt.ApplicationModal
+        standardButtons: StandardButton.Ok | StandardButton.Cancel
+        title: "Paramètres de courriel"
+        visible : false
+        onAccepted: {
+            app.settings.setValue("email/prefixe", prefixe.text)
+            app.settings.setValue("email/domaine", domaine.text)
+        }
+        Row {
+            TextField {
+                id: prefixe
+                placeholderText: "prefixe"
+                text: app.settings.value("email/prefixe")
+            }
+
+            Text {
+                text: "+<i>variable</i>@"
+            }
+            TextField {
+                id: domaine
+                placeholderText: qsTr("domaine")
+                text: app.settings.value("email/domaine")
+            }
+        }
+    }
+
+    Action {
         id: planDeLEvenement
         text: qsTr("Plan de l'évènement…")
         tooltip: "Charger le plan de l'évènement"
@@ -130,6 +164,7 @@ ApplicationWindow { // Fenetre principale
         Menu {
             title: qsTr("&Options")
             MenuItem { action: parametresDeConnexion }
+            MenuItem { action: parametresDeCourriel }
         }
 
 
