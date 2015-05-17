@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick sql svg
+QT += qml quick sql svg xml
 
 SOURCES += main.cpp \
     sqlquerymodel.cpp \

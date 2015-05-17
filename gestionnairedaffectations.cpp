@@ -4,6 +4,7 @@
 #include <QtQml>
 #include <QtDebug>
 #include <QQuickView>
+#include <QXmlSimpleReader>
 #include "gestionnairedaffectations.h"
 
 
@@ -313,6 +314,31 @@ void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTim
     if (query.exec()) {
         setIdEvenement(query.lastInsertId().toInt());
     }
+}
+
+void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
+{
+    QFile file(url.toLocalFile());
+    QXmlSimpleReader xmlReader;
+    QXmlInputSource source(&file);
+    if(xmlReader.parse(&source)) {
+        QSqlQuery query;
+        if (query.prepare("update evenement set plan=:plan where id=:id")) {
+            file.seek(0);
+            query.bindValue(":plan", QString(file.readAll()));
+            query.bindValue(":id", idEvenement());
+            if (query.exec()) {
+                emit planMisAJour();
+            } else {
+                qDebug() << "Erreur exec :" << query.lastError();
+            }
+        } else {
+            qDebug() << "Erreur prepare : " << query.lastError();
+        }
+    } else {
+        qDebug() << "TODO emit erreur parse";
+    }
+    file.close();
 }
 
 void GestionnaireDAffectations::setHeureEtatTour(QDateTime heure) {

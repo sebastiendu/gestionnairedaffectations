@@ -5,6 +5,7 @@ import fr.ldd.qml 1.0
 import QtWebKit 3.0
 import QtQuick.Controls.Styles 1.2
 import QtGraphicalEffects 1.0
+import QtQuick.Dialogs 1.2
 
 import "fonctions.js" as Fonctions
 
@@ -59,6 +60,26 @@ ApplicationWindow { // Fenetre principale
         }
     }
 
+    Action {
+        id: planDeLEvenement
+        text: qsTr("Plan de l'évènement…")
+        tooltip: "Charger le plan de l'évènement"
+        onTriggered: planEvenement.open()
+    }
+    FileDialog {
+        id: planEvenement
+        title: "Chargement du plan de l'évènement"
+        nameFilters: [
+            "Document SVG (*.svg)",
+            "Tous les fichiers (*)"
+        ]
+        onAccepted: {
+            app.enregistrerPlanEvenement(fileUrl)
+        }
+        modality: Qt.ApplicationModal
+    }
+
+
     onClosing: {
         app.settings.setValue("x", x)
         app.settings.setValue("y", y)
@@ -89,6 +110,7 @@ ApplicationWindow { // Fenetre principale
         Menu {
             title: qsTr("&Évenement")
             MenuItem { action: nouvelEvenement }
+            MenuItem { action: planDeLEvenement }
             MenuItem {
                 text: qsTr("Supprimer")
                 onTriggered: console.log("TODO : Ouvrir l'interface de suppression de l'évènement");

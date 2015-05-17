@@ -10,6 +10,7 @@
 #include <map>
 #include <QProcess>
 #include <QTemporaryFile>
+#include <QUrl>
 
 class GestionnaireDAffectations : public QGuiApplication
 {
@@ -51,6 +52,7 @@ public:
     Q_INVOKABLE void setIdDisponibilite(int);
     Q_INVOKABLE void setIdAffectation(int);
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
+    Q_INVOKABLE void enregistrerPlanEvenement(QUrl url);
 
 
     Q_INVOKABLE void insererPoste(QString,QString,float,float);
@@ -120,6 +122,7 @@ signals:
     void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours es t
     void erreurBD(QString erreur);
     void idEvenementChanged();
+    void planMisAJour();
 
 
 public slots:

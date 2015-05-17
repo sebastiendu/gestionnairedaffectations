@@ -32,6 +32,12 @@ Item {
             anchors.leftMargin:10
             source: "image://plan/" + app.idEvenement
             onStatusChanged: console.log(planPosteEtTours.anchors.right)
+            Connections {
+                target: app
+                onPlanMisAJour: {
+                    console.log("TODO : recharger l'image");
+                }
+            }
 
             Rectangle {
 
