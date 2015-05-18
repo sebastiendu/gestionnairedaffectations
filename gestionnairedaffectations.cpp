@@ -200,7 +200,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
 
 
     } else {
-        qDebug() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
+        qCritical() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
     }
     return db.isOpen();
 }
@@ -359,13 +359,13 @@ void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
             if (query.exec()) {
                 emit planMisAJour();
             } else {
-                qDebug() << "Erreur exec :" << query.lastError();
+                qCritical() << "Echec d'execution de la requête d'enregistrement du plan :" << query.lastError();
             }
         } else {
-            qDebug() << "Erreur prepare : " << query.lastError();
+            qCritical() << "Echec de préparation de la requête d'enregistrement du plan :" << query.lastError();
         }
     } else {
-        qDebug() << "TODO emit erreur parse";
+        qCritical() << "Le fichier" << url.toLocalFile() << "n'est pas un document SVG valide";
     }
     file.close();
 }
@@ -596,8 +596,7 @@ void GestionnaireDAffectations::modifierTourDebut(QDateTime date, int heure, int
     }
     else
     {
-        qDebug() << query.lastError().text();
-        erreurBD(query.lastError().text());
+        qCritical() << query.lastError().text();
     }
 
 
@@ -633,8 +632,7 @@ void GestionnaireDAffectations::modifierTourFin(QDateTime date, int heure, int m
     }
     else
     {
-        qDebug() << query.lastError().text();
-        erreurBD(query.lastError().text());
+        qCritical() << query.lastError().text();
     }
 
 }
@@ -660,8 +658,7 @@ void GestionnaireDAffectations::modifierTourMinMax(QString type, int nombre, int
 
         if(!query.exec())
         {
-            qDebug() << query.lastError().text();
-            erreurBD(query.lastError().text());
+            qCritical() << query.lastError().text();
         }
         else {
             query = m_poste_et_tour_sql->query();
@@ -757,7 +754,7 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     query.bindValue(":commentaire",commentaireBenevole);
     if(!query.exec())
     {
-        erreurBD(query.lastError().text());
+        qCritical() << query.lastError().text();
     }
 
     qDebug() << query.lastQuery();
