@@ -18,6 +18,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     qmlRegisterType<Settings>("fr.ldd.qml", 1, 0, "Settings");
     qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
     qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
+    qmlRegisterType<ToursParPosteModel>("fr.ldd.qml", 1, 0, "ToursParPosteModel");
 
     qInstallMessageHandler(gestionDesMessages);
 
@@ -198,6 +199,8 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_etat_tour_heure->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_etat_tour_heure->setFilterKeyColumn(-1); */
 
+        m_toursParPosteModel = new ToursParPosteModel(this);
+        m_toursParPosteModel->setIdEvenement(idEvenement());
 
     } else {
         qCritical() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
