@@ -1,6 +1,7 @@
 #ifndef GESTIONNAIREDAFFECTATIONS_H
 #define GESTIONNAIREDAFFECTATIONS_H
 
+#include "abstracttablemodel.h"
 #include "sqlquerymodel.h"
 #include <QGuiApplication>
 #include <QDateTime>
@@ -35,7 +36,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QSortFilterProxyModel* etat_tour_heure MEMBER m_etat_tour_heure  NOTIFY etatTourHeureChanged)
     Q_PROPERTY(QDateTime heureCourante MEMBER m_heure_courante NOTIFY heureCouranteChanged)
 
-
+    
 
 public:
     GestionnaireDAffectations(int & argc, char ** argv);
