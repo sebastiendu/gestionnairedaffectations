@@ -229,18 +229,6 @@ function afficherFenetreSupprimerPoste() {
     window.open() // On ouvre la fenetre d'ajout du nouveau poste
 }
 
-function afficherFenetreErreurBD(erreur) {
-    var component = Qt.createComponent("ErreurBD.qml")
-    if( component.status !== Component.Ready )
-    {
-        if( component.status === Component.Error )
-            console.debug("Error:"+ component.errorString() );
-        return;
-    }
-    var window = component.createObject(gestionDesAffectations, {"erreur":erreur})
-    window.open() // On ouvre la fenetre d'ajout du nouveau poste
-}
-
 function afficherFenetreAjouterTour(champ, valeur,idtour,h,m) {
     var component = Qt.createComponent("CalendrierTour.qml")
     if( component.status !== Component.Ready )

@@ -288,10 +288,6 @@ Item {
                         tableauTours.model = app.fiche_poste_tour;
                     }
 
-                    onErreurBD: {
-                        Fonctions.afficherFenetreErreurBD(erreur);
-
-                    }
                 }
 
                 id: tableauTours

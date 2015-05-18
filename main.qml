@@ -319,5 +319,26 @@ ApplicationWindow { // Fenetre principale
             text: Fonctions.dateBarreStatut(app.heure)
         }
     }
+    MessageDialog {
+        id: messageDErreur
+    }
+    Connections {
+        target: app
+        onWarning: {
+            messageDErreur.icon = StandardIcon.Warning
+            messageDErreur.text=msg
+            messageDErreur.visible=true
+        }
+        onCritical: {
+            messageDErreur.icon = StandardIcon.Critical
+            messageDErreur.text=msg
+            messageDErreur.visible=true
+        }
+        onFatal: {
+            messageDErreur.icon = StandardIcon.Fatal
+            messageDErreur.text=msg
+            messageDErreur.visible=true
+        }
+    }
 }
 

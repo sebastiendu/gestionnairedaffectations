@@ -104,6 +104,9 @@ public:
     //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
 
 signals:
+    void warning(const QString &msg);
+    void critical(const QString &msg);
+    void fatal(const QString &msg);
     void heureChanged();
     void heureMinChanged();
     void heureMaxChanged();
@@ -166,7 +169,7 @@ private:
     int nombreDeTours; // Le nombre de tours associés au poste
     int nombreDAffectations;
 
-
+    static void gestionDesMessages(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 };
 
 #endif // GESTIONNAIREDAFFECTATIONS_H

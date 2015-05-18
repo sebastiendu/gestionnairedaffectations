@@ -24,6 +24,5 @@
         <file>Q_EmploiDuTemps.qml</file>
         <file>variables.js</file>
         <file>DatePicker.qml</file>
-        <file>ErreurBD.qml</file>
     </qresource>
 </RCC>

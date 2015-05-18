@@ -5,9 +5,7 @@
 #include <QtDebug>
 #include <QQuickView>
 #include <QXmlSimpleReader>
-#include <QCryptographicHash>
 #include "gestionnairedaffectations.h"
-
 
 
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
@@ -21,6 +19,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
     qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
 
+    qInstallMessageHandler(gestionDesMessages);
 
     m_settings = new Settings;
 
@@ -78,6 +77,25 @@ GestionnaireDAffectations::~GestionnaireDAffectations()
     QSqlDatabase().close();
 }
 
+void GestionnaireDAffectations::gestionDesMessages(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
+    GestionnaireDAffectations *inst = (GestionnaireDAffectations*) instance();
+    switch (type) {
+    case QtDebugMsg:
+        qInstallMessageHandler(0);
+        qDebug(msg.toLocal8Bit());
+        qInstallMessageHandler(gestionDesMessages);
+        break;
+    case QtWarningMsg:
+        emit inst->warning(msg);
+        break;
+    case QtCriticalMsg:
+        emit inst->critical(msg);
+        break;
+    case QtFatalMsg:
+        emit inst->fatal(msg);
+        break;
+    }
+}
 
 QString GestionnaireDAffectations::messageDErreurDeLaBase() {
     return db.lastError().text();
@@ -182,7 +200,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
 
 
     } else {
-        qDebug() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
+        qCritical() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
     }
     return db.isOpen();
 }
@@ -341,13 +359,13 @@ void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
             if (query.exec()) {
                 emit planMisAJour();
             } else {
-                qDebug() << "Erreur exec :" << query.lastError();
+                qCritical() << "Echec d'execution de la requête d'enregistrement du plan :" << query.lastError();
             }
         } else {
-            qDebug() << "Erreur prepare : " << query.lastError();
+            qCritical() << "Echec de préparation de la requête d'enregistrement du plan :" << query.lastError();
         }
     } else {
-        qDebug() << "TODO emit erreur parse";
+        qCritical() << "Le fichier" << url.toLocalFile() << "n'est pas un document SVG valide";
     }
     file.close();
 }
@@ -578,8 +596,7 @@ void GestionnaireDAffectations::modifierTourDebut(QDateTime date, int heure, int
     }
     else
     {
-        qDebug() << query.lastError().text();
-        erreurBD(query.lastError().text());
+        qCritical() << query.lastError().text();
     }
 
 
@@ -615,8 +632,7 @@ void GestionnaireDAffectations::modifierTourFin(QDateTime date, int heure, int m
     }
     else
     {
-        qDebug() << query.lastError().text();
-        erreurBD(query.lastError().text());
+        qCritical() << query.lastError().text();
     }
 
 }
@@ -642,8 +658,7 @@ void GestionnaireDAffectations::modifierTourMinMax(QString type, int nombre, int
 
         if(!query.exec())
         {
-            qDebug() << query.lastError().text();
-            erreurBD(query.lastError().text());
+            qCritical() << query.lastError().text();
         }
         else {
             query = m_poste_et_tour_sql->query();
@@ -739,7 +754,7 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     query.bindValue(":commentaire",commentaireBenevole);
     if(!query.exec())
     {
-        erreurBD(query.lastError().text());
+        qCritical() << query.lastError().text();
     }
 
     qDebug() << query.lastQuery();
@@ -757,21 +772,24 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
     QVariant domaine = m_settings->value("email/domaine");
     if (prefixe.isValid() && domaine.isValid()) {
         if (possibles or proposees or relancees) {
-            QCryptographicHash hash(QCryptographicHash::Md4);
-            hash.addData(QDateTime::currentDateTime().toString().toUtf8());
-            hash.addData(QString::number(applicationPid()).toUtf8());
-            QByteArray cle = hash.result().toHex();
-            QSqlQuery query;
-            if (QSqlDatabase::database().transaction()) {
-                if (query.prepare("insert into lot(cle) values(?)")) {
-                    query.addBindValue(cle);
+            QSqlDatabase database = QSqlDatabase::database();
+            if (database.transaction()) {
+                QStringList titre;
+                if (possibles) titre << "possibles";
+                if (proposees) titre << "déjà proposées";
+                if (proposees) titre << "déjà proposées plusieurs fois";
+                QSqlQuery query;
+                if (query.prepare("insert into lot(titre) values(?) returning cle")) {
+                    query.addBindValue("Affectations " + titre.join(" ou "));
                     if (query.exec()) {
                         QVariant id = query.lastInsertId();
-                        adresseEmail = prefixe.toString() + '+' + id.toString() + '_' + cle + '@' + domaine.toString();
+                        query.next();
+                        QVariant cle = query.value(0);
+                        adresseEmail = prefixe.toString() + '+' + id.toString() + '_' + cle.toString() + '@' + domaine.toString();
                         QStringList conditions;
                         if (possibles) conditions << "statut='possible'";
-                        if (proposees) conditions << "statut='proposees' and id not in (select id from lot_affectation where traite and reussi)";
-                        if (relancees) conditions << "statut='proposees' and id in (select id from lot_affectation where traite and reussi)";
+                        if (proposees) conditions << "statut='proposee' and id not in (select id from lot_affectation where traite and reussi)";
+                        if (relancees) conditions << "statut='proposee' and id in (select id from lot_affectation where traite and reussi)";
                         if (query.prepare(
                                     "insert into lot_affectation(id_lot, id_affectation)"
                                     " select ?, id"
@@ -780,21 +798,25 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
                                     )) {
                             query.addBindValue(id.toInt());
                             if (query.exec()) {
-                                QSqlDatabase::database().commit();
+                                database.commit();
                             } else {
                                 qCritical() << "Impossible d'executer la requête de population du lot d'affectations : " << query.lastError();
+                                database.rollback();
                             }
                         } else {
                             qCritical() << "Impossible de préparer la requête de population du lot d'affectations : " << query.lastError();
+                            database.rollback();
                         }
                     } else {
                         qCritical() << "Impossible d'executer la requête de création du lot d'affectations : " << query.lastError();
+                        database.rollback();
                     }
                 } else {
                     qCritical() << "Impossible de préparer la requête de création du lot d'affectations : " << query.lastError();
+                    database.rollback();
                 }
             } else {
-                qCritical() << "Impossible de démarrer la transaction de création du lot d'affectations : " << query.lastError();
+                qCritical() << "Impossible de démarrer la transaction de création du lot d'affectations : " << database.lastError();
             }
         } else {
             qWarning() << "Vous devez selectionner au moins un ensemble d'affectations";
