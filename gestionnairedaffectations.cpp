@@ -450,7 +450,7 @@ void GestionnaireDAffectations::genererFichesDePostes()
         pandoc->write("|");
         pandoc->write(query.record().value("prenom_personne").toString().toUtf8());
         pandoc->write("|");
-        pandoc->write(QString("").append(query.record().value("portable").toString()).toUtf8());
+        pandoc->write(query.record().value("portable").toString().toUtf8());
         pandoc->write("\n");
     }
 
