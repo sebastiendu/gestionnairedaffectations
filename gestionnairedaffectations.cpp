@@ -40,7 +40,8 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_planComplet = new SqlQueryModel;
     m_plan = new QSortFilterProxyModel(this);
     m_horaires = new SqlQueryModel;
-    m_etat_tour_heure = new SqlQueryModel;
+    m_etat_tour_heure = new QSortFilterProxyModel(this);
+    m_etat_tour_heure_sql = new SqlQueryModel;
 
     if(!m_settings->contains("database/databaseName")) {
         if(!m_settings->contains("database/hostName")) {
@@ -68,6 +69,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     }
 
     connect(this,SIGNAL(heureChanged()),this,SLOT(mettreAJourModelPlan()));
+    connect(this,SIGNAL(heureCouranteChanged()),this,SLOT(setHeureEtatTour()));
 }
 
 GestionnaireDAffectations::~GestionnaireDAffectations()
@@ -187,11 +189,14 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
 
         query.prepare("SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < :debut  AND fin > :fin) or t.debut is null AND id_evenement = :evt ORDER BY nom ;");
         query.bindValue(":evt",idEvenement());
-        query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
-        query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
+        query.bindValue(":debut",m_heure_courante.toString("yyyy-MM-d h:m:s"));
+        query.bindValue(":fin",m_heure_courante.toString("yyyy-MM-d h:m:s"));
         query.exec();
+        m_etat_tour_heure_sql->setQuery(query);
 
-        m_etat_tour_heure->setQuery(query);
+     /*   m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
+        m_etat_tour_heure->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        m_etat_tour_heure->setFilterKeyColumn(-1); */
 
 
     } else {
@@ -255,6 +260,11 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_poste_et_tour_sql->setQuery(query);
 
+
+    query = m_etat_tour_heure_sql ->query();
+    query.bindValue(0,idEvenement());
+    query.exec();
+    m_etat_tour_heure_sql ->setQuery(query);
 
     query = m_horaires->query();
     query.bindValue(0,idEvenement());
@@ -360,16 +370,27 @@ void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
     file.close();
 }
 
-void GestionnaireDAffectations::setHeureEtatTour(QDateTime heure) {
+void GestionnaireDAffectations::setHeureEtatTour() {
 
     QSqlQuery query;
-    query.prepare("SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < :debut  AND fin > :fin) or t.debut is null AND id_evenement = :evt ORDER BY nom ;");
+    query.prepare("SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < :debut  AND t.fin > :fin) or t.debut is null AND id_evenement = :evt ORDER BY nom ;");
     query.bindValue(":evt",idEvenement());
-    query.bindValue(":debut",heure);
-    query.bindValue(":fin",heure);
+    query.bindValue(":debut",m_heure_courante.toString("yyyy-MM-d h:m:s"));
+    query.bindValue(":fin",m_heure_courante.toString("yyyy-MM-d h:m:s"));
     query.exec();
 
-    m_etat_tour_heure->setQuery(query);
+    m_etat_tour_heure_sql = new SqlQueryModel;
+    m_etat_tour_heure_sql->setQuery(query);
+    qDebug() << "Requete : " << query.lastError().text() ;
+
+    m_etat_tour_heure = new QSortFilterProxyModel();
+    m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
+    m_plan->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_plan->setFilterKeyColumn(-1);
+
+    qDebug() << "La date:" << m_heure_courante.toString("yyyy-MM-d h:m:s");
+    qDebug() << "Nombre de postes à ce moment: " << m_etat_tour_heure_sql->rowCount();
+
 }
 
 void GestionnaireDAffectations::mettreAJourModelPlan(){

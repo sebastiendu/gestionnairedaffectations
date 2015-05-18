@@ -54,7 +54,7 @@ Item {
 
                 delegate: Rectangle {
                     //text: Fonctions.dateEmploiDuTemps(heure)
-                   // text: Fonctions.dateEmploiDuTemps(heure)+" \t \t "+Fonctions.dateFR(heure)+"\t \t"+heure.getHours();
+                    // text: Fonctions.dateEmploiDuTemps(heure)+" \t \t "+Fonctions.dateFR(heure)+"\t \t"+heure.getHours();
                     // Si heure = 00 ou debut nom du jour sinon heure seule
 
                     Text {text: (heure == Date(app.heureMin.getTime())) ? Fonctions.nomJourEtDate(heure)+"\t" + Fonctions.heureMinutes(heure) : (heure.getHours() == 0 )? Fonctions.nomJourEtDate(heure)+"\t" + Fonctions.heureMinutes(heure) : "\t \t" + Fonctions.heureMinutes(heure) }
@@ -63,10 +63,19 @@ Item {
                     GridView {
                         id: thisGrid
                         // model: app.planComplet
-                        delegate: Rectangle { width: 50; height: 20; color: "red"}
+                        delegate: Rectangle { width: 50; height: 30; border.color: "black"; color: debut == "" ? "white" : "lightblue";
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: { console.log(debut); }
+                            }
+
+                            Text {
+                                text: nom;
+                            }
+                        }
                         width: blockParent.width
-                       // Component.onCompleted: { app.setHeureEtatTour(heure); thisGrid.model = app.etat_tour_heure;}
-                        Component.onCompleted: { app.heure = heure; thisGrid.model = app.planCourant;}
+                        Component.onCompleted: { app.heureCourante = heure ; thisGrid.model = app.etat_tour_heure;}
+                        //Component.onCompleted: { app.heure = heure; thisGrid.model = app.planCourant;}
                     }
 
                 }
@@ -75,10 +84,7 @@ Item {
             }
         }
 
-        Button {
-            onClicked : { thisGrid.model = app.etat_tour_heure;}
-            text: "okkkkkkkkk"
-        }
+
 
         // SELECT distinct * FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE t.debut < '2014-11-15 12:30:00+01' AND t.fin > '2014-11-15 12:30:00+01' or t.debut is null;
         // Pour récuperer les postes sans rien

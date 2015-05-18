@@ -6,7 +6,8 @@ SOURCES += main.cpp \
     sqlquerymodel.cpp \
     gestionnairedaffectations.cpp \
     settings.cpp \
-    plansvgimageprovider.cpp
+    plansvgimageprovider.cpp \
+    abstracttablemodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -27,4 +28,5 @@ HEADERS += \
     sqlquerymodel.h \
     gestionnairedaffectations.h \
     settings.h \
-    plansvgimageprovider.h
+    plansvgimageprovider.h \
+    abstracttablemodel.h
