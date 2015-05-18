@@ -166,8 +166,8 @@ private:
     ToursParPosteModel *m_toursParPosteModel;
 
     // Variables Temporaires necessaires pour transmettre des informations d'une fenetre QML à une autre
-    float ratioX = -1; // Stocke temporairement la position x cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )
-    float ratioY = -1; // Stocke temporairement la position y cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )
+    float ratioX; // Stocke temporairement la position x cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )
+    float ratioY; // Stocke temporairement la position y cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )
     QString nomPoste; // Le nom du poste courant
     int nombreDeTours; // Le nombre de tours associés au poste
     int nombreDAffectations;

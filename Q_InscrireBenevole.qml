@@ -10,7 +10,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: green
+        color: "#2ecc71"
 
         Label {
             id: l_nomBenevole

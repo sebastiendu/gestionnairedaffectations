@@ -75,9 +75,9 @@ Item {
                         MouseArea {
                             anchors.fill: parent;
                             onClicked:{
-                                listView.currentIndex = index;
-                                _numCandidat.text = "Candidat Sélectionné: "+index
-
+                                listView.currentIndex = index
+                                app.setIdDisponibilite(id_disponibilite)
+                                ficheBenevole.model = app.benevoles_disponibles
                                 //Fonctions.focusCandidat(index); TODO
                             }
                         }
@@ -126,19 +126,59 @@ Item {
                 anchors.topMargin: 10
                 anchors.horizontalCenter: parent.horizontalCenter
                 font.underline: true
-                anchors.left: rectangleCandidats.right
-                anchors.leftMargin: 10
+
             }
 
-            Label {
+            Rectangle {
 
-                id: _numCandidat
-                text: "Candidat Sélectionné: aucun"
                 anchors.top: _ficheDuCandidatSelectionne.top
                 anchors.topMargin: rectangleFicheDuCandidat.height/2
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.left: rectangleCandidats.right
-                anchors.leftMargin: 10
+
+                ListView {
+                    id: ficheBenevole
+                    model: app.fiche_benevole
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.margins: 5
+                    anchors.leftMargin: 20
+                    anchors.right: parent.right
+                    anchors.left: parent.left
+                    clip:true
+
+                    delegate: Column {
+
+
+                        Text { text: "<img src='personne.png'/>     <b>" + prenom + " " + nom + "</b><br>";}
+                        Text { text: 'Inscription :\t' + date_inscription.toLocaleDateString();}
+                        Text { text: 'Amis :\t' + liste_amis }
+                        Text { text: 'Type de poste :\t' + type_poste }
+                        Text { text: 'Commentaire :\t' + commentaire_disponibilite }
+                        Text { text: 'Statut :\t' + statut_disponibilite }
+                        Text { text: 'Adresse :\t' + adresse }
+                        Text { text: '\t' + code_postal + ' ' + ville}
+                        Text { text: 'Contact :\t' + portable + " " + domicile }
+                        Text { text: '\t' + email }
+                        Text { text: 'Âge :\t' + age + " ans" }
+                        Text { text: 'Profession :\t' + profession }
+                        Text { text: 'Id DISPO :\t' + id_disponibilite } // A ENKLEVER
+                        Text {
+                            text: 'Compétences : ' + competences
+                            wrapMode: Text.WordWrap
+                            width: parent.width}
+                        Text { text: 'Langues :\t' + langues }
+                        Text {
+                            text: 'Commentaire : ' + commentaire_personne
+                            wrapMode: Text.WordWrap
+                            width: parent.width}
+                        Text {
+                            text: 'Disponibilite : ' + commentaire_disponibilite
+                            wrapMode: Text.WordWrap
+                            width: parent.width}
+
+                    }
+                }
+
             }
 
         }
@@ -160,8 +200,7 @@ Item {
                 anchors.topMargin: 10
                 anchors.horizontalCenter: parent.horizontalCenter
                 font.underline: true
-                anchors.left: rectangleFicheDuCandidat.right
-                anchors.leftMargin: 10
+
             }
         }
 
@@ -182,8 +221,7 @@ Item {
                 anchors.topMargin: 10
                 anchors.horizontalCenter: parent.horizontalCenter
                 font.underline: true
-                anchors.left: rectangleListeDoublons.right
-                anchors.leftMargin: 10
+
             }
         }
 

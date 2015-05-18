@@ -17,10 +17,6 @@ Item  {
         anchors.rightMargin: 0
         anchors.left: parent.left
         anchors.leftMargin: 0
-        anchors.bottom: navigateurDeTemps.top
-        anchors.bottomMargin: 0
-        anchors.top: onglet.bottom
-        anchors.topMargin: 0
         anchors.fill: parent
 
 

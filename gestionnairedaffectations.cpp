@@ -26,7 +26,8 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
 
     m_id_disponibilite=0;
     m_id_poste=0;
-
+    ratioX  =-1;
+    ratioY = -1;
     m_liste_des_evenements = new SqlQueryModel;
     m_postes = new SqlQueryModel;
     m_tour_benevole = new SqlQueryModel;
