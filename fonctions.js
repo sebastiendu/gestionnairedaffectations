@@ -7,6 +7,7 @@ var jourPrecedent= 0;
 var moisPrecedent = 0;
 var anneePrecedente = 0;
 
+var jourPrecedentEmploiDuTemps = 0;
 
 function dateBarreStatut(dateRecu) {
     var heure;
@@ -33,8 +34,11 @@ function dateBarreStatut(dateRecu) {
 
 
 function dateFR(dateRecu) {
+    if(dateRecu == "") return "" // Bug courant, permet de patcher les warnings qui s'affolent dans la console
+
     var heure;
     var minutes;
+
     var numeroMois = dateRecu.getMonth() + 1;
 
     // ==== On affiche l'heure correctement====//
@@ -51,7 +55,7 @@ function dateFR(dateRecu) {
 
 
 
-    return dateRecu.getDate()+"/"+numeroMois+"/"+dateRecu.getFullYear()+" "+heure+"h"+minutes;
+    return dateRecu.getDate()+"/"+numeroMois+"/"+dateRecu.getFullYear()+" "+heure+":"+minutes;
 
 }
 
@@ -112,6 +116,49 @@ function dateTour(debut,fin) {
 
 }
 
+function dateEmploiDuTemps(date) {
+
+    var heure;
+    var minutes;
+    var nomJour = [
+        "Lundi", "Mardi", "Mercredi",
+        "Jeudi", "Vendredi", "Samedi", "Dimanche"
+    ];
+
+    if(date.getHours() < 10) heure = "0"+date.getHours(); // pour afficher 07h00 au lieu de 7h00
+    else heure = date.getHours();
+    if(date.getMinutes() < 10) minutes = "0"+date.getMinutes(); // pour afficher 07h05 au lieu de 07h5
+    else minutes = date.getMinutes();
+
+    if(jourPrecedentEmploiDuTemps == date.getDate() )
+    {
+        console.log("Courant: " + jourPrecedentEmploiDuTemps+" "+heure+"h"+minutes )
+        jourPrecedentEmploiDuTemps = date.getDate();
+        return "\t "+heure+"h"+minutes;
+    }
+    else
+    {
+        console.log(jourPrecedentEmploiDuTemps+"!="+date.getDate())
+        jourPrecedentEmploiDuTemps = date.getDate()
+        return nomJour[date.getDay()]+" "+date.getDate()+ "/"+ (date.getMonth()+1);
+    }
+
+
+}
+
+function nomJourEtDate (date)
+{
+
+    var nomJour = [
+        "Lundi", "Mardi", "Mercredi",
+        "Jeudi", "Vendredi", "Samedi", "Dimanche"
+    ];
+
+        return nomJour[date.getDay()]+" "+date.getDate()+ "/"+ (date.getMonth()+1);
+
+}
+
+
 function definirCouleurCercleNom (statut) {
     if(statut == "acceptee")
         return "green";
@@ -130,7 +177,7 @@ function couleurCercle(statut){
         return "orange";
 }
 
-function heure(dateRecu) {
+function heureMinutes(dateRecu) {
     var heure;
     var minutes;
 
@@ -152,6 +199,9 @@ function heure(dateRecu) {
     return heure+"h"+minutes;
 
 }
+
+
+
 
 
 
@@ -179,8 +229,7 @@ function afficherFenetreSupprimerPoste() {
     window.open() // On ouvre la fenetre d'ajout du nouveau poste
 }
 
-
-function afficherFenetreAjouterTour(champ, valeur) {
+function afficherFenetreAjouterTour(champ, valeur,idtour,h,m) {
     var component = Qt.createComponent("CalendrierTour.qml")
     if( component.status !== Component.Ready )
     {
@@ -188,7 +237,7 @@ function afficherFenetreAjouterTour(champ, valeur) {
             console.debug("Error:"+ component.errorString() );
         return;
     }
-    var window = component.createObject(gestionDesAffectations, {"champ":champ, "valeur": valeur})
+    var window = component.createObject(gestionDesAffectations, {"champ":champ, "valeur": valeur, "idtour": idtour, "heureRecu":h,"minutesRecu":m })
     window.show() // On ouvre la fenetre d'ajout du nouveau poste
 }
 
@@ -200,8 +249,6 @@ function createSpriteObjects(rect,x,y) {
     else
         component.statusChanged.connect(finishCreation);
 }
-
-
 
 
 

@@ -6,15 +6,16 @@
 #include <QDateTime>
 #include <QSortFilterProxyModel>
 #include "settings.h"
-#include "poste.h"
+//#include "poste.h"
 #include <map>
-#include <plan.h>
-
+#include <QProcess>
+#include <QTemporaryFile>
+#include <QUrl>
 
 class GestionnaireDAffectations : public QGuiApplication
 {
     Q_OBJECT
-    Q_PROPERTY(int idEvenement READ idEvenement WRITE setIdEvenement)
+    Q_PROPERTY(int idEvenement READ idEvenement WRITE setIdEvenement NOTIFY idEvenementChanged)
     Q_PROPERTY(QDateTime heure MEMBER m_heure NOTIFY heureChanged)
     Q_PROPERTY(QDateTime heureMin MEMBER m_heureMin NOTIFY heureMinChanged)
     Q_PROPERTY(QDateTime heureMax MEMBER m_heureMax NOTIFY heureMaxChanged)
@@ -30,6 +31,9 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QSortFilterProxyModel* planCourant MEMBER m_plan NOTIFY planChanged)
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
     Q_PROPERTY(QSortFilterProxyModel* poste_et_tour MEMBER m_poste_et_tour NOTIFY posteEtTourChanged)
+    Q_PROPERTY(SqlQueryModel* horaires MEMBER m_horaires NOTIFY horaireChanged)
+    Q_PROPERTY(QSortFilterProxyModel* etat_tour_heure MEMBER m_etat_tour_heure  NOTIFY etatTourHeureChanged)
+    Q_PROPERTY(QDateTime heureCourante MEMBER m_heure_courante NOTIFY heureCouranteChanged)
 
 
 
@@ -49,17 +53,31 @@ public:
     Q_INVOKABLE void setIdDisponibilite(int);
     Q_INVOKABLE void setIdAffectation(int);
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
-    Q_INVOKABLE void selectionnerMarqueur();
+    Q_INVOKABLE void enregistrerPlanEvenement(QUrl url);
+
 
     Q_INVOKABLE void insererPoste(QString,QString,float,float);
     Q_INVOKABLE void supprimerPoste(int);
     Q_INVOKABLE void rafraichirStatistiquePoste(int n, QString nom);
     Q_INVOKABLE void modifierPositionPoste(float x,float y);
-    Q_INVOKABLE void modifierTourDebut(QDateTime debut, int id);
-    Q_INVOKABLE void modifierTourFin(QDateTime fin, int id);
+    Q_INVOKABLE void modifierNomPoste(QString nom);
+    Q_INVOKABLE void modifierDescriptionPoste(QString nom);
+    Q_INVOKABLE void rechargerPlan();
+
+
+    Q_INVOKABLE void modifierTourDebut(QDateTime date, int heure, int minutes, int id);
+    Q_INVOKABLE void modifierTourFin(QDateTime date, int heure, int minutes, int id);
+    Q_INVOKABLE void modifierTourMinMax(QString type, int nombre, int id);
+    Q_INVOKABLE void insererTour(QDateTime dateFinPrecedente, int min,int max);
+    Q_INVOKABLE void supprimerTour(int id);
     Q_INVOKABLE void desaffecterBenevole();
     Q_INVOKABLE void affecterBenevole();
-    //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
+    Q_INVOKABLE void inscrireBenevole(QString nomBenevole, QString prenomBenevole, QString adresseBenevole,
+                                      QString codePostalBenevole, QString communeBenevole, QString courrielBenevole,
+                                      QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
+                                      QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
+                                      QString commentaireBenevole);
+    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees);
 
 
     Q_INVOKABLE float getRatioX();
@@ -83,9 +101,12 @@ public:
     void faireUnRetourALaLigne(QProcess* unPandoc);
     void afficherEntete(QProcess* unPandoc, QSqlQuery uneQuery);
     bool terminerGenerationEtat(QProcess* unPandoc, QTemporaryFile *unFichier);
- //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
+    //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
 
 signals:
+    void warning(const QString &msg);
+    void critical(const QString &msg);
+    void fatal(const QString &msg);
     void heureChanged();
     void heureMinChanged();
     void heureMaxChanged();
@@ -101,9 +122,19 @@ signals:
     void fiche_posteTourChanged();
     void affectationsChanged();
     void posteEtTourChanged();
+    void horaireChanged();
+    void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours es t
+    void erreurBD(QString erreur);
+    void idEvenementChanged();
+    void planMisAJour();
+    void heureCouranteChanged();
+    void etatTourHeureChanged();
+
+
 
 public slots:
     void mettreAJourModelPlan();
+    void setHeureEtatTour();
 
 private:
     QSqlDatabase db;
@@ -121,13 +152,15 @@ private:
     int m_id_poste;
     int m_id_tour;
     int m_id_affectation;
-    QDateTime m_heureMin, m_heureMax, m_heure;
+    QDateTime m_heureMin, m_heureMax, m_heure, m_heure_courante;
     Settings *m_settings;
-    std::map<int,Poste> listeDePoste;
     QSortFilterProxyModel *m_plan;
     SqlQueryModel *m_planComplet;
     SqlQueryModel *m_poste_et_tour_sql;
+    SqlQueryModel *m_horaires;
     QSortFilterProxyModel *m_poste_et_tour;
+    QSortFilterProxyModel *m_etat_tour_heure;
+    SqlQueryModel *m_etat_tour_heure_sql;
 
     // Variables Temporaires necessaires pour transmettre des informations d'une fenetre QML à une autre
     float ratioX = -1; // Stocke temporairement la position x cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )
@@ -136,7 +169,7 @@ private:
     int nombreDeTours; // Le nombre de tours associés au poste
     int nombreDAffectations;
 
-
+    static void gestionDesMessages(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 };
 
 #endif // GESTIONNAIREDAFFECTATIONS_H

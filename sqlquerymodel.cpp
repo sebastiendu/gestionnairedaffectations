@@ -1,5 +1,8 @@
 #include "sqlquerymodel.h"
 #include <QSqlRecord>
+#include <QtDebug>
+#include <QSqlError>
+
 
 SqlQueryModel::SqlQueryModel(QObject *parent) :
     QSqlQueryModel(parent)
@@ -41,4 +44,9 @@ int SqlQueryModel::getIndexFromId(int id) {
         }
     }
     return -1;
+}
+
+QVariant SqlQueryModel::getDataFromModel(int ligne, QString colonne)
+{
+    return record(ligne).value(colonne).toString();
 }

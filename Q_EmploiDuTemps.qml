@@ -12,151 +12,163 @@
  * kind of assumed to be a Timekeeper object.
  */
 import QtQuick 2.0
+import QtQuick 2.3
+import QtQuick.Window 2.2
+import QtQuick.Controls 1.2
+import fr.ldd.qml 1.0
+import QtWebKit 3.0
+import QtQuick.Controls.Styles 1.2
+import QtGraphicalEffects 1.0
+
+import "variables.js" as Variables
+import "fonctions.js" as Fonctions
 
 Item {
     id:root
 
-    property variant model
-    signal timeSlotClicked (int day, int timeslot)
+    Rectangle {
+
+        id: blockParent
 
 
-    /* Week - row containing 7 days: */
-    Row {
         anchors.fill: parent
-        spacing: 1
-
-        Repeater {
-            model: root.model
-            id: dayrepeater
-
-            /* Day - Column containing 7 timeslots: */
-            Rectangle {
-                id: dayColumn
-                width: root.width / 7
-                height: root.height
-                opacity: 0
-
-                //label:
-                Rectangle {
-                    id: daylabelContainer
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: daylabel.paintedHeight
-                    color: "#888"
-
-                    Text {
-                        id: daylabel
-                        anchors.top: parent.top
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: day.toUpperCase()
-                        color: "white"
-
-                    }
-                }
-
-                //--------------------------
-                //-------Animation effects:
+        anchors.top: parent.top
+        anchors.left:parent.left
 
 
-                /** Fancy opacity animation that triggers the
-                    next column too at about the halfway point. */
-                SequentialAnimation {
-                    id: animate
-                    PropertyAnimation {
-                        target: dayColumn;
-                        from:0; to: 0.6; property: "opacity"
-                        duration: 50
-                    }
-                    ScriptAction { script: showNext() }
-                    PropertyAnimation {
-                        target: dayColumn;
-                        to: 1; property: "opacity"
-                        duration: 100
-                    }
-                }
 
-                /** shows this column */
-                function show() {
-                    animate.start()
-                }
-
-                /** shows the next column in the repeater */
-                function showNext() {
-                    if(index < 6) {
-                        dayrepeater.itemAt(index+1).show();
-                    }
-                }
-
-                /** hides this column */
-                function hide() {
-                    opacity = 0
-                }
+        // Le rectangle contenant la liste des horaires
+        Rectangle {
 
 
-                //-------------------
-                //---Time slots:
+            id: blockEmploiTemps
+            anchors.fill: parent
+            clip: true
+            ListView {
+                id: listeDesHeures
+                anchors.fill: parent
+                anchors.top: parent.top
+                anchors.topMargin: 50
+                model: listeHeures
+                clip: true
 
-                Column {
-                    anchors.top: daylabelContainer.bottom
-                    anchors.bottom: parent.bottom
-                    anchors.topMargin: 1
-                    width: parent.width
-                    spacing: 1
+                delegate: Rectangle {
+                    //text: Fonctions.dateEmploiDuTemps(heure)
+                    // text: Fonctions.dateEmploiDuTemps(heure)+" \t \t "+Fonctions.dateFR(heure)+"\t \t"+heure.getHours();
+                    // Si heure = 00 ou debut nom du jour sinon heure seule
 
-                    Repeater {
-                        model: dayModel
+                    Text {text: (heure == Date(app.heureMin.getTime())) ? Fonctions.nomJourEtDate(heure)+"\t" + Fonctions.heureMinutes(heure) : (heure.getHours() == 0 )? Fonctions.nomJourEtDate(heure)+"\t" + Fonctions.heureMinutes(heure) : "\t \t" + Fonctions.heureMinutes(heure) }
+                    height: 30
 
-                        /* Two-hour time slot that can be clicked */
-                        Rectangle {
-                            id: timeslot
-                            width: parent.width
-                            height: parent.height / 7
-                            color: timeslotArea.containsMouse ? "#EEE" : "#BBB"
-                            clip: true
-
+                    GridView {
+                        id: thisGrid
+                        // model: app.planComplet
+                        delegate: Rectangle { width: 50; height: 30; border.color: "black"; color: debut == "" ? "white" : "lightblue";
                             MouseArea {
-                                id: timeslotArea
                                 anchors.fill: parent
-                                hoverEnabled: true
-                                enabled: parent.visible
-
-                                //when clicked, indicate day and slot by their Repeater indices:
-                                onClicked: timeSlotClicked(day, index)
+                                onClicked: { console.log(debut); }
                             }
 
-                            //hour label
                             Text {
-                                text: hour
-                                color: "#666"
-                            }
-
-                            //event description
-                            Text {
-                                text: dayEvent
-                                anchors.centerIn: parent
-                                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                                width: parent.width
+                                text: nom;
                             }
                         }
+                        width: blockParent.width
+                        Component.onCompleted: { app.heureCourante = heure ; thisGrid.model = app.etat_tour_heure;}
+                        //Component.onCompleted: { app.heure = heure; thisGrid.model = app.planCourant;}
                     }
 
+                }
+
+
+            }
+        }
+
+
+
+        // SELECT distinct * FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE t.debut < '2014-11-15 12:30:00+01' AND t.fin > '2014-11-15 12:30:00+01' or t.debut is null;
+        // Pour récuperer les postes sans rien
+
+        //SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < '2014-11-15 12:30:00+01' ANASC;fin > '2014-11-15 12:30:00+01') or t.debut is null ORDER BY nom A
+
+
+
+        // Le model contenant les horaires
+        ListModel {
+            id: listeHeures
+        }
+
+
+        // L'item permettant de charger le début, puis de peupler la liste
+        Item {
+            id: chargeurDeDebut
+
+            Component.onCompleted: {
+                console.log("Debut chargé") ;
+                Variables.setDebut("ok");
+
+                if(Variables.getFin()!="" && Variables.getDebut()!="")
+                {
+                    ajouterHoraires();
+                }
+
+                function ajouterHoraires()
+                {
+
+                    var heureCourante = new Date(app.heureMin.getTime());
+                    var heureDeFin = new Date(app.heureMax.getTime());
+
+                    listeHeures.append({"heure": heureCourante}); // On met la 1ere heure en tete de liste
+
+                    while(heureCourante < heureDeFin)// while(heureCourante<fin)
+                    {
+                        heureCourante.setHours (heureCourante.getHours() + 1 );
+                        listeHeures.append({"heure": heureCourante});
+                    }
+
+                    listeHeures.append({"heure": heureDeFin});
                 }
             }
         }
-    }
 
-    // functions for fancy animations:
 
-    function show() {
-        dayrepeater.itemAt(0).show();
-        visible = true
-    }
+        // L'item permettant de charger la fin, puis de peupler la liste
+        Item {
+            id: chargeurDeFin
+            Component.onCompleted: {
+                console.log("Fin chargé") ;
+                Variables.setFin("ok");
 
-    function hide() {
-        for (var i=0; i<7; i++) {
-            dayrepeater.itemAt(i).hide();
+                if(Variables.getFin()!="" && Variables.getDebut()!="")
+                {
+                    ajouterHoraires();
+                }
+
+                function ajouterHoraires()
+                {
+
+                    var heureCourante = new Date(app.heureMin.getTime());
+                    var heureDeFin = new Date(app.heureMax.getTime());
+
+                    listeHeures.append({"heure": heureCourante}); // On met la 1ere heure en tete de liste
+
+                    while(heureCourante < heureDeFin)// while(heureCourante<fin)
+                    {
+                        heureCourante.setHours (heureCourante.getHours() + 1 );
+                        listeHeures.append({"heure": heureCourante});
+                    }
+
+                    listeHeures.append({"heure": heureDeFin});
+                }
+            }
         }
-        visible = false
+
+
+
+
+
+
+
     }
+
 }

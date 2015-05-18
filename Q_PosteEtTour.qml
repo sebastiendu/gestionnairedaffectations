@@ -30,8 +30,14 @@ Item {
             anchors.bottomMargin: 85
             anchors.left: parent.left
             anchors.leftMargin:10
-            source: "../plan.svg"
+            source: "image://plan/" + app.idEvenement
             onStatusChanged: console.log(planPosteEtTours.anchors.right)
+            Connections {
+                target: app
+                onPlanMisAJour: {
+                    console.log("TODO : recharger l'image");
+                }
+            }
 
             Rectangle {
 
@@ -43,6 +49,7 @@ Item {
                     target: app
                     onPlanCompletChanged: {
                         repeaterPostesEtTours.model = app.planComplet;
+                        console.log("PlanCompletChanged");
                     }
                 }
 
@@ -61,7 +68,7 @@ Item {
 
                         Fonctions.afficherFenetreNouveauPoste();
 
-                        // Fonctions.createSpriteObjects(rectangleBordurePlan, mouse.x, mouse.y)
+
                     }
 
                     cursorShape: Qt.CrossCursor
@@ -228,6 +235,7 @@ Item {
                 anchors.rightMargin: 10
                 anchors.topMargin:5
                 anchors.left: _descriptionPoste.left
+                onEditingFinished: app.modifierNomPoste(_nomPoste.text)
 
             }
 
@@ -249,28 +257,56 @@ Item {
                 anchors.leftMargin: 10
                 height:parent.height/3
 
+
+
+
+            }
+
+            Button {
+                id: _btnSauvegarderChangements
+                anchors.top: _descriptionPoste.bottom
+                anchors.topMargin: 5
+                anchors.right: parent.right
+                anchors.rightMargin: 15
+                //anchors.horizontalCenter: parent.horizontalCenter
+                text: "Enregistrer"
+                onClicked: {
+                     app.modifierNomPoste(_nomPoste.text)
+                     app.modifierDescriptionPoste(_descriptionPoste.text)
+                     app.rechargerPlan();
+                }
+
+
             }
 
             TableView {
+
+                Connections {
+                    target: app
+
+                    onTableauTourChanged: {
+                        tableauTours.model = app.fiche_poste_tour;
+                    }
+
+                }
+
                 id: tableauTours
                 width:parent.width *0.95
+                height: parent.height * 0.40
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top:_descriptionPoste.bottom
-                anchors.topMargin: 10
+                anchors.top:_btnSauvegarderChangements.bottom
+                anchors.topMargin: 25
                 selectionMode: SelectionMode.SingleSelection
-                itemDelegate :editableDelegate
-                TableViewColumn{ role: "id_tour"  ; title: "id" ; width:(3*(tableauTours.width/10)); visible: true;delegate: id_tour}
-                TableViewColumn{ role: "debut"  ; title: "Debut du tour" ; width:(3*(tableauTours.width/10));delegate: debut}
-                TableViewColumn{ role: "fin" ; title: "Fin du tour" ;width:(3*(tableauTours.width/10)); delegate: fin}
-                TableViewColumn{ role: "min"  ; title: "Nb. min" ;width:(tableauTours.width/5); delegate: nombre}
-                TableViewColumn{ role: "max" ; title: "Nb. max" ;width:(tableauTours.width/5); delegate: nombre}
+                TableViewColumn{ role: "id_tour"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:(3*(tableauTours.width/10))-1; visible: false;delegate: id_tour}
+                TableViewColumn{ role: "debut"  ; title: "Debut du tour" ;  horizontalAlignment: Text.AlignHCenter; width:(4*(tableauTours.width/10))-1;delegate: debut}
+                TableViewColumn{ role: "fin" ; title: "Fin du tour" ; horizontalAlignment: Text.AlignHCenter;width:(4*(tableauTours.width/10))-1; delegate: fin}
+                TableViewColumn{ role: "min"  ; title: "Min" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/10)-1; delegate: nombre}
+                TableViewColumn{ role: "max" ; title: "Max" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/10)-1; delegate: nombre}
 
 
 
                 // TODO : - ERREUR :  Property 'getMonth' of object  is not a function
-                // TODO : - ENREGISTRER DANS LA BASE LES INFORMATION
-                // TODO : - RECHARGER LE MODEL AVEC ORDER BY
-                // TODO : - RECUPERER LE ID CORRECTEMENT
+
 
 
                 Component {
@@ -278,28 +314,26 @@ Item {
 
                     Item {
 
-                        TextInput {
+                        Text {
                             id: inputDate
-                            anchors.fill: parent
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
                             text: Fonctions.dateFR(styleData.value)
-                            onAccepted: console.log("debut: "+styleData.value +  styleData.row.id_tour  + styleData.id_tour+ " " + id_tour.value + " " + id.value)
-
-
                         }
 
-                         MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                console.log("clic");
-                                tableauTours.selection.clear();
-                                tableauTours.selection.select(styleData.row );
-                                inputDate.positionAt(mouseX,mouseY);
-                                inputDate.forceActiveFocus();
-                                //  inputDate.color = "white"
-
-                            }
+                        Button {
+                            id: boutonCalendrier
+                            anchors.top: parent.top
+                            anchors.topMargin: 1
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 1
+                            anchors.left: inputDate.right
+                            anchors.leftMargin: parent.width*0.05
+                            width: parent.width*0.15
+                            text: "v"
+                            onClicked : { Fonctions.afficherFenetreAjouterTour("debut",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id_tour"),styleData.value.getHours(),styleData.value.getMinutes())}
                         }
-
 
 
 
@@ -314,26 +348,25 @@ Item {
                     Item {
 
 
-                        TextInput {
+                        Text {
                             id: inputDate
-                            anchors.fill: parent
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
                             text: Fonctions.dateFR(styleData.value)
-                            onAccepted: console.log("fin: " + styleData.value + " " + inputDate.text + " " + styleData.role + " " + styleData.row + " " + styleData.column)
-
-
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                console.log("clic");
-                                tableauTours.selection.clear();
-                                tableauTours.selection.select(styleData.row );
-                                inputDate.positionAt(mouseX,mouseY);
-                                inputDate.forceActiveFocus();
-                                //  inputDate.color = "white"
-
-                            }
+                        Button {
+                            id: boutonCalendrier
+                            anchors.top: parent.top
+                            anchors.topMargin: 1
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 1
+                            anchors.left: inputDate.right
+                            anchors.leftMargin: parent.width*0.05
+                            width: parent.width*0.15
+                            text: "v"
+                            onClicked : { Fonctions.afficherFenetreAjouterTour("fin",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id_tour"),styleData.value.getHours(),styleData.value.getMinutes())}
                         }
 
 
@@ -349,9 +382,6 @@ Item {
                     id: nombre
 
                     Item {
-
-
-
                         TextInput
                         {
                             id: nouveauNombre
@@ -359,7 +389,17 @@ Item {
                             text: styleData.value
                             // activeFocusOnPress: false
                             //   selectByMouse: true
-                            onAccepted: console.log(styleData.value + " " +nouveauNombre.text)
+                            horizontalAlignment: TextInput.AlignHCenter
+
+                            onEditingFinished:  {
+                                if(styleData.value != nouveauNombre.text)
+                                {
+                                    app.modifierTourMinMax(styleData.role, nouveauNombre.text, tableauTours.model.getDataFromModel(styleData.row,"id_tour"))
+                                    console.log("On enregistre");
+                                }
+                                else
+                                    console.log("On enregistre pas")
+                            }
 
                         }
 
@@ -370,8 +410,9 @@ Item {
                                 console.log("clic");
                                 tableauTours.selection.clear();
                                 tableauTours.selection.select(styleData.row );
-
+                                console.log(styleData.role);
                                 nouveauNombre.forceActiveFocus();
+                                console.log(tableauTours.model.getDataFromModel(styleData.row,"id_tour"))
 
                             }
                         }
@@ -388,7 +429,7 @@ Item {
 
                         TextInput
                         {
-                            property int idDuTour: 0
+                            //property int idDuTour: 0
                             id: nouveauNombre
                             anchors.fill: parent
                             text: styleData.value
@@ -422,7 +463,10 @@ Item {
                 anchors.top: tableauTours.bottom
                 anchors.right: _btnSupprimerTour.left
                 anchors.topMargin: 5
-                onClicked: { Fonctions.afficherFenetreAjouterTour() }
+                onClicked: {
+                    app.insererTour(tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"fin"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"min"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"max"))
+                    tableauTours.selection.select(tableauTours.rowCount-1);
+            }
             }
 
             Button {
@@ -432,6 +476,9 @@ Item {
                 anchors.right: parent.right
                 anchors.topMargin: 5
                 anchors.rightMargin: 15
+                onClicked: {
+                    app.supprimerTour(tableauTours.model.getDataFromModel(tableauTours.currentRow,"id_tour"));
+                }
             }
 
 
