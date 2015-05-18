@@ -8,7 +8,6 @@
 #include "gestionnairedaffectations.h"
 
 
-
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     QGuiApplication(argc,argv)
 {
@@ -20,6 +19,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
     qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
 
+    qInstallMessageHandler(gestionDesMessages);
 
     m_settings = new Settings;
 
@@ -75,6 +75,25 @@ GestionnaireDAffectations::~GestionnaireDAffectations()
     QSqlDatabase().close();
 }
 
+void GestionnaireDAffectations::gestionDesMessages(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
+    GestionnaireDAffectations *inst = (GestionnaireDAffectations*) instance();
+    switch (type) {
+    case QtDebugMsg:
+        qInstallMessageHandler(0);
+        qDebug(msg.toLocal8Bit());
+        qInstallMessageHandler(gestionDesMessages);
+        break;
+    case QtWarningMsg:
+        emit inst->warning(msg);
+        break;
+    case QtCriticalMsg:
+        emit inst->critical(msg);
+        break;
+    case QtFatalMsg:
+        emit inst->fatal(msg);
+        break;
+    }
+}
 
 QString GestionnaireDAffectations::messageDErreurDeLaBase() {
     return db.lastError().text();
