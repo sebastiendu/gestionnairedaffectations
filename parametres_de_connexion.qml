@@ -21,7 +21,7 @@ Window {
                 }
                 TextField {
                     id: hostname
-                    text: app.settings.value("database/hostName")
+                    text: app.settings.value("database/hostName", "")
                     onEditingFinished: app.settings.setValue("database/hostName", text)
                 }
             }
@@ -31,7 +31,7 @@ Window {
                 }
                 TextField {
                     id: port
-                    text: app.settings.value("database/port")
+                    text: app.settings.value("database/port", "")
                     onEditingFinished: app.settings.setValue("database/port", text)
                 }
             }
@@ -41,7 +41,7 @@ Window {
                 }
                 TextField {
                     id: databaseName
-                    text: app.settings.value("database/databaseName")
+                    text: app.settings.value("database/databaseName", "")
                     onEditingFinished: app.settings.setValue("database/databaseName", text)
                 }
             }
@@ -54,7 +54,7 @@ Window {
                 }
                 TextField {
                     id: userName
-                    text: app.settings.value("database/userName")
+                    text: app.settings.value("database/userName", "")
                     onEditingFinished: app.settings.setValue("database/userName", text)
                 }
             }
@@ -65,7 +65,7 @@ Window {
                 TextField {
                     echoMode: TextInput.PasswordEchoOnEdit
                     id: password
-                    text: app.settings.value("database/password")
+                    text: app.settings.value("database/password", "")
                     focus: true
                     onEditingFinished: app.settings.setValue("database/password",
                                                              rememberPassword.checked ? text : "")
@@ -73,7 +73,7 @@ Window {
                 CheckBox {
                     id: rememberPassword
                     text: "enregistrer"
-                    checked: app.settings.value("database/rememberPassword")
+                    checked: app.settings.value("database/rememberPassword", false)
                     onCheckedStateChanged: {
                         app.settings.setValue("database/rememberPassword", checked)
                         app.settings.setValue("database/password", (checked ? password.text : ""))
