@@ -71,7 +71,6 @@ ApplicationWindow { // Fenetre principale
         modality: Qt.ApplicationModal
         standardButtons: StandardButton.Ok | StandardButton.Cancel
         title: "Paramètres de courriel"
-        visible : false
         onAccepted: {
             app.settings.setValue("email/prefixe", prefixe.text)
             app.settings.setValue("email/domaine", domaine.text)
@@ -80,7 +79,7 @@ ApplicationWindow { // Fenetre principale
             TextField {
                 id: prefixe
                 placeholderText: "prefixe"
-                text: app.settings.value("email/prefixe")
+                text: app.settings.value("email/prefixe", "")
             }
 
             Text {
@@ -89,7 +88,7 @@ ApplicationWindow { // Fenetre principale
             TextField {
                 id: domaine
                 placeholderText: qsTr("domaine")
-                text: app.settings.value("email/domaine")
+                text: app.settings.value("email/domaine", "")
             }
         }
     }
