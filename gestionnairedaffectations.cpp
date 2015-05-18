@@ -4,6 +4,8 @@
 #include <QtQml>
 #include <QtDebug>
 #include <QQuickView>
+#include <QXmlSimpleReader>
+#include <QCryptographicHash>
 #include "gestionnairedaffectations.h"
 
 
@@ -189,6 +191,7 @@ int GestionnaireDAffectations::idEvenement() { // Retourne la valeur de la cle "
 void GestionnaireDAffectations::setIdEvenement(int id) {
     QSettings settings;
     settings.setValue("id_evenement", id);
+    emit idEvenementChanged();
 }
 
 void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
@@ -312,6 +315,31 @@ void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTim
     if (query.exec()) {
         setIdEvenement(query.lastInsertId().toInt());
     }
+}
+
+void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
+{
+    QFile file(url.toLocalFile());
+    QXmlSimpleReader xmlReader;
+    QXmlInputSource source(&file);
+    if(xmlReader.parse(&source)) {
+        QSqlQuery query;
+        if (query.prepare("update evenement set plan=:plan where id=:id")) {
+            file.seek(0);
+            query.bindValue(":plan", QString(file.readAll()));
+            query.bindValue(":id", idEvenement());
+            if (query.exec()) {
+                emit planMisAJour();
+            } else {
+                qDebug() << "Erreur exec :" << query.lastError();
+            }
+        } else {
+            qDebug() << "Erreur prepare : " << query.lastError();
+        }
+    } else {
+        qDebug() << "TODO emit erreur parse";
+    }
+    file.close();
 }
 
 void GestionnaireDAffectations::setHeureEtatTour(QDateTime heure) {
@@ -701,6 +729,60 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     // Erreur de syntaxe pres de « ( »
 }
 
+QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool proposees, bool relancees)
+{
+    QString adresseEmail;
+    QVariant prefixe = m_settings->value("email/prefixe");
+    QVariant domaine = m_settings->value("email/domaine");
+    if (prefixe.isValid() && domaine.isValid()) {
+        if (possibles or proposees or relancees) {
+            QCryptographicHash hash(QCryptographicHash::Md4);
+            hash.addData(QDateTime::currentDateTime().toString().toUtf8());
+            hash.addData(QString::number(applicationPid()).toUtf8());
+            QByteArray cle = hash.result().toHex();
+            QSqlQuery query;
+            if (QSqlDatabase::database().transaction()) {
+                if (query.prepare("insert into lot(cle) values(?)")) {
+                    query.addBindValue(cle);
+                    if (query.exec()) {
+                        QVariant id = query.lastInsertId();
+                        adresseEmail = prefixe.toString() + '+' + id.toString() + '_' + cle + '@' + domaine.toString();
+                        QStringList conditions;
+                        if (possibles) conditions << "statut='possible'";
+                        if (proposees) conditions << "statut='proposees' and id not in (select id from lot_affectation where traite and reussi)";
+                        if (relancees) conditions << "statut='proposees' and id in (select id from lot_affectation where traite and reussi)";
+                        if (query.prepare(
+                                    "insert into lot_affectation(id_lot, id_affectation)"
+                                    " select ?, id"
+                                    " from affectation"
+                                    " where " + conditions.join(" or ")
+                                    )) {
+                            query.addBindValue(id.toInt());
+                            if (query.exec()) {
+                                QSqlDatabase::database().commit();
+                            } else {
+                                qCritical() << "Impossible d'executer la requête de population du lot d'affectations : " << query.lastError();
+                            }
+                        } else {
+                            qCritical() << "Impossible de préparer la requête de population du lot d'affectations : " << query.lastError();
+                        }
+                    } else {
+                        qCritical() << "Impossible d'executer la requête de création du lot d'affectations : " << query.lastError();
+                    }
+                } else {
+                    qCritical() << "Impossible de préparer la requête de création du lot d'affectations : " << query.lastError();
+                }
+            } else {
+                qCritical() << "Impossible de démarrer la transaction de création du lot d'affectations : " << query.lastError();
+            }
+        } else {
+            qWarning() << "Vous devez selectionner au moins un ensemble d'affectations";
+        }
+    } else {
+        qWarning() << "Les paramètres de courriel (préfixe et domaine) ne sont pas renseignés";
+    }
+    return adresseEmail;
+}
 
 float GestionnaireDAffectations::getRatioX() { return this->ratioX ; }
 float GestionnaireDAffectations::getRatioY() { return this->ratioY ;}

@@ -47,7 +47,7 @@ Item {
             anchors.topMargin: 10
             anchors.left: _soumettreAffectations.left
             anchors.leftMargin: 50
-            text: "Les affectations qui ont fait l'objet d'une relance mais n'ont pas obtenue de réaction"
+            text: "Les affectations qui ont fait l'objet d'une relance mais n'ont pas obtenu de réaction"
         }
 
         Label {
@@ -66,11 +66,21 @@ Item {
             anchors.left: _envoyerMessage.right
             anchors.leftMargin: 10
             text: "Generer l'adresse mail"
-            onClicked: {
-                console.log("TODO: Generer la chaine de caractère et la placer à la place du bouton.")
-                console.log("Si ce n'est pas possible, ouvrir une boite de dialogue ?")
-                // _boutonGenerer.destroy()
-            }
+            onClicked: _adresseEmail.text = app.creerLotDAffectations(
+               _checkboxAffecationsJamaisSoumises.checked,
+               _checkboxAffecationsNonTraitees.checked,
+               _checkboxAffecationsRelance.checked
+            )
+        }
+
+        Label {
+            id: _adresseEmail
+            anchors.top: _boutonGenerer.bottom
+            anchors.topMargin: 100
+            anchors.left: _soumettreAffectations.left
+            anchors.leftMargin: 50
+            text: ""
+            textFormat: Text.PlainText
         }
     }
 }

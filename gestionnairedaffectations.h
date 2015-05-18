@@ -8,14 +8,14 @@
 #include "settings.h"
 //#include "poste.h"
 #include <map>
-#include <plan.h>
 #include <QProcess>
 #include <QTemporaryFile>
+#include <QUrl>
 
 class GestionnaireDAffectations : public QGuiApplication
 {
     Q_OBJECT
-    Q_PROPERTY(int idEvenement READ idEvenement WRITE setIdEvenement)
+    Q_PROPERTY(int idEvenement READ idEvenement WRITE setIdEvenement NOTIFY idEvenementChanged)
     Q_PROPERTY(QDateTime heure MEMBER m_heure NOTIFY heureChanged)
     Q_PROPERTY(QDateTime heureMin MEMBER m_heureMin NOTIFY heureMinChanged)
     Q_PROPERTY(QDateTime heureMax MEMBER m_heureMax NOTIFY heureMaxChanged)
@@ -52,6 +52,7 @@ public:
     Q_INVOKABLE void setIdDisponibilite(int);
     Q_INVOKABLE void setIdAffectation(int);
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
+    Q_INVOKABLE void enregistrerPlanEvenement(QUrl url);
 
 
     Q_INVOKABLE void insererPoste(QString,QString,float,float);
@@ -76,6 +77,7 @@ public:
                                       QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
                                       QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
                                       QString commentaireBenevole);
+    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees);
 
 
     Q_INVOKABLE float getRatioX();
@@ -120,6 +122,8 @@ signals:
     void horaireChanged();
     void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours es t
     void erreurBD(QString erreur);
+    void idEvenementChanged();
+    void planMisAJour();
 
 
 public slots:

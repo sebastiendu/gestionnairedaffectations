@@ -1,11 +1,12 @@
 TEMPLATE = app
 
-QT += qml quick sql
+QT += qml quick sql svg xml
 
 SOURCES += main.cpp \
     sqlquerymodel.cpp \
     gestionnairedaffectations.cpp \
-    settings.cpp
+    settings.cpp \
+    plansvgimageprovider.cpp
 
 RESOURCES += qml.qrc
 
@@ -16,7 +17,6 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 OTHER_FILES += \
-    plan.svg \
     nouvelevenement.qml \
     corbeille.png \
     marqueur.qml \
@@ -26,4 +26,5 @@ OTHER_FILES += \
 HEADERS += \
     sqlquerymodel.h \
     gestionnairedaffectations.h \
-    settings.h
+    settings.h \
+    plansvgimageprovider.h
