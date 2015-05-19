@@ -21,8 +21,9 @@ signals:
 public slots:
 
 private:
-    class Tranche {
+    class Tour {
     public:
+        int id;
         int debut;
         int fin;
     };
@@ -31,10 +32,12 @@ private:
     public:
         int id;
         QString nom;
-        QList<Tranche> tranches;
+        QList<Tour> tours;
     };
 
     QList<Poste> postes;
+    int debutEvenement;
+    int finEvenement;
 };
 
 #endif // TOURSPARPOSTEMODEL_H
