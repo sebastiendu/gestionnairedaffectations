@@ -3,7 +3,7 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
 
 
-import "fonctions.js" as Fonctions
+// import "fonctions.js" as Fonctions
 Item {
     anchors.fill: parent
     Rectangle {
@@ -49,7 +49,6 @@ Item {
                         id: cadreCandidat
                         width: parent.width
                         height: 50
-
                         anchors.margins: 3
 
                         Row {
@@ -254,7 +253,7 @@ Item {
                             listeDoublons.currentIndex = index
                             app.setIdPersonne(id)
                             ficheDoublon.model = app.fiche_personne
-                            //Fonctions.focusCandidat(index); TODO
+
                         }
                     }
                 }

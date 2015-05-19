@@ -24,5 +24,6 @@
         <file>Q_EmploiDuTemps.qml</file>
         <file>variables.js</file>
         <file>DatePicker.qml</file>
+        <file>Q_SolliciterAnciensBenevoles.qml</file>
     </qresource>
 </RCC>

@@ -37,7 +37,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QSortFilterProxyModel* etat_tour_heure MEMBER m_etat_tour_heure  NOTIFY etatTourHeureChanged)
     Q_PROPERTY(QDateTime heureCourante MEMBER m_heure_courante NOTIFY heureCouranteChanged)
 
-    Q_PROPERTY(SqlQueryModel* candidatures_en_attente MEMBER m_candidatures_en_attente)
+    Q_PROPERTY(SqlQueryModel* candidatures_en_attente MEMBER m_candidatures_en_attente NOTIFY candidatureEnAttenteChanged)
     Q_PROPERTY(SqlQueryModel* personnes_doublons MEMBER m_personnes_doublons)
 
     Q_PROPERTY(ToursParPosteModel *toursParPosteModel MEMBER m_toursParPosteModel NOTIFY toursParPosteModelChanged)
@@ -141,6 +141,7 @@ signals:
     void heureCouranteChanged();
     void etatTourHeureChanged();
     void toursParPosteModelChanged();
+    void candidatureEnAttenteChanged();
 
 
 

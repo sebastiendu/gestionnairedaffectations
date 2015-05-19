@@ -228,6 +228,31 @@ ApplicationWindow { // Fenetre principale
 
             Rectangle {
                 color: "yellow"
+                width: 500
+                height: 500
+
+
+                TableView {
+                    id: tableauTest
+                    model: app.planComplet
+                    width: parent.width
+
+                    TableViewColumn{
+                        role: "id";
+                        title: "Id du poste" ;
+                    }
+
+                    TableViewColumn{
+                        role: "posx";
+                        title: "Position en X" ;
+                    }
+
+                    TableViewColumn{
+                        role: "posy";
+                        title: "Position en Y" ;
+                    }
+
+                }
 
             }
         }

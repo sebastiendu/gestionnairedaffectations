@@ -90,7 +90,7 @@ void GestionnaireDAffectations::gestionDesMessages(QtMsgType type, const QMessag
         fflush(stderr);
         break;
     case QtWarningMsg:
-        emit inst->warning(msg);
+        emit inst->warning(msg + context.function + " \n Ligne: " + context.line);
         break;
     case QtCriticalMsg:
         emit inst->critical(msg);
@@ -206,6 +206,8 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         /*   m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
         m_etat_tour_heure->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_etat_tour_heure->setFilterKeyColumn(-1); */
+
+
 
         m_toursParPosteModel = new ToursParPosteModel(this);
         m_toursParPosteModel->setIdEvenement(idEvenement());
