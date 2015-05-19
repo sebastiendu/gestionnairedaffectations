@@ -83,9 +83,8 @@ void GestionnaireDAffectations::gestionDesMessages(QtMsgType type, const QMessag
     GestionnaireDAffectations *inst = (GestionnaireDAffectations*) instance();
     switch (type) {
     case QtDebugMsg:
-        qInstallMessageHandler(0);
-        qDebug(msg.toLocal8Bit());
-        qInstallMessageHandler(gestionDesMessages);
+        fprintf(stderr, "%s\n\t%s\t%s:%d\n\n", qPrintable(msg), context.function, qPrintable(QString(context.file).split('/').last()), context.line);
+        fflush(stderr);
         break;
     case QtWarningMsg:
         emit inst->warning(msg);
