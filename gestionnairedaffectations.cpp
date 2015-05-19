@@ -173,7 +173,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_tour_benevole->setQuery(query);
 
-        query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement; ");
+        query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement AND (statut_affectation = 'acceptee' OR statut_affectation = 'validee' OR statut_affectation = 'proposee') ORDER BY  statut_affectation = 'proposee' , statut_affectation = 'validee', statut_affectation = 'acceptee' DESC; ");
         query.bindValue(":tour",m_id_tour);
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
@@ -184,9 +184,11 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_planComplet->setQuery(query);
 
-        query.prepare("select * from candidatures_en_attente;");
+        query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
+        query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_candidatures_en_attente->setQuery(query);
+
 
         query.prepare("select * from poste_et_tour where id_evenement= :evt ORDER BY nom, debut ASC;");
         query.bindValue(":id_evenement",idEvenement());
@@ -284,6 +286,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_horaires->setQuery(query);
 
+    query = m_candidatures_en_attente->query();
+    query.bindValue(0,idEvenement());
+    query.exec();
+    m_candidatures_en_attente->setQuery(query);
 
     query = m_candidatures_en_attente->query();
     query.exec();

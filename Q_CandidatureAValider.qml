@@ -307,11 +307,14 @@ Item {
                     anchors.leftMargin: 20
                     anchors.right: parent.right
                     anchors.left: parent.left
+
                     clip:true
 
                     delegate: Column {
 
                         anchors.verticalCenter: parent.verticalCenter
+                        anchors.right: parent.right
+                        anchors.left: parent.left
 
                         Text {
                             font.family: "Helvetica [Cronyx]";
@@ -322,14 +325,14 @@ Item {
                         Text {
                             font.family: "Helvetica [Cronyx]";
                             text: (commentaire_personne== "") ? "" : "<i>\" "+commentaire_personne+ " </i> \" <br><br>"
-                            wrapMode: Text.WordWrap
+                            wrapMode: Text.Wrap
                         }
 
                         Text {
                             font.family: "Helvetica [Cronyx]";
                             text: (commentaire_disponibilite== "") ? "" : "<i>\" "+commentaire_disponibilite+ " </i> \" <br><br>"
 
-                            wrapMode: Text.WordWrap
+                            wrapMode: Text.Wrap
                         }
 
                         TextEdit { text: 'Inscription :\t' + date_inscription.toLocaleDateString(); readOnly: true}

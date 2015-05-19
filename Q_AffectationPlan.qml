@@ -217,8 +217,8 @@ Item  {
                         height: (plan.width > plan.height) ? (70/1000) * plan.height : (70/1000) * plan.width
                         width: (plan.width > plan.height) ? (70/1000) * plan.width : (70/1000) * plan.width
                         radius: 100
-                        border.width: 4
-                        border.color: "red"
+                        border.width: 5
+                        border.color: (nombre_affectations_validees_ou_acceptees > max) ? "red" : (nombre_affectations_validees_ou_acceptees < min) ? "grey" : (nombre_affectations_proposees != 0) ? "orange" : "green"
 
                         transform: Translate {
                             x: -width/2
