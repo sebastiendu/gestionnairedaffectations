@@ -7,7 +7,8 @@ SOURCES += main.cpp \
     gestionnairedaffectations.cpp \
     settings.cpp \
     plansvgimageprovider.cpp \
-    abstracttablemodel.cpp
+    abstracttablemodel.cpp \
+    toursparpostemodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -29,4 +30,5 @@ HEADERS += \
     gestionnairedaffectations.h \
     settings.h \
     plansvgimageprovider.h \
-    abstracttablemodel.h
+    abstracttablemodel.h \
+    toursparpostemodel.h

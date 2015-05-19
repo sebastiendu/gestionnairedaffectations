@@ -11,6 +11,7 @@
 #include <QProcess>
 #include <QTemporaryFile>
 #include <QUrl>
+#include "toursparpostemodel.h"
 
 class GestionnaireDAffectations : public QGuiApplication
 {
@@ -35,8 +36,12 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* horaires MEMBER m_horaires NOTIFY horaireChanged)
     Q_PROPERTY(QSortFilterProxyModel* etat_tour_heure MEMBER m_etat_tour_heure  NOTIFY etatTourHeureChanged)
     Q_PROPERTY(QDateTime heureCourante MEMBER m_heure_courante NOTIFY heureCouranteChanged)
+
     Q_PROPERTY(SqlQueryModel* candidatures_en_attente MEMBER m_candidatures_en_attente)
     Q_PROPERTY(SqlQueryModel* personnes_doublons MEMBER m_personnes_doublons)
+
+    Q_PROPERTY(ToursParPosteModel *toursParPosteModel MEMBER m_toursParPosteModel NOTIFY toursParPosteModelChanged)
+
 
 
 public:
@@ -135,6 +140,7 @@ signals:
     void planMisAJour();
     void heureCouranteChanged();
     void etatTourHeureChanged();
+    void toursParPosteModelChanged();
 
 
 
@@ -170,6 +176,9 @@ private:
     SqlQueryModel *m_etat_tour_heure_sql;
     SqlQueryModel *m_candidatures_en_attente;
     SqlQueryModel *m_personnes_doublons;
+
+    ToursParPosteModel *m_toursParPosteModel;
+
 
     // Variables Temporaires necessaires pour transmettre des informations d'une fenetre QML à une autre
     float ratioX; // Stocke temporairement la position x cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )

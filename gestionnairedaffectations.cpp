@@ -18,6 +18,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     qmlRegisterType<Settings>("fr.ldd.qml", 1, 0, "Settings");
     qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
     qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
+    qmlRegisterType<ToursParPosteModel>("fr.ldd.qml", 1, 0, "ToursParPosteModel");
 
     qInstallMessageHandler(gestionDesMessages);
 
@@ -85,9 +86,8 @@ void GestionnaireDAffectations::gestionDesMessages(QtMsgType type, const QMessag
     GestionnaireDAffectations *inst = (GestionnaireDAffectations*) instance();
     switch (type) {
     case QtDebugMsg:
-        qInstallMessageHandler(0);
-        qDebug(msg.toLocal8Bit());
-        qInstallMessageHandler(gestionDesMessages);
+        fprintf(stderr, "%s\n\t%s\t%s:%d\n\n", qPrintable(msg), context.function, qPrintable(QString(context.file).split('/').last()), context.line);
+        fflush(stderr);
         break;
     case QtWarningMsg:
         emit inst->warning(msg);
@@ -207,6 +207,8 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_etat_tour_heure->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_etat_tour_heure->setFilterKeyColumn(-1); */
 
+        m_toursParPosteModel = new ToursParPosteModel(this);
+        m_toursParPosteModel->setIdEvenement(idEvenement());
 
     } else {
         qCritical() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
@@ -985,7 +987,7 @@ void GestionnaireDAffectations::genererFichesDePostes()
         pandoc->write("|");
         pandoc->write(query.record().value("prenom_personne").toString().toUtf8());
         pandoc->write("|");
-        pandoc->write(QString("").append(query.record().value("portable").toString()).toUtf8());
+        pandoc->write(query.record().value("portable").toString().toUtf8());
         pandoc->write("\n");
     }
 
@@ -1353,6 +1355,7 @@ void GestionnaireDAffectations::genererFichesProblemes()
     QString commentairePersonneCourant;
     QDate dateDebutEvenement;
     QDate dateNaissancePersonneCourant;
+    QString dateEtHeureDispo;
 
     afficherEntete(pandoc,query);
 
@@ -1374,6 +1377,7 @@ void GestionnaireDAffectations::genererFichesProblemes()
         amisPersonneCourant = query.record().value("liste_amis").toString();
         typePostePersonneCourant = query.record().value("type_poste").toString();
         commentairePersonneCourant = query.record().value("commentaire_disponibilite").toString();
+        dateEtHeureDispo = query.record().value("jours_et_heures_dispo").toString();
 
         faireUnRetourALaLigne(pandoc);
         pandoc->write("\n###");
@@ -1434,6 +1438,9 @@ void GestionnaireDAffectations::genererFichesProblemes()
 
         if (languesPersonneCourant != "")
             pandoc->write(QString("                    ● Langues: ").append(languesPersonneCourant).append("\n\n").toUtf8());
+
+        if (amisPersonneCourant != "")
+            pandoc->write(QString("                    ● Disponibilités : ").append(dateEtHeureDispo).append("\n\n").toUtf8());
 
         if (amisPersonneCourant != "")
             pandoc->write(QString("                    ● Affinités : ").append(amisPersonneCourant).append("\n\n").toUtf8());
