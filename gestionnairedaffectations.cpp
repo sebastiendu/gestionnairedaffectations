@@ -34,6 +34,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_benevoles_disponibles_sql = new SqlQueryModel;
     m_benevoles_disponibles = new QSortFilterProxyModel(this);
     m_fiche_benevole = new SqlQueryModel;
+    m_fiche_personne = new SqlQueryModel;
     m_affectations = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
     m_fiche_poste_tour = new SqlQueryModel;
@@ -44,6 +45,8 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_horaires = new SqlQueryModel;
     m_etat_tour_heure = new QSortFilterProxyModel(this);
     m_etat_tour_heure_sql = new SqlQueryModel;
+    m_candidatures_en_attente =  new SqlQueryModel;
+    m_personnes_doublons = new SqlQueryModel;
 
     if(!m_settings->contains("database/databaseName")) {
         if(!m_settings->contains("database/hostName")) {
@@ -87,7 +90,7 @@ void GestionnaireDAffectations::gestionDesMessages(QtMsgType type, const QMessag
         fflush(stderr);
         break;
     case QtWarningMsg:
-        emit inst->warning(msg);
+        emit inst->warning(msg + context.function + " \n Ligne: " + context.line);
         break;
     case QtCriticalMsg:
         emit inst->critical(msg);
@@ -145,6 +148,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_fiche_benevole->setQuery(query);
 
+
         query.prepare("select * from poste_et_tour where id_poste= :poste AND debut <= :debut AND fin >= :fin ORDER BY debut ASC"); //AND debut <= :debut AND fin >= :fin"
         query.bindValue(":poste",m_id_poste);
         query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
@@ -169,7 +173,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_tour_benevole->setQuery(query);
 
-        query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement; ");
+        query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement AND (statut_affectation = 'acceptee' OR statut_affectation = 'validee' OR statut_affectation = 'proposee') ORDER BY  statut_affectation = 'proposee' , statut_affectation = 'validee', statut_affectation = 'acceptee' DESC; ");
         query.bindValue(":tour",m_id_tour);
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
@@ -179,6 +183,12 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_planComplet->setQuery(query);
+
+        query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
+        query.bindValue(":id_evenement",idEvenement());
+        query.exec();
+        m_candidatures_en_attente->setQuery(query);
+
 
         query.prepare("select * from poste_et_tour where id_evenement= :evt ORDER BY nom, debut ASC;");
         query.bindValue(":id_evenement",idEvenement());
@@ -195,9 +205,11 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_etat_tour_heure_sql->setQuery(query);
 
-     /*   m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
+        /*   m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
         m_etat_tour_heure->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_etat_tour_heure->setFilterKeyColumn(-1); */
+
+
 
         m_toursParPosteModel = new ToursParPosteModel(this);
         m_toursParPosteModel->setIdEvenement(idEvenement());
@@ -274,6 +286,14 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_horaires->setQuery(query);
 
+    query = m_candidatures_en_attente->query();
+    query.bindValue(0,idEvenement());
+    query.exec();
+    m_candidatures_en_attente->setQuery(query);
+
+    query = m_candidatures_en_attente->query();
+    query.exec();
+    m_candidatures_en_attente->setQuery(query);
 
     query.prepare("select debut, fin from evenement where id=?");
     query.addBindValue(idEvenement());
@@ -335,6 +355,17 @@ void GestionnaireDAffectations::setIdDisponibilite(int id) {
     qDebug() << "setIdDisponibilite: " << id;
 }
 
+void GestionnaireDAffectations::setIdPersonne(int id) {
+    QSqlQuery query;
+    query.prepare("SELECT * FROM fiche_benevole WHERE id_personne = :id_personne AND id_evenement = :id_evenement");
+    query.bindValue(":id_personne", id);
+    query.bindValue(":id_evenement", idEvenement());
+    query.exec();
+    m_fiche_personne->setQuery(query);
+    qDebug() << "id_personne: " << id;
+}
+
+
 void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTime debut, QDateTime fin, QString lieu, int id_evenement_precedent) {
     QSqlQuery query;
     query.prepare("insert into evenement (nom, debut, fin, lieu, id_evenement_precedent) values (?,?,?,?,?)");
@@ -384,15 +415,12 @@ void GestionnaireDAffectations::setHeureEtatTour() {
 
     m_etat_tour_heure_sql = new SqlQueryModel;
     m_etat_tour_heure_sql->setQuery(query);
-    qDebug() << "Requete : " << query.lastError().text() ;
+
 
     m_etat_tour_heure = new QSortFilterProxyModel();
     m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
     m_plan->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_plan->setFilterKeyColumn(-1);
-
-    qDebug() << "La date:" << m_heure_courante.toString("yyyy-MM-d h:m:s");
-    qDebug() << "Nombre de postes à ce moment: " << m_etat_tour_heure_sql->rowCount();
 
 }
 
@@ -473,26 +501,26 @@ void GestionnaireDAffectations::supprimerPoste(int id){
 
 void GestionnaireDAffectations::modifierNomPoste(QString nom) {
 
-        QSqlQuery query;
-        query.prepare("UPDATE poste SET nom = :nom WHERE id = :id");
-        query.bindValue(":nom",nom);
-        query.bindValue(":id",m_id_poste);
-        query.exec();
+    QSqlQuery query;
+    query.prepare("UPDATE poste SET nom = :nom WHERE id = :id");
+    query.bindValue(":nom",nom);
+    query.bindValue(":id",m_id_poste);
+    query.exec();
 
-        rechargerPlan();
+    rechargerPlan();
 
 
 }
 
 void GestionnaireDAffectations::modifierDescriptionPoste(QString description) {
 
-        QSqlQuery query;
-        query.prepare("UPDATE poste SET description = :description WHERE id = :id");
-        query.bindValue(":description",description);
-        query.bindValue(":id",m_id_poste);
-        query.exec();
+    QSqlQuery query;
+    query.prepare("UPDATE poste SET description = :description WHERE id = :id");
+    query.bindValue(":description",description);
+    query.bindValue(":id",m_id_poste);
+    query.exec();
 
-        qDebug() << query.lastError().text();
+    qDebug() << query.lastError().text();
 
 }
 
@@ -540,6 +568,7 @@ void GestionnaireDAffectations::desaffecterBenevole(){
     qDebug() << "m_id_tour: " + m_id_affectation;
 
 }
+
 
 void GestionnaireDAffectations::affecterBenevole(){
 
@@ -692,7 +721,7 @@ void GestionnaireDAffectations::insererTour(QDateTime dateFinPrecedente, int min
 
     if(!query.exec())
     {
-            qDebug() << query.lastError().text();
+        qDebug() << query.lastError().text();
     }
     else {
         query = m_fiche_poste_tour->query();
@@ -766,6 +795,15 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     qDebug() << dateNaiss.toString();
 
     // Erreur de syntaxe pres de « ( »
+}
+
+void GestionnaireDAffectations::setIdDoublons(int id_doublon) {
+
+    QSqlQuery query;
+    query.prepare("select * from personnes_doublons where idnouveau = :id_doublon;");
+    query.bindValue(":id_doublon",id_doublon);
+    query.exec();
+    m_personnes_doublons->setQuery(query);
 }
 
 QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool proposees, bool relancees)
@@ -957,7 +995,7 @@ void GestionnaireDAffectations::genererFichesDePostes()
         pandoc->write("|");
         pandoc->write(query.record().value("prenom_personne").toString().toUtf8());
         pandoc->write("|");
-        pandoc->write(QString("").append(query.record().value("portable").toString()).toUtf8());
+        pandoc->write(query.record().value("portable").toString().toUtf8());
         pandoc->write("\n");
     }
 
@@ -1325,6 +1363,7 @@ void GestionnaireDAffectations::genererFichesProblemes()
     QString commentairePersonneCourant;
     QDate dateDebutEvenement;
     QDate dateNaissancePersonneCourant;
+    QString dateEtHeureDispo;
 
     afficherEntete(pandoc,query);
 
@@ -1346,6 +1385,7 @@ void GestionnaireDAffectations::genererFichesProblemes()
         amisPersonneCourant = query.record().value("liste_amis").toString();
         typePostePersonneCourant = query.record().value("type_poste").toString();
         commentairePersonneCourant = query.record().value("commentaire_disponibilite").toString();
+        dateEtHeureDispo = query.record().value("jours_et_heures_dispo").toString();
 
         faireUnRetourALaLigne(pandoc);
         pandoc->write("\n###");
@@ -1406,6 +1446,9 @@ void GestionnaireDAffectations::genererFichesProblemes()
 
         if (languesPersonneCourant != "")
             pandoc->write(QString("                    ● Langues: ").append(languesPersonneCourant).append("\n\n").toUtf8());
+
+        if (amisPersonneCourant != "")
+            pandoc->write(QString("                    ● Disponibilités : ").append(dateEtHeureDispo).append("\n\n").toUtf8());
 
         if (amisPersonneCourant != "")
             pandoc->write(QString("                    ● Affinités : ").append(amisPersonneCourant).append("\n\n").toUtf8());

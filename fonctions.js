@@ -160,18 +160,18 @@ function nomJourEtDate (date)
 
 
 function definirCouleurCercleNom (statut) {
-    if(statut == "acceptee")
+    if(statut == "acceptee" || statut == "validee")
         return "green";
-    else if(statut == "rejetee")
+    else if(statut == "rejetee" || statut == "annulee")
         return "red"
     else
         return "orange";
 }
 
 function couleurCercle(statut){
-    if(statut == "acceptee")
+    if(statut == "acceptee" || statut == "validee")
         return "green";
-    else if(statut == "rejetee")
+    else if(statut == "rejetee" || statut == "annulee")
         return "red"
     else
         return "orange";
