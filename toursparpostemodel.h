@@ -21,23 +21,15 @@ signals:
 public slots:
 
 private:
-    class Tour {
-    public:
-        int id;
-        int debut;
-        int fin;
-    };
 
     class Poste {
     public:
         int id;
         QString nom;
-        QList<Tour> tours;
+        QStringList tours; // FIXME : http://doc.qt.io/qt-5/qtquick-modelviewsdata-cppmodels.html#qobjectlist-based-model
     };
 
     QList<Poste> postes;
-    int debutEvenement;
-    int finEvenement;
 };
 
 #endif // TOURSPARPOSTEMODEL_H
