@@ -250,7 +250,25 @@ function createSpriteObjects(rect,x,y) {
         component.statusChanged.connect(finishCreation);
 }
 
+function construireEmail(id,cle,prefixe,domaine)
+{
+    var mail;
+    mail = prefixe+'+'+id+'_'+cle+'@'+domaine;
+    return mail;
+}
 
+function expire(date)
+{
+    var dateRecue = new Date(date)
+    var dateCourante = new Date();
+    var dateJourPrecedent = new Date();
+    dateJourPrecedent.setHours(dateCourante.getHours() - 24);
+
+    if (dateJourPrecedent > dateRecue)
+        return true;
+    else
+        return false;
+}
 
 function min(a,b){
     if(a<b) return a;
