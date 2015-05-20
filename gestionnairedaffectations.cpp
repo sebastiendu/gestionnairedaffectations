@@ -84,21 +84,26 @@ GestionnaireDAffectations::~GestionnaireDAffectations()
 
 void GestionnaireDAffectations::gestionDesMessages(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     GestionnaireDAffectations *inst = (GestionnaireDAffectations*) instance();
+    QString info = QString("%1:%2").arg(QString(context.file).split('/').last(), QString::number(context.line));
+    QString detail = context.function;
     switch (type) {
     case QtDebugMsg:
-        fprintf(stderr, "%s\n\t%s\t%s:%d\n\n", qPrintable(msg), context.function, qPrintable(QString(context.file).split('/').last()), context.line);
-        fflush(stderr);
         break;
     case QtWarningMsg:
-        emit inst->warning(msg + context.function + " \n Ligne: " + context.line);
+        fprintf(stderr, "AVERTISSEMENT : ");
+        emit inst->warning(msg, info, detail);
         break;
     case QtCriticalMsg:
-        emit inst->critical(msg);
+        fprintf(stderr, "ERREUR CRITIQUE : ");
+        emit inst->critical(msg, info, detail);
         break;
     case QtFatalMsg:
-        emit inst->fatal(msg);
+        fprintf(stderr, "ERREUR FATALE : ");
+        emit inst->fatal(msg, info, detail);
         break;
     }
+    fprintf(stderr, "%s\n\t%s\t%s\n\n", qPrintable(msg), qPrintable(info), qPrintable(detail));
+    fflush(stderr);
 }
 
 QString GestionnaireDAffectations::messageDErreurDeLaBase() {

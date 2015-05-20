@@ -350,17 +350,26 @@ ApplicationWindow { // Fenetre principale
         target: app
         onWarning: {
             messageDErreur.icon = StandardIcon.Warning
+            messageDErreur.title = "Avertissement"
             messageDErreur.text=msg
+            messageDErreur.informativeText=info
+            messageDErreur.detailedText=detail
             messageDErreur.visible=true
         }
         onCritical: {
             messageDErreur.icon = StandardIcon.Critical
+            messageDErreur.title = "Erreur critique"
             messageDErreur.text=msg
+            messageDErreur.informativeText=info
+            messageDErreur.detailedText=detail
             messageDErreur.visible=true
         }
         onFatal: {
             messageDErreur.icon = StandardIcon.Fatal
+            messageDErreur.title = "Erreur fatale"
             messageDErreur.text=msg
+            messageDErreur.informativeText=info
+            messageDErreur.detailedText=detail
             messageDErreur.visible=true
         }
     }

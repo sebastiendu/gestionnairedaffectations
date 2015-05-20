@@ -7,35 +7,68 @@ ToursParPosteModel::ToursParPosteModel(QObject *parent) :
     QAbstractListModel(parent)
 {
 }
-
 void ToursParPosteModel::setIdEvenement(int idEvenement) {
-    QSqlQuery query;
-    if (query.prepare("select poste.nom, poste.id, string_agg(debut::varchar, ',') as debuts, string_agg(fin::varchar, ',') as fins"
-                      " from poste left join tour on id_poste = poste.id"
-                      " where poste.id_evenement = ?"
-                      " group by poste.nom, poste.id"
-                      " order by poste.nom, poste.id")) {
-        query.addBindValue(idEvenement);
-        if (query.exec()) {
-            while (query.next()) {
-                Poste poste;
-                poste.id = query.value("id").toInt();
-                poste.nom = query.value("nom").toString();
-                QStringList debuts = query.value("debuts").toString().split(',');
-                QStringList fins = query.value("fins").toString().split(',');
-                for (int i = 0; i < debuts.size(); ++i) {
-                    Tranche tranche;
-                    tranche.debut = debuts.at(i).toInt();
-                    tranche.fin = fins.at(i).toInt();
-                    poste.tranches.append(tranche);
+    QSqlQuery queryEvenement;
+    if (queryEvenement.prepare("select"
+                               " extract(epoch from min(debut)) as debut,"
+                               " extract(epoch from max(fin)) as fin"
+                               " from poste left join tour on id_poste = poste.id"
+                               " where id_evenement = ?")) {
+        queryEvenement.addBindValue(idEvenement);
+        if (queryEvenement.exec()) {
+            if (queryEvenement.first()) {
+                int debutEvenement = queryEvenement.value("debut").toInt();
+                int finEvenement = queryEvenement.value("fin").toInt();
+                int dureeEvenement = finEvenement - debutEvenement;
+                QSqlQuery queryPoste;
+                if (queryPoste.prepare(
+                            "select id, nom"
+                            " from poste"
+                            " where poste.id_evenement = ?"
+                            " order by nom, id")) {
+                    queryPoste.addBindValue(idEvenement);
+                    if (queryPoste.exec()) {
+                        QSqlQuery queryTour;
+                        if(queryTour.prepare("select concat_ws('|',"
+                                             " id_tour,"
+                                             " (extract(epoch from debut) - " + QString::number(debutEvenement) + ") / " + QString::number(dureeEvenement) + ","
+                                             " (extract(epoch from fin) - extract(epoch from debut)) / " + QString::number(dureeEvenement) + ","
+                                             " min, max, debut, fin, effectif, besoin, faim"
+                                             ")"
+                                             " from taux_de_remplissage_tour"
+                                             " where id_poste=?"
+                                             " order by debut, fin")) {
+                            while (queryPoste.next()) {
+                                Poste poste;
+                                poste.id = queryPoste.value("id").toInt();
+                                poste.nom = queryPoste.value("nom").toString();
+                                queryTour.addBindValue(poste.id);
+                                if (queryTour.exec()) {
+                                    while (queryTour.next()) {
+                                        poste.tours.append(queryTour.value(0).toString());
+                                    }
+                                    postes.append(poste);
+                                } else {
+                                    qDebug() << "Echec d'execution de la requête de lecture des tours du poste" << poste.id << "(" << poste.nom << ") :" << queryTour.lastError();
+                                }
+                            }
+                        } else {
+                            qDebug() << "Echec de preparation de la requête de lecture des tours d'un poste :" << queryTour.lastError();
+                        }
+                    } else {
+                        qDebug() << "Echec d'execution de la requête de lecture des postes de l'evenement" << idEvenement << ":" << queryPoste.lastError();
+                    }
+                } else {
+                    qDebug() << "Echec de préparation de la requête de lecture des postes d'un évènement' :" << queryPoste.lastError();
                 }
-                postes.append(poste);
+            } else {
+                qDebug() << "Evenement numéro" << idEvenement << "introuvable";
             }
         } else {
-            qDebug() << "Echec d'execution de la requête de lecture des postes et des tours pour l'emploi du temps :" << query.lastError();
+            qDebug() << "Echec d'execution de la requête de récupération des dates de début et de fin de l'évènement" << idEvenement << ":" << queryEvenement.lastError();
         }
     } else {
-        qDebug() << "Echec de préparation de la requête de lecture des postes et des tours pour l'emploi du temps :" << query.lastError();
+        qDebug() << "Echec de préparation de la requête de récupération des dates de début et de fin d'un évènement :" << queryEvenement.lastError();
     }
 }
 
@@ -46,13 +79,25 @@ int ToursParPosteModel::rowCount(const QModelIndex &parent) const
 
 int ToursParPosteModel::columnCount(const QModelIndex &parent) const
 {
-    return 2;
+    return 3;
 }
 
 QVariant ToursParPosteModel::data(const QModelIndex &index, int role) const
 {
     Poste poste = postes.at(index.row());
-    return role == 0 ? QVariant(poste.id) : QVariant(poste.nom);
+    QVariant data;
+    switch (role) {
+    case 0:
+        data = poste.id;
+        break;
+    case 1:
+        data = poste.nom;
+        break;
+    case 2:
+        data = poste.tours;
+        break;
+    }
+    return data;
 }
 
 QHash<int, QByteArray> ToursParPosteModel::roleNames() const
@@ -60,5 +105,6 @@ QHash<int, QByteArray> ToursParPosteModel::roleNames() const
     QHash<int, QByteArray> hash;
     hash.insert(0, "id");
     hash.insert(1, "nom");
+    hash.insert(2, "tours");
     return hash;
 }
