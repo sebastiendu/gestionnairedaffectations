@@ -110,12 +110,14 @@ Item  {
                 }
 
                 model: app.benevoles_disponibles
-                highlight: Rectangle { z:5;color: "blue"; radius: 5; opacity: 0.5; width: listeDesDisponibles.width ; height:13 ;y: listeDesDisponibles.currentItem.y;x: listeDesDisponibles.currentItem.x}
+                highlight: Rectangle { visible: (listeDesDisponibles.currentIndex == -1 )? false: true; z:5;color: "blue"; radius: 5; opacity: 0.5; width: listeDesDisponibles.width ; height:13 ;y: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.y;x: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.x}
                 focus: true
                 highlightFollowsCurrentItem: false
 
             }
-
+            Component.onCompleted: {
+                listeDesDisponibles.currentIndex = -1;
+            }
 
 
             ScrollBar {

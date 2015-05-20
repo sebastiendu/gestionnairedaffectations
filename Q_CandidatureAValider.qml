@@ -93,7 +93,13 @@ Item {
                     anchors.margins: 5
                     model: app.candidatures_en_attente
                     delegate: listDelegate
+                    highlight: Rectangle {visible: (listView.currentIndex == -1 ) ? false: true; z:5;color: Qt.rgba(0,0,1,0.5); radius: 5; opacity: 0.5; width: listView.width ; height:50; y: (listView.currentIndex == -1 ) ? 0: listView.currentItem.y;x: (listView.currentIndex == -1 ) ? 0: listView.currentItem.x}
                     focus: true
+                    highlightFollowsCurrentItem: false
+                }
+
+                Component.onCompleted: {
+                    listView.currentIndex = -1
                 }
 
                 ScrollBar {
@@ -125,9 +131,11 @@ Item {
 
             Rectangle {
 
+                id: blockFicheCandidat
                 anchors.top: _ficheDuCandidatSelectionne.bottom
                 anchors.topMargin: 15
                 anchors.bottom: parent.bottom
+                anchors.bottomMargin: 100
                 anchors.left: parent.left
                 anchors.right: parent.right
 
@@ -189,7 +197,32 @@ Item {
                     }
                 }
 
+                Button {
+                    id: boutonInscrireCeBenevole
+                    anchors.top: blockFicheCandidat.bottom
+                    anchors.topMargin: (parent.anchors.bottomMargin- height)/2
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    width: parent.width * 0.70 - 15
+                    text: "Inscrire ce bénévole"
+                    visible: (ficheBenevole.model) ? true: false
+
             }
+
+                Button {
+                    id: boutonRejeter
+                    anchors.top: blockFicheCandidat.bottom
+                    anchors.topMargin: (parent.anchors.bottomMargin- height)/2
+                    anchors.right: parent.right
+                    anchors.rightMargin: 10
+                    width: parent.width * 0.30 -10
+                    text: "Rejeter"
+                    visible: (ficheBenevole.model) ? true: false
+                }
+
+            }
+
+
 
         }
 
@@ -289,6 +322,7 @@ Item {
                 width: (parent.width/4 - 10)
                 height: parent.height * 0.90
 
+
                 Label {
                     id: _ficheDuDoublon
                     text: "Fiche du doublon"
@@ -303,6 +337,7 @@ Item {
                     id: ficheDoublon
                     anchors.top: _ficheDuDoublon.bottom
                     anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 100
                     anchors.margins: 5
                     anchors.leftMargin: 20
                     anchors.right: parent.right
@@ -358,6 +393,15 @@ Item {
                             width: parent.width}
 
                     }
+                }
+
+                Button {
+                    anchors.top: ficheDoublon.bottom
+                    anchors.topMargin: (ficheDoublon.anchors.bottomMargin - height)/2
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Accepter"
+                    visible: ficheDoublon.model ? true : false
+                    onClicked : { }
                 }
 
 
