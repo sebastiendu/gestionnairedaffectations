@@ -115,9 +115,9 @@ public:
 
 
 signals:
-    void warning(const QString &msg);
-    void critical(const QString &msg);
-    void fatal(const QString &msg);
+    void warning(const QString &msg, const QString &info, const QString &detail);
+    void critical(const QString &msg, const QString &info, const QString &detail);
+    void fatal(const QString &msg, const QString &info, const QString &detail);
     void heureChanged();
     void heureMinChanged();
     void heureMaxChanged();
