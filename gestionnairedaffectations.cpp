@@ -140,6 +140,8 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_postes->setQuery(query);
 
+        qDebug() << "Id evenement: " << idEvenement();
+
         query.prepare("select * from benevoles_disponibles where id_evenement=?");
         query.addBindValue(idEvenement());
         query.exec();
@@ -167,8 +169,9 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_horaires->setQuery(query);
 
-        query.prepare("select * from poste_et_tour where id_poste= :poste ORDER BY debut ASC;");
+        query.prepare("select * from poste_et_tour where id_poste= :poste AND id_evenement = :id_evenement ORDER BY debut ASC;");
         query.bindValue(":poste",m_id_poste);
+        query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_fiche_poste_tour->setQuery(query);
 
@@ -185,9 +188,11 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_affectations->setQuery(query);
 
         query.prepare("select * from poste where id_evenement= :evt;");
-        query.bindValue(":id_evenement",idEvenement());
+        query.bindValue(":evt",idEvenement());
         query.exec();
         m_planComplet->setQuery(query);
+
+        qDebug() << query.lastError().text() ;
 
         query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
         query.bindValue(":id_evenement",idEvenement());
@@ -195,7 +200,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_candidatures_en_attente->setQuery(query);
 
 
-        query.prepare("select * from poste_et_tour where id_evenement= :evt ORDER BY nom, debut ASC;");
+        query.prepare("select * from poste_et_tour where id_evenement= :id_evenement ORDER BY nom, debut ASC;");
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_poste_et_tour_sql->setQuery(query);
@@ -210,10 +215,14 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_etat_tour_heure_sql->setQuery(query);
 
-        /*   m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
-        m_etat_tour_heure->setFilterCaseSensitivity(Qt::CaseInsensitive);
-        m_etat_tour_heure->setFilterKeyColumn(-1); */
-
+        query.prepare("select debut, fin from evenement where id=?");
+        query.addBindValue(idEvenement());
+        query.exec();
+        if (query.next()) {
+            setProperty("heureMin", query.value("debut").toDateTime());
+            setProperty("heureMax", query.value("fin").toDateTime());
+            setProperty("heure", query.value("debut").toDateTime());
+        }
 
 
         m_toursParPosteModel = new ToursParPosteModel(this);
@@ -308,6 +317,7 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
         setProperty("heureMax", query.value("fin").toDateTime());
         setProperty("heure", query.value("debut").toDateTime());
     }
+
 }
 
 int GestionnaireDAffectations::getEvenementModelIndex() {
@@ -327,6 +337,7 @@ void GestionnaireDAffectations::setIdPoste(int id) {
 void GestionnaireDAffectations::setIdPosteTour(int id) {
     QSqlQuery query = m_fiche_poste_tour->query();
     query.bindValue(":poste", id);
+            query.bindValue(":id_evenement",idEvenement());
     query.exec();
     m_fiche_poste_tour->setQuery(query);
 }
@@ -626,6 +637,7 @@ void GestionnaireDAffectations::modifierTourDebut(QDateTime date, int heure, int
     {
         query = m_fiche_poste_tour->query();
         query.bindValue(":poste", m_id_poste);
+                query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_fiche_poste_tour->setQuery(query);
 
@@ -662,6 +674,7 @@ void GestionnaireDAffectations::modifierTourFin(QDateTime date, int heure, int m
 
         query = m_fiche_poste_tour->query();
         query.bindValue(":poste", m_id_poste);
+                query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_fiche_poste_tour->setQuery(query);
 
@@ -731,6 +744,7 @@ void GestionnaireDAffectations::insererTour(QDateTime dateFinPrecedente, int min
     else {
         query = m_fiche_poste_tour->query();
         query.bindValue(":poste", m_id_poste);
+                query.bindValue(":id_evenement",idEvenement());
         query.exec();
         m_fiche_poste_tour->setQuery(query);
 
@@ -750,6 +764,7 @@ void GestionnaireDAffectations::supprimerTour(int id){
 
     query = m_fiche_poste_tour->query();
     query.bindValue(0,m_id_poste);
+    query.bindValue(":id_evenement",idEvenement());
     query.exec();
     m_fiche_poste_tour->setQuery(query);
 

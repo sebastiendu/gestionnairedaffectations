@@ -29,6 +29,8 @@ Item {
                 font.underline: true
             }
 
+
+
             Rectangle {
                 anchors.top:_listeDesCandidats.bottom
                 anchors.topMargin:10

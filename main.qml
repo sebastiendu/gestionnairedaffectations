@@ -66,6 +66,69 @@ ApplicationWindow { // Fenetre principale
         tooltip: "Définir les paramètres d'envoi des messages de courriel par lot"
         onTriggered: parametresCourriel.open()
     }
+
+
+    Action {
+        id: actionOuvrirEvenement
+        text: qsTr("Ouvrir un Événement")
+        onTriggered: fenetreOuvrirEvenement.open()
+    }
+
+    Dialog {
+        id: fenetreOuvrirEvenement
+
+        width: 700
+
+        TableView { // Le menu déroulant permettant de sélectionner l'événement
+            id: tableauEvenement
+            // height:50
+            anchors.right: parent.right
+            anchors.rightMargin: 0
+            anchors.left: parent.left
+            anchors.leftMargin: 0
+            anchors.top: parent.top
+            anchors.topMargin: 0
+
+            model: app.liste_des_evenements // On charge la liste des évenement du menu déroulant
+            selectionMode: SelectionMode.SingleSelection
+            TableViewColumn{ role: "id"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:((tableauEvenement.width/10))-1; visible: false;}
+            TableViewColumn{ role: "nom"  ; title: "Nom" ; horizontalAlignment: Text.AlignHCenter;width:3*(tableauEvenement.width/10)-1}
+            TableViewColumn{ role: "archive" ; title: "Archivé" ; horizontalAlignment: Text.AlignHCenter;width:(1.5*tableauEvenement.width/10)-1;}
+            TableViewColumn{ role: "debut"  ; title: "Debut" ;  horizontalAlignment: Text.AlignHCenter; width:(2*(tableauEvenement.width/10))-1; delegate: Text { text: Fonctions.dateFR(styleData.value);elide:styleData.elideMode;color: (styleData.selected)? "white" : "black"}}
+            TableViewColumn{ role: "fin" ; title: "Fin" ; horizontalAlignment: Text.AlignHCenter;width:(2*(tableauEvenement.width/10))-1; delegate: Text { text: Fonctions.dateFR(styleData.value);elide:styleData.elideMode; color: (styleData.selected)? "white" : "black"}}
+            TableViewColumn{ role: "lieu"  ; title: "Lieu" ; horizontalAlignment: Text.AlignHCenter;width:(1.5*tableauEvenement.width/10)-1;}
+
+            rowDelegate: Rectangle {
+
+                color: styleData.selected ? Qt.rgba(0,0,1,0.5) : "white"
+                MouseArea {
+                    anchors.fill: parent
+                    onDoubleClicked: {
+                        app.setIdEvenementFromModelIndex(styleData.row)
+                        fenetreOuvrirEvenement.close();
+
+                    }
+
+                    onClicked: {
+                        tableauEvenement.currentRow = styleData.row
+                        tableauEvenement.selection.clear();
+                        tableauEvenement.selection.select(styleData.row);
+                    }
+                }
+            }
+
+
+        }
+
+
+
+        onAccepted : {
+            app.setIdEvenementFromModelIndex(tableauEvenement.currentRow)
+            fenetreOuvrirEvenement.close();
+        }
+
+    }
+
     Dialog {
         id: parametresCourriel
         modality: Qt.ApplicationModal
@@ -120,30 +183,14 @@ ApplicationWindow { // Fenetre principale
         app.settings.setValue("height", height)
     }
 
-    ComboBox { // Le menu déroulant permettant de sélectionner l'événement
-        id: selecteurEvenement
-        // height:50
-        anchors.right: parent.right
-        anchors.rightMargin: 0
-        anchors.left: parent.left
-        anchors.leftMargin: 0
-        anchors.top: parent.top
-        anchors.topMargin: 0
-
-        model: app.liste_des_evenements // On charge la liste des évenement du menu déroulant
-        currentIndex: app.getEvenementModelIndex() // Par defaut le menu déroulant est sur l'index courant
-        textRole: "nom"
-        onCurrentIndexChanged: {
-            app.setIdEvenementFromModelIndex(currentIndex) // On appelle la fonction permettant entre autre de charger toutes les informations du nouvel évenement
-        }
-
-    }
 
     menuBar: MenuBar { // La barre de menu
         Menu {
             title: qsTr("&Évenement")
             MenuItem { action: nouvelEvenement }
+            MenuItem { action: actionOuvrirEvenement }
             MenuItem { action: planDeLEvenement }
+
             MenuItem {
                 text: qsTr("Supprimer")
                 onTriggered: console.log("TODO : Ouvrir l'interface de suppression de l'évènement");
@@ -202,7 +249,7 @@ ApplicationWindow { // Fenetre principale
 
     TabView { // Les differents onglets
         id: onglet
-        anchors.top: selecteurEvenement.bottom
+        anchors.top: parent.top
         anchors.right: parent.right
         anchors.rightMargin: 0
         anchors.left: parent.left
