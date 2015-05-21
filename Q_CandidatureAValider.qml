@@ -10,6 +10,14 @@ Item {
         anchors.fill: parent
         color: "#bdc3c7"
 
+
+        BusyIndicator {
+            id: chargement
+            anchors.centerIn: parent
+            running: false
+            z: 500
+        }
+
         Rectangle {
             id: rectangleCandidats
             color: "white"
