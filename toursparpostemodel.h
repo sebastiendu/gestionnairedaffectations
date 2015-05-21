@@ -26,7 +26,7 @@ private:
     public:
         int id;
         QString nom;
-        QStringList tours; // FIXME : http://doc.qt.io/qt-5/qtquick-modelviewsdata-cppmodels.html#qobjectlist-based-model
+        QStringList tours;
     };
 
     QList<Poste> postes;

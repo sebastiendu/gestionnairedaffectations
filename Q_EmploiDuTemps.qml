@@ -21,41 +21,21 @@ Item {
                     color: "transparent"
                     Repeater {
                         model: styleData.value
-                        // 0 id, 3 min, 4 max, 5 debut, 6 fin, 7 effectif, 8 besoin, 9 faim
+                        // 0 id, 1 debut, 2 durée, 3 min, 4 max, 5 debut, 6 fin, 7 effectif, 8 besoin, 9 faim, 10 taux
                         Rectangle {
+                            anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.leftMargin: parent.width * modelData.split('|')[1] // debut
                             width: parent.width * modelData.split('|')[2] // durée
                             height: parent.height
-                            color: "gray" // TODO : calculer la bonne couleur en fonction de la faim
-                            border.color: "black"
+                            radius: 5
+                            border.color: modelData.split('|')[10] === '100' ? "darkgreen" : modelData.split('|')[10] > 100 ? "darkyellow"  : "darkred"
+                            color: modelData.split('|')[9] === '0' ? "green" : modelData.split('|')[9] < 0 ? "yellow"  : "red" // faim
+                            opacity: 0.5
                             MouseArea {
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                Rectangle {
-                                    color: "#f3eea5"
-                                    border.color: "black"
-                                    anchors.centerIn: parent
-                                    width: 200
-                                    height: 50
-                                    visible: parent.containsMouse
-                                    Label {
-                                        anchors.fill: parent
-                                        text: "%1: de %2 à %3\n%4 personnes affectées (min %5, max %6)" // FIXME
-                                        /*.arg(
-                                            modelData.split('|')[0], // id
-                                            modelData.split('|')[5], // debut
-                                            modelData.split('|')[6], // fin
-                                            modelData.split('|')[7], // effectif
-                                            modelData.split('|')[3], // min
-                                            modelData.split('|')[4] // max
-                                        )*/
-                                        verticalAlignment: Text.AlignVCenter
-                                        horizontalAlignment: Text.AlignHCenter
-                                        font.pointSize: 7
-                                        elide: Text.ElideRight
-                                    }
-                                }
+                                onClicked: console.info("setIdTour(" + modelData.split('|')[0] + ") (TODO)")
                             }
                         }
                     }
