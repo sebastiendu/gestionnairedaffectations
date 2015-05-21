@@ -37,6 +37,9 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QSortFilterProxyModel* etat_tour_heure MEMBER m_etat_tour_heure  NOTIFY etatTourHeureChanged)
     Q_PROPERTY(QDateTime heureCourante MEMBER m_heure_courante NOTIFY heureCouranteChanged)
 
+    Q_PROPERTY(SqlQueryModel* responsables MEMBER m_responsables NOTIFY responsablesChanged)
+
+
     Q_PROPERTY(SqlQueryModel* fiche_evenement MEMBER m_fiche_evenement NOTIFY ficheEvenementChanged())
 
     Q_PROPERTY(SqlQueryModel* candidatures_en_attente MEMBER m_candidatures_en_attente NOTIFY candidatureEnAttenteChanged)
@@ -62,6 +65,7 @@ public:
     Q_INVOKABLE void setIdTour(int);
     Q_INVOKABLE void setIdDisponibilite(int);
     Q_INVOKABLE void setIdAffectation(int);
+    Q_INVOKABLE void setResponsables();
 
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
     Q_INVOKABLE void enregistrerPlanEvenement(QUrl url);
@@ -150,6 +154,7 @@ signals:
     void toursParPosteModelChanged();
     void candidatureEnAttenteChanged();
     void ficheEvenementChanged();
+    void responsablesChanged();
     void fermerFenetreProprietesEvenement();
 
 
@@ -188,6 +193,7 @@ private:
     SqlQueryModel *m_personnes_doublons;
 
     SqlQueryModel *m_fiche_evenement;
+    SqlQueryModel *m_responsables;
 
     ToursParPosteModel *m_toursParPosteModel;
 

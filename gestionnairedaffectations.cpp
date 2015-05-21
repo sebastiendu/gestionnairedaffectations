@@ -48,6 +48,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_candidatures_en_attente =  new SqlQueryModel;
     m_personnes_doublons = new SqlQueryModel;
     m_fiche_evenement = new SqlQueryModel;
+    m_responsables = new SqlQueryModel;
 
     if(!m_settings->contains("database/databaseName")) {
         if(!m_settings->contains("database/hostName")) {
@@ -431,6 +432,7 @@ void GestionnaireDAffectations::setIdPoste(int id) {
 }
 
 void GestionnaireDAffectations::setIdPosteTour(int id) {
+    m_id_poste = id;
     QSqlQuery query = m_fiche_poste_tour->query();
     query.bindValue(":poste", id);
     query.bindValue(":id_evenement",idEvenement());
@@ -438,6 +440,14 @@ void GestionnaireDAffectations::setIdPosteTour(int id) {
     m_fiche_poste_tour->setQuery(query);
 }
 
+void GestionnaireDAffectations::setResponsables() {
+    QSqlQuery query;
+    query.prepare("SELECT * FROM responsable JOIN personne ON responsable.id_personne=personne.id WHERE responsable.id_poste = :id_poste ");
+    query.bindValue(":id_poste", m_id_poste);
+    query.exec();
+    qDebug() << m_id_poste;
+    m_responsables->setQuery(query);
+}
 
 void GestionnaireDAffectations::setIdTour(int id) {
     m_id_tour = id;

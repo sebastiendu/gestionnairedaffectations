@@ -138,8 +138,9 @@ ApplicationWindow { // Fenetre principale
     Dialog {
         id: proprietesEvenement
         width: 400
-        height: 250
+        height: 270
         standardButtons: StandardButton.NoButton
+       // modality: Qt.ApplicationModal
 
         Connections {
             target: app
@@ -199,8 +200,18 @@ ApplicationWindow { // Fenetre principale
                 CheckBox { id: _checkboxArchive; anchors.top: _fin.bottom; anchors.left: _archive.right;anchors.topMargin:20;anchors.leftMargin: 20; checked: archive}
 
                 Button {
-                    id: _boutonEnregistrer
+                    id: _boutonChangerPlan
+                    text: "Changer le plan de l'événement"
                     anchors.top: _checkboxArchive.bottom
+                    anchors.topMargin: 20
+                    anchors.left: parent.left
+                    anchors.leftMargin: 20
+                    onClicked:  { planEvenement.open()}
+                }
+
+                Button {
+                    id: _boutonEnregistrer
+                    anchors.top: _boutonChangerPlan.bottom
                     anchors.topMargin: 20
                     anchors.left: parent.left
                     anchors.leftMargin: (proprietesEvenement.width - width) /2
