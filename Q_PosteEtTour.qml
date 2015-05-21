@@ -162,6 +162,9 @@ Item {
                                         _nomPoste.text = nom;
                                         _descriptionPoste.text = description;
                                         app.setIdPosteTour(id);
+                                        app.setResponsables();
+                                        tableauResponsable.model = app.responsables;
+                                        tableauResponsable.resizeColumnsToContents();
                                         tableauTours.model = app.fiche_poste_tour;
                                         imageMarqueurPostesEtTours.z = 149;
                                         nomBulle.z = 150;
@@ -255,10 +258,7 @@ Item {
                 anchors.right: parent.right
                 anchors.rightMargin:10
                 anchors.leftMargin: 10
-                height:parent.height/3
-
-
-
+                height:parent.height/6
 
             }
 
@@ -280,6 +280,22 @@ Item {
             }
 
             TableView {
+                id: tableauResponsable
+                height: parent.height /6
+                anchors.top: _btnSauvegarderChangements.bottom
+                anchors.topMargin: 20
+                width:parent.width *0.95
+                anchors.horizontalCenter: parent.horizontalCenter
+                sortIndicatorVisible: true
+
+                TableViewColumn{ role: "nom"  ; title: "Nom" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/5)-1;}
+                TableViewColumn{ role: "prenom" ; title: "prenom" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/5)-1;}
+                TableViewColumn{ role: "portable"  ; title: "Téléphone" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/4)-1;}
+                TableViewColumn{ role: "email" ; title: "email" ; elideMode: Text.ElideMiddle}
+
+            }
+
+            TableView {
 
                 Connections {
                     target: app
@@ -292,9 +308,9 @@ Item {
 
                 id: tableauTours
                 width:parent.width *0.95
-                height: parent.height * 0.40
+                height: parent.height * 0.30
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top:_btnSauvegarderChangements.bottom
+                anchors.top:tableauResponsable.bottom
                 anchors.topMargin: 25
                 selectionMode: SelectionMode.SingleSelection
                 TableViewColumn{ role: "id_tour"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:(3*(tableauTours.width/10))-1; visible: false;delegate: id_tour}

@@ -22,6 +22,7 @@ ApplicationWindow { // Fenetre principale
     color: "#ffffff"
 
 
+
     Action {
         id: nouvelEvenement
         text: qsTr("&Nouveau")
@@ -104,8 +105,11 @@ ApplicationWindow { // Fenetre principale
                 MouseArea {
                     anchors.fill: parent
                     onDoubleClicked: {
+
                         app.setIdEvenementFromModelIndex(styleData.row)
                         fenetreOuvrirEvenement.close();
+
+
 
                     }
 
@@ -123,9 +127,111 @@ ApplicationWindow { // Fenetre principale
 
 
         onAccepted : {
-            app.setIdEvenementFromModelIndex(tableauEvenement.currentRow)
+
+            if(tableauEvenement.currentRow != -1) app.setIdEvenementFromModelIndex(tableauEvenement.currentRow);
             fenetreOuvrirEvenement.close();
+
         }
+
+    }
+
+    Dialog {
+        id: proprietesEvenement
+        width: 400
+        height: 270
+        standardButtons: StandardButton.NoButton
+       // modality: Qt.ApplicationModal
+
+        Connections {
+            target: app
+            onFicheEvenementChanged: {
+                listeFicheEvenement.model = app.fiche_evenement;
+            }
+
+            onFermerFenetreProprietesEvenement : {
+                proprietesEvenement.close();
+            }
+
+        }
+
+
+        ListView {
+            id: listeFicheEvenement
+            anchors.bottom: parent.bottom
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            model: app.fiche_evenement;
+
+
+
+            delegate:
+                Rectangle {
+
+                Text { id: _nom; text: "Nom: \t";anchors.left: parent.left;anchors.leftMargin: 20 }
+                TextField {id: _inputNom; anchors.left: _nom.right; width: 200; text: nom;anchors.leftMargin: 20}
+                Text { text: "Lieu: \t" ;id: _lieu; anchors.top: _nom.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+                TextField { id: _inputLieu; anchors.left: _lieu.right; width: 200;  anchors.top: _nom.bottom; text: lieu;anchors.topMargin:20;anchors.leftMargin: 20}
+                Text { text: "Debut: \t"; id: _debut; anchors.top: _lieu.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+                TextField {id: _inputDebut; anchors.left: _debut.right;  readOnly: true; width: 200;  anchors.top: _lieu.bottom; text: Fonctions.dateFR(debut);anchors.topMargin:20;anchors.leftMargin: 20}
+                Button {
+                    id: boutonCalendrierDebut
+                    anchors.top: _inputDebut.top
+                    anchors.left: _inputDebut.right
+                    anchors.leftMargin: 10
+                    width: 30
+                    text: "v"
+                    onClicked : { Fonctions.afficherFenetreCalendrier("debut",debut,debut.getHours(),debut.getMinutes())}
+                }
+
+                Text { text: "Fin: \t";id: _fin; anchors.top: _debut.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+                TextField{ id: _inputFin; anchors.top: _debut.bottom;  readOnly: true; width: 200; anchors.left: _fin.right; text: Fonctions.dateFR(fin);anchors.topMargin:20;anchors.leftMargin: 20}
+                Button {
+                    id: boutonCalendrierFin
+                    anchors.top: _inputFin.top
+                    anchors.left: _inputFin.right
+                    anchors.leftMargin: 10
+                    width: 30
+                    text: "v"
+                    onClicked : { Fonctions.afficherFenetreCalendrier("fin",fin,fin.getHours(),fin.getMinutes())}
+                }
+
+                Text { text: "Archivé: \t" ; id: _archive; anchors.top: _fin.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+                CheckBox { id: _checkboxArchive; anchors.top: _fin.bottom; anchors.left: _archive.right;anchors.topMargin:20;anchors.leftMargin: 20; checked: archive}
+
+                Button {
+                    id: _boutonChangerPlan
+                    text: "Changer le plan de l'événement"
+                    anchors.top: _checkboxArchive.bottom
+                    anchors.topMargin: 20
+                    anchors.left: parent.left
+                    anchors.leftMargin: 20
+                    onClicked:  { planEvenement.open()}
+                }
+
+                Button {
+                    id: _boutonEnregistrer
+                    anchors.top: _boutonChangerPlan.bottom
+                    anchors.topMargin: 20
+                    anchors.left: parent.left
+                    anchors.leftMargin: (proprietesEvenement.width - width) /2
+                    width: 200
+                    text: "Enregistrer"
+
+                    onClicked : {
+                        app.updateEvenement(_inputNom.text, _inputLieu.text, _checkboxArchive.checked);
+                    }
+
+
+                }
+            }
+
+        }
+
+
+    onAccepted: {
+        console.log(_inputNom.text);
+    }
 
     }
 
@@ -190,7 +296,10 @@ ApplicationWindow { // Fenetre principale
             MenuItem { action: nouvelEvenement }
             MenuItem { action: actionOuvrirEvenement }
             MenuItem { action: planDeLEvenement }
-
+            MenuItem {
+                text: qsTr("Propriétés")
+                onTriggered: proprietesEvenement.open();
+            }
             MenuItem {
                 text: qsTr("Supprimer")
                 onTriggered: console.log("TODO : Ouvrir l'interface de suppression de l'évènement");
@@ -273,33 +382,8 @@ ApplicationWindow { // Fenetre principale
             id: solliciterAnciensBenevoles
             title: "Solliciter d'anciens bénévoles"
 
-            Rectangle {
-                color: "yellow"
-                width: 500
-                height: 500
 
-
-                TableView {
-                    id: tableauTest
-                    model: app.planComplet
-                    width: parent.width
-
-                    TableViewColumn{
-                        role: "id";
-                        title: "Id du poste" ;
-                    }
-
-                    TableViewColumn{
-                        role: "posx";
-                        title: "Position en X" ;
-                    }
-
-                    TableViewColumn{
-                        role: "posy";
-                        title: "Position en Y" ;
-                    }
-
-                }
+            Q_SolliciterAnciensBenevoles {
 
             }
         }

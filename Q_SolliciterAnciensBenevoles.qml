@@ -6,11 +6,20 @@ import QtQuick.Controls 1.2
 import "fonctions.js" as Fonctions
 Item {
 
+    BusyIndicator {
+     id: busyIndication
+     anchors.centerIn: parent
+    running: false
 
-Rectangle {
-    width: 500
-    height: 500
-    color: "blue"
-}
+     }
+
+    Button {
+     anchors.horizontalCenter: parent.horizontalCenter
+     anchors.bottom: parent.bottom
+     anchors.bottomMargin: 100
+     text: busyIndication.running ? "Stop Busy Indicator" : "Start Busy Indicator"
+
+     onClicked: busyIndication.running = true;
+     }
 
 }

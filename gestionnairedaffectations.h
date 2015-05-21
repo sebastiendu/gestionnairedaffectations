@@ -37,6 +37,11 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QSortFilterProxyModel* etat_tour_heure MEMBER m_etat_tour_heure  NOTIFY etatTourHeureChanged)
     Q_PROPERTY(QDateTime heureCourante MEMBER m_heure_courante NOTIFY heureCouranteChanged)
 
+    Q_PROPERTY(SqlQueryModel* responsables MEMBER m_responsables NOTIFY responsablesChanged)
+
+
+    Q_PROPERTY(SqlQueryModel* fiche_evenement MEMBER m_fiche_evenement NOTIFY ficheEvenementChanged())
+
     Q_PROPERTY(SqlQueryModel* candidatures_en_attente MEMBER m_candidatures_en_attente NOTIFY candidatureEnAttenteChanged)
     Q_PROPERTY(SqlQueryModel* personnes_doublons MEMBER m_personnes_doublons)
 
@@ -54,13 +59,19 @@ public:
     Q_INVOKABLE QString messageDErreurDeLaBase();
     Q_INVOKABLE void setIdEvenementFromModelIndex(int);
     Q_INVOKABLE int getEvenementModelIndex();
+
     Q_INVOKABLE void setIdPoste(int);
     Q_INVOKABLE void setIdPosteTour(int);
     Q_INVOKABLE void setIdTour(int);
     Q_INVOKABLE void setIdDisponibilite(int);
     Q_INVOKABLE void setIdAffectation(int);
+    Q_INVOKABLE void setResponsables();
+
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
     Q_INVOKABLE void enregistrerPlanEvenement(QUrl url);
+    Q_INVOKABLE void setDebutEvenement(QDateTime date, int heure, int minutes);
+    Q_INVOKABLE void setFinEvenement(QDateTime date, int heure, int minutes);
+    Q_INVOKABLE void updateEvenement(QString nom, QString lieu, bool archive);
 
 
     Q_INVOKABLE void insererPoste(QString,QString,float,float);
@@ -142,6 +153,9 @@ signals:
     void etatTourHeureChanged();
     void toursParPosteModelChanged();
     void candidatureEnAttenteChanged();
+    void ficheEvenementChanged();
+    void responsablesChanged();
+    void fermerFenetreProprietesEvenement();
 
 
 
@@ -177,6 +191,9 @@ private:
     SqlQueryModel *m_etat_tour_heure_sql;
     SqlQueryModel *m_candidatures_en_attente;
     SqlQueryModel *m_personnes_doublons;
+
+    SqlQueryModel *m_fiche_evenement;
+    SqlQueryModel *m_responsables;
 
     ToursParPosteModel *m_toursParPosteModel;
 
