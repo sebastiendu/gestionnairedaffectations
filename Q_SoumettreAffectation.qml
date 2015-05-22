@@ -6,8 +6,15 @@ import QtQuick.Controls 1.2
 import "fonctions.js" as Fonctions
 
 Item {
+    focus: false
+    anchors.fill: parent
+
+    Rectangle
+    {
 
     anchors.fill: parent
+    color: "white"
+
     Rectangle
     {
         id: _rectangleHaut
@@ -22,7 +29,7 @@ Item {
 
         Label {
             id : _soumettreAffectations
-            text : "Soumettre à chaque bénévole par email (pour validation) les affectations qui ont été :"
+            text : "Envoyer à chaque bénévole un email pour valider les affectations qui ont été :"
             anchors.top: _rectangleHaut.top
             anchors.left: _rectangleHaut.left
             anchors.topMargin: 20
@@ -31,13 +38,21 @@ Item {
             font.pixelSize: 16
             wrapMode: "WordWrap"
         }
-
+                                        //______________________________________________________________________________________________//
+        CheckBox {                      // Cette CheckBox qui parait inutile et dont l'implémentation laisse à désirer                  //
+            anchors.top: parent.top     // a une raison : lors de l'affichage, la première checkBox est selectionné,                    //
+            anchors.topMargin: 10000    // en entourant en bleu son texte, or, les checkBox suivantes n'ont pas le texte                //
+            anchors.left: parent.left   // en attribut mais j'ai créé un autre objet Text afin de leur attribuer l'attribut wordWrap    //
+            anchors.leftMargin: 10000   // pour le redimensionnement, du coup ça me faisait un affichage dégeu, donc j'ai créé une      //
+        }                               // CheckBox qui sont sélectionnée par le programme mais qu'on en peut pas voir.                 //
+                                        //______________________________________________________________________________________________//
         CheckBox {
             id: _checkboxAffecationsJamaisSoumises
             anchors.top: _soumettreAffectations.bottom
             anchors.topMargin: 10
             anchors.left: _soumettreAffectations.left
             anchors.leftMargin: 50
+            z:2
             onClicked: {
                 _adresseEmail.visible=false
                 _boutonGenerer.visible=true
@@ -46,11 +61,13 @@ Item {
         }
 
         Text {
-            anchors.left : _checkboxAffecationsJamaisSoumises.right
+            anchors.left : _checkboxAffecationsJamaisSoumises.left
             anchors.top : _checkboxAffecationsJamaisSoumises.top
+            anchors.leftMargin: 20
             text: "Proposées mais qui n'ont jamais été soumises à l'approbation du bénévole (1er envoi)"
             wrapMode: "WordWrap"
             width: parent.width * 0.8
+            z:1
         }
 
         CheckBox {
@@ -159,10 +176,11 @@ Item {
         id: rectangleTableauListeDesLotsDejaCrees
         /*border.color:"blue"
         color: "yellow" // DEBUG */
+        color: white
         anchors.top: _rectangleHaut.bottom
         anchors.topMargin: 10
         anchors.left: parent.left
-        width: parent.width*0.7
+        width: parent.width*0.9
         anchors.bottom : parent.bottom
         anchors.bottomMargin: parent.height*0.1
         anchors.leftMargin: (parent.width - width)/2
@@ -219,13 +237,13 @@ Item {
                     horizontalAlignment: Text.AlignHLeft // Pour que le titre de la colonne soit à gauche
                     anchors.left: parent.left
                     anchors.leftMargin: 10
-                    //wrapMode: Text.WrapAnywhere;
+                    wrapMode: Text.WrapAnywhere;
                     elide: Text.ElideRight
                 }
 
                 //width: (rectangleTableauListeDesLotsDejaCrees.width*0.25)-1;
                 title: "Titre" ;
-                horizontalAlignment: Text.AlignHCenter // Pour que le titre de la colonne soit à gauche
+                horizontalAlignment: Text.AlignHCenter // Pour que le titre de la colonne soit au centre
             }
 
             TableViewColumn{
@@ -237,17 +255,31 @@ Item {
                 width: rectangleTableauListeDesLotsDejaCrees.width*0.20 -1;
                 delegate: Text{
                     wrapMode: Text.WrapAnywhere; // C'est pour que le texte ne déborde pas
-                    text: "<a href='mailto:"+Fonctions.construireEmail(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"id"),_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"cle"),app.settings.value("email/prefixe", ""),app.settings.value("email/domaine", ""))+"'>"+Fonctions.construireEmail(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"id"),_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"cle"),app.settings.value("email/prefixe", ""),app.settings.value("email/domaine", ""))+"</a>"
+                    text: ((Fonctions.expire(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"date_de_creation")))?//Si c'est expiré
+                          Fonctions.construireEmail(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"id"),_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"cle"),app.settings.value("email/prefixe", ""),app.settings.value("email/domaine", ""))
+                          :
+                          (((_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"traite"))=="false")?
+                               ("<a href='mailto:"+Fonctions.construireEmail(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"id"),_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"cle"),app.settings.value("email/prefixe", ""),app.settings.value("email/domaine", ""))+"'>"+Fonctions.construireEmail(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"id"),_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"cle"),app.settings.value("email/prefixe", ""),app.settings.value("email/domaine", ""))+"</a>"
+                               )
+                             :
+                               (Fonctions.construireEmail(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"id"),_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"cle"),app.settings.value("email/prefixe", ""),app.settings.value("email/domaine", ""))
+                               )
+                          )
+                          )
+
+
+                    font.strikeout:(((Fonctions.expire(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"date_de_creation"))) == true)?true:((_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"traite")) == "true"?true:false))
                     verticalAlignment: Text.AlignVCenter
                     elide: Text.ElideRight
                     anchors.leftMargin: 20
-                    onLinkActivated: Qt.openUrlExternally(link) // Permet que le lien soit cliquable
+                    onLinkActivated: (Fonctions.expire(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"date_de_creation"))?false:Qt.openUrlExternally(link)) // Permet que le lien soit cliquable
 
 
 
 
                 }
             }
+
 
             TableViewColumn{
                 id: colonne4;
@@ -256,27 +288,33 @@ Item {
                 role: "traite";
                 width: (rectangleTableauListeDesLotsDejaCrees.width*0.08 - 1) < 80 ? 80 : (rectangleTableauListeDesLotsDejaCrees.width*0.08 - 1);
                 title: "Etat" ;
-                horizontalAlignment: Text.AlignHCenter; // Pour que le titre de la colonne soit bien centré
+                horizontalAlignment: Text.AlignHCenter // Pour que le titre de la colonne soit bien centré
+
                 delegate: Text{
+                    id: texteColonneEtat
                     text:(styleData.value==false)?"Non utilisée":"Utilisée"
                     verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    color: text=="Utilisée"?"red":"green"
                 }
             }
+
             TableViewColumn{
                 id: colonne5;
                 resizable : false;
                 movable:false;
-                width: rectangleTableauListeDesLotsDejaCrees.width * 0.09 - 1;
-                title: "Expiré" ;
-                horizontalAlignment: Text.AlignLeft // Pour que le titre de la colonne soit a gauche
-                delegate: Rectangle{
-                    color:(Fonctions.expire(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"date_de_creation")))?"red":"green"
-                    border.color: "white"
-                    border.width: 1
-                    }
+                width: rectangleTableauListeDesLotsDejaCrees.width * 0.08 - 1;
+                title: "Statut" ;
+                horizontalAlignment: Text.AlignHCenter // Pour que le titre de la colonne soit au centre
+                delegate: Text{
+                    text:(Fonctions.expire(_tableauListeDesLotsDejaCrees.model.getDataFromModel(styleData.row,"date_de_creation")))?"Expiré":"Valide"
+                    horizontalAlignment: Text.AlignHCenter
+                    color: text=="Expiré"?"red":"green"
+                }
             }
 
            }
       }
 
+    }
 }

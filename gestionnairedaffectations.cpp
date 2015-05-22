@@ -1299,7 +1299,7 @@ void GestionnaireDAffectations::genererFichesProblemes()
 {
     // FICHIER //
 
-    QTemporaryFile* f = new QTemporaryFile("Fiche_a_problemes_XXXXXX.odt");
+    QTemporaryFile* f = new QTemporaryFile("Fiche_bénévoles_sans_tour_de_travail_XXXXXX.odt");
     f->open();
 
     // REQUETE //
