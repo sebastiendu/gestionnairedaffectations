@@ -25,7 +25,7 @@ Item {
 
                 Item {
                 Rectangle {
-                    color: Qt.rgba(0,0,0,0.1)
+                    color: Qt.rgba(0,0,0,0.2)
                     width: 10000
                     height: 10000
                     transform: Translate { y: -5000; x:-5000 }
@@ -39,7 +39,8 @@ Item {
                     height: 50
                     visible: chargement.running
                     Text {
-                        text: "...Chargement..."
+
+                        text: "Recherche de possibles doublons…"
                         visible: chargement.running
                         anchors.centerIn: parent
                     }

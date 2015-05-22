@@ -137,24 +137,86 @@ ApplicationWindow { // Fenetre principale
 
     Dialog {
         id: proprietesEvenement
+
         width: 400
-        height: 270
         standardButtons: StandardButton.NoButton
        // modality: Qt.ApplicationModal
 
         Connections {
             target: app
-            onFicheEvenementChanged: {
-                listeFicheEvenement.model = app.fiche_evenement;
+            onListe_des_evenementsChanged: {
+
+                _inputFin.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")))
+                _inputDebut.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")))
+               console.log(Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin"))));
             }
 
             onFermerFenetreProprietesEvenement : {
                 proprietesEvenement.close();
             }
 
+
         }
 
 
+        Text { id: _nom; text: "Nom: \t";anchors.left: parent.left;anchors.leftMargin: 20 }
+        TextField {id: _inputNom; anchors.left: _nom.right; width: 200; text: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "nom");anchors.leftMargin: 20}
+        Text { text: "Lieu: \t" ;id: _lieu; anchors.top: _nom.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+        TextField { id: _inputLieu; anchors.left: _lieu.right; width: 200;  anchors.top: _nom.bottom; text: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "lieu");anchors.topMargin:20;anchors.leftMargin: 20}
+        Text { text: "Debut: \t"; id: _debut; anchors.top: _lieu.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+        TextField {id: _inputDebut; anchors.left: _debut.right;  readOnly: true; width: 200;  anchors.top: _lieu.bottom; text: Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")));anchors.topMargin:20;anchors.leftMargin: 20}
+        Button {
+            id: boutonCalendrierDebut
+            anchors.top: _inputDebut.top
+            anchors.left: _inputDebut.right
+            anchors.leftMargin: 10
+            width: 30
+            text: "v"
+            onClicked : { Fonctions.afficherFenetreCalendrier("debut",app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut"),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")).getHours(),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")).getMinutes())}
+        }
+
+        Text { text: "Fin: \t";id: _fin; anchors.top: _debut.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+        TextField{ id: _inputFin; anchors.top: _debut.bottom;  readOnly: true; width: 200; anchors.left: _fin.right; text: Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")));anchors.topMargin:20;anchors.leftMargin: 20}
+        Button {
+            id: boutonCalendrierFin
+            anchors.top: _inputFin.top
+            anchors.left: _inputFin.right
+            anchors.leftMargin: 10
+            width: 30
+            text: "v"
+            onClicked : { Fonctions.afficherFenetreCalendrier("fin",app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin"),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")).getHours(),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")).getMinutes())}
+        }
+
+        Text { text: "Archivé: \t" ; id: _archive; anchors.top: _fin.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+        CheckBox { id: _checkboxArchive; anchors.top: _fin.bottom; anchors.left: _archive.right;anchors.topMargin:20;anchors.leftMargin: 20; checked: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "archive") }
+
+        Button {
+            id: _boutonChangerPlan
+            text: "Changer le plan de l'événement"
+            anchors.top: _checkboxArchive.bottom
+            anchors.topMargin: 20
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            onClicked:  { planEvenement.open()}
+        }
+
+        Button {
+            id: _boutonEnregistrer
+            anchors.top: _boutonChangerPlan.bottom
+            anchors.topMargin: 20
+            anchors.left: parent.left
+            anchors.leftMargin: (proprietesEvenement.width - width) /2
+            width: 200
+            text: "Enregistrer"
+            //text: app.liste_des_evenements.getDataFromModel(app.idEvenement, "id")
+
+            onClicked : {
+                app.updateEvenement(_inputNom.text, _inputLieu.text, _checkboxArchive.checked);
+            }
+
+
+        }
+        /*
         ListView {
             id: listeFicheEvenement
             anchors.bottom: parent.bottom
@@ -216,7 +278,8 @@ ApplicationWindow { // Fenetre principale
                     anchors.left: parent.left
                     anchors.leftMargin: (proprietesEvenement.width - width) /2
                     width: 200
-                    text: "Enregistrer"
+                    //text: "Enregistrer"
+                    text: app.liste_des_evenements.getDataFromModel(app.idEvenement, "id")
 
                     onClicked : {
                         app.updateEvenement(_inputNom.text, _inputLieu.text, _checkboxArchive.checked);
@@ -226,7 +289,7 @@ ApplicationWindow { // Fenetre principale
                 }
             }
 
-        }
+        } */
 
 
     onAccepted: {

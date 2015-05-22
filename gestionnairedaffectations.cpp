@@ -159,7 +159,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_benevoles_disponibles->setFilterKeyColumn(-1);
 
-        query.prepare("select * from fiche_benevole where id_disponibilite=?");
+        query.prepare("select * from fiche_benevole where id_personne=? LIMIT 1");
         query.addBindValue(m_id_disponibilite);
         query.exec();
         m_fiche_benevole->setQuery(query);
@@ -266,17 +266,16 @@ void GestionnaireDAffectations::setDebutEvenement(QDateTime date, int heure, int
 
 
     query.prepare("UPDATE evenement SET debut = :debut WHERE id = :id");
-    query.bindValue(":debut",dateEtHeure);
+    query.bindValue(":debut",dateEtHeure.toUTC());
     query.bindValue(":id",idEvenement());
 
     if(query.exec())
     {
-        query = m_fiche_evenement->query();
-        query.bindValue(":id_evenement",idEvenement());
+        query = m_liste_des_evenements->query();
         query.exec();
-        m_fiche_evenement->setQuery(query);
+        m_liste_des_evenements->setQuery(query);
 
-        ficheEvenementChanged();
+        liste_des_evenementsChanged();
     }
     else
     {
@@ -299,12 +298,11 @@ void GestionnaireDAffectations::setFinEvenement(QDateTime date, int heure, int m
 
     if(query.exec())
     {
-        query = m_fiche_evenement->query();
-        query.bindValue(":id_evenement",idEvenement());
+        query = m_liste_des_evenements->query();
         query.exec();
-        m_fiche_evenement->setQuery(query);
+        m_liste_des_evenements->setQuery(query);
 
-        ficheEvenementChanged();
+        liste_des_evenementsChanged();
     }
     else
     {
@@ -320,15 +318,14 @@ void GestionnaireDAffectations::updateEvenement(QString nom, QString lieu, bool 
     query.bindValue(":lieu",lieu);
     query.bindValue(":archive",archive);
     query.bindValue(":id",idEvenement());
-    qDebug() << archive;
+
     if(query.exec())
     {
-        query = m_fiche_evenement->query();
-        query.bindValue(":id_evenement",idEvenement());
+        query = m_liste_des_evenements->query();
         query.exec();
-        m_fiche_evenement->setQuery(query);
+        m_liste_des_evenements->setQuery(query);
 
-        ficheEvenementChanged();
+        liste_des_evenementsChanged();
         fermerFenetreProprietesEvenement();
     }
     else
