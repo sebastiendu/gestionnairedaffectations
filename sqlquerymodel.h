@@ -14,6 +14,8 @@ public:
     QHash<int, QByteArray> roleNames() const;
     Q_INVOKABLE int getIdFromIndex(int);
     Q_INVOKABLE int getIndexFromId(int);
+
+
     Q_INVOKABLE QVariant getDataFromModel(int ligne, QString colonne);
 
 signals:

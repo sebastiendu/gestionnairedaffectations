@@ -47,7 +47,6 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_etat_tour_heure_sql = new SqlQueryModel;
     m_candidatures_en_attente =  new SqlQueryModel;
     m_personnes_doublons = new SqlQueryModel;
-    m_fiche_evenement = new SqlQueryModel;
     m_responsables = new SqlQueryModel;
     m_sequence_emploi_du_temps = new SqlQueryModel;
 
@@ -134,16 +133,9 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
 
         QSqlQuery query;
 
-        query.prepare("select * from liste_des_evenements");
+        query.prepare("select * from liste_des_evenements ORDER BY id DESC");
         query.exec();
         m_liste_des_evenements->setQuery(query);
-
-
-        query.prepare("select * from liste_des_evenements WHERE id = :id");
-        query.bindValue(":id",idEvenement());
-        query.exec();
-        m_fiche_evenement->setQuery(query);
-
 
         query.prepare("select * from poste where id_evenement=? order by nom ");
         query.addBindValue(idEvenement());
@@ -160,7 +152,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_benevoles_disponibles->setFilterKeyColumn(-1);
 
-        query.prepare("select * from fiche_benevole where id_disponibilite=?");
+        query.prepare("select * from fiche_benevole where id_personne=? LIMIT 1");
         query.addBindValue(m_id_disponibilite);
         query.exec();
         m_fiche_benevole->setQuery(query);
@@ -278,17 +270,16 @@ void GestionnaireDAffectations::setDebutEvenement(QDateTime date, int heure, int
 
 
     query.prepare("UPDATE evenement SET debut = :debut WHERE id = :id");
-    query.bindValue(":debut",dateEtHeure);
+    query.bindValue(":debut",dateEtHeure.toUTC());
     query.bindValue(":id",idEvenement());
 
     if(query.exec())
     {
-        query = m_fiche_evenement->query();
-        query.bindValue(":id_evenement",idEvenement());
+        query = m_liste_des_evenements->query();
         query.exec();
-        m_fiche_evenement->setQuery(query);
+        m_liste_des_evenements->setQuery(query);
 
-        ficheEvenementChanged();
+        liste_des_evenementsChanged();
     }
     else
     {
@@ -311,12 +302,11 @@ void GestionnaireDAffectations::setFinEvenement(QDateTime date, int heure, int m
 
     if(query.exec())
     {
-        query = m_fiche_evenement->query();
-        query.bindValue(":id_evenement",idEvenement());
+        query = m_liste_des_evenements->query();
         query.exec();
-        m_fiche_evenement->setQuery(query);
+        m_liste_des_evenements->setQuery(query);
 
-        ficheEvenementChanged();
+        liste_des_evenementsChanged();
     }
     else
     {
@@ -332,15 +322,14 @@ void GestionnaireDAffectations::updateEvenement(QString nom, QString lieu, bool 
     query.bindValue(":lieu",lieu);
     query.bindValue(":archive",archive);
     query.bindValue(":id",idEvenement());
-    qDebug() << archive;
+
     if(query.exec())
     {
-        query = m_fiche_evenement->query();
-        query.bindValue(":id_evenement",idEvenement());
+        query = m_liste_des_evenements->query();
         query.exec();
-        m_fiche_evenement->setQuery(query);
+        m_liste_des_evenements->setQuery(query);
 
-        ficheEvenementChanged();
+        liste_des_evenementsChanged();
         fermerFenetreProprietesEvenement();
     }
     else
@@ -350,7 +339,12 @@ void GestionnaireDAffectations::updateEvenement(QString nom, QString lieu, bool 
 }
 
 void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
+
+    qDebug() << "L'id recu:" << index;
+
     this->setIdEvenement(m_liste_des_evenements->getIdFromIndex(index));
+
+    qDebug() << "L'id mis en index: " << m_liste_des_evenements->getIdFromIndex(index);
 
     QSqlQuery query = m_benevoles_disponibles_sql->query(); // On fait un select des bénévoles participant à un événement avec un id précis
     query.bindValue(0,idEvenement()); // Cet id correspond à l'id evenement
@@ -362,10 +356,9 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_postes->setQuery(query);
 
-    query = m_fiche_evenement->query();
-    query.bindValue(":id",idEvenement());
+    query = m_liste_des_evenements->query();
     query.exec();
-    m_fiche_evenement->setQuery(query);
+    m_liste_des_evenements->setQuery(query);
 
     query = m_fiche_benevole->query();
     query.bindValue(0,0);
@@ -481,6 +474,7 @@ void GestionnaireDAffectations::setIdAffectation(int id) {
 
 
 void GestionnaireDAffectations::setIdDisponibilite(int id) {
+
     m_id_disponibilite = id;
     QSqlQuery query = m_fiche_benevole->query(); //On demande la fiche d'un bénévole ayant un id precis
     query.bindValue(0, m_id_disponibilite); // Cet id correspond à l'id passé en parametre
@@ -500,17 +494,33 @@ void GestionnaireDAffectations::setIdPersonne(int id) {
 }
 
 
-void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTime debut, QDateTime fin, QString lieu, int id_evenement_precedent) {
+void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTime debut, QDateTime fin, int heureDebut, int heureFin, QString lieu, int id_evenement_precedent) {
+
+    QDateTime dateEtHeureDebut;
+    dateEtHeureDebut = debut.addSecs(heureDebut*3600);
+
+    QDateTime dateEtHeureFin;
+    dateEtHeureFin = fin.addSecs(heureFin*3600);
+
     QSqlQuery query;
     query.prepare("insert into evenement (nom, debut, fin, lieu, id_evenement_precedent) values (?,?,?,?,?)");
     query.addBindValue(nom);
-    query.addBindValue(debut);
-    query.addBindValue(fin);
+    query.addBindValue(dateEtHeureDebut);
+    query.addBindValue(dateEtHeureFin);
     query.addBindValue(lieu);
     query.addBindValue(id_evenement_precedent);
     if (query.exec()) {
         setIdEvenement(query.lastInsertId().toInt());
     }
+    else {
+        qDebug() << "Insertion: " << query.lastError().text();
+    }
+
+    m_liste_des_evenements->query().exec();
+
+    setIdEvenementFromModelIndex(0);
+
+
 }
 
 void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
