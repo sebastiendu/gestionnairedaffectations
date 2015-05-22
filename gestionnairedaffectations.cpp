@@ -49,6 +49,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_personnes_doublons = new SqlQueryModel;
     m_fiche_evenement = new SqlQueryModel;
     m_responsables = new SqlQueryModel;
+    m_sequence_emploi_du_temps = new SqlQueryModel;
 
     if(!m_settings->contains("database/databaseName")) {
         if(!m_settings->contains("database/hostName")) {
@@ -237,6 +238,17 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
 
         m_toursParPosteModel = new ToursParPosteModel(this);
         m_toursParPosteModel->setIdEvenement(idEvenement());
+
+        if (query.prepare("select * from libelle_sequence_evenement where id_evenement=?")) {
+            query.addBindValue(idEvenement());
+            if (query.exec()) {
+                m_sequence_emploi_du_temps->setQuery(query);
+            } else {
+                qCritical() << "Impossible d'executer la requète de chargement des séquences de l'emploi du temps :" << db.lastError().text();
+            }
+        } else {
+            qCritical() << "Impossible de préparer la requète de chargement des séquences de l'emploi du temps :" << db.lastError().text();
+        }
 
     } else {
         qCritical() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
