@@ -36,11 +36,15 @@ Item {
                                     color: "#f3eea5"
                                     border.color: "black"
                                     anchors.centerIn: parent
+                                    anchors.bottom: parent.bottom
                                     width: 200
-                                    height: 50
+                                    height: 60
                                     visible: parent.containsMouse
+                                    z: 100
                                     Label {
-                                        anchors.fill: parent
+                                        anchors.top: parent.top
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
                                         text: "%1: de %2 à %3\n%4 personnes affectées (min %5, max %6)" // FIXME
                                         /*.arg(
                                             modelData.split('|')[0], // id

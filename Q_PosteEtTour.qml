@@ -289,10 +289,42 @@ Item {
                 sortIndicatorVisible: true
 
                 TableViewColumn{ role: "nom"  ; title: "Nom" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/5)-1;}
-                TableViewColumn{ role: "prenom" ; title: "prenom" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/5)-1;}
+                TableViewColumn{ role: "prenom" ; title: "Prenom" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/5)-1;}
                 TableViewColumn{ role: "portable"  ; title: "Téléphone" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/4)-1;}
-                TableViewColumn{ role: "email" ; title: "email" ; elideMode: Text.ElideMiddle}
+                TableViewColumn{ role: "email" ; title: "Email" ; elideMode: Text.ElideMiddle}
 
+            }
+
+
+            ComboBox {
+                id: choixResponsable
+                editable: true
+                model: app.benevoles_disponibles
+
+                anchors.right: ajouterResponsable.left
+                anchors.rightMargin: 10
+                anchors.top: tableauResponsable.bottom
+                width: parent.width*0.50
+                textRole: "nom_personne"
+
+                onCurrentIndexChanged: {
+                        console.log(currentIndex) // On appelle la fonction permettant entre autre de charger toutes les informations du nouvel évenement
+                    }
+
+            }
+
+            Button {
+                id: ajouterResponsable
+                anchors.top: choixResponsable.top
+                anchors.right: rejeterResponsable.left
+                text: " + "
+            }
+
+            Button {
+                id: rejeterResponsable
+                anchors.top: choixResponsable.top
+                anchors.right: tableauResponsable.right
+                text: " - "
             }
 
             TableView {
@@ -310,7 +342,7 @@ Item {
                 width:parent.width *0.95
                 height: parent.height * 0.30
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top:tableauResponsable.bottom
+                anchors.top:choixResponsable.bottom
                 anchors.topMargin: 25
                 selectionMode: SelectionMode.SingleSelection
                 TableViewColumn{ role: "id_tour"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:(3*(tableauTours.width/10))-1; visible: false;delegate: id_tour}

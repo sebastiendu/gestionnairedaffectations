@@ -5,6 +5,7 @@ import QtQuick.Controls 1.2
 
 // import "fonctions.js" as Fonctions
 Item {
+    id: tab
     anchors.fill: parent
     Rectangle {
         anchors.fill: parent
@@ -13,9 +14,40 @@ Item {
 
         BusyIndicator {
             id: chargement
-            anchors.centerIn: parent
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.leftMargin: parent.width/2 - 100
+            anchors.topMargin: parent.height/2 - 30
             running: false
             z: 500
+
+            style: Component {
+
+                Item {
+                Rectangle {
+                    color: Qt.rgba(0,0,0,0.1)
+                    width: 10000
+                    height: 10000
+                    transform: Translate { y: -5000; x:-5000 }
+                    visible: chargement.running
+                }
+
+                Rectangle {
+                    color: "white"
+                    border.color: "black"
+                    width: 200
+                    height: 50
+                    visible: chargement.running
+                    Text {
+                        text: "...Chargement..."
+                        visible: chargement.running
+                        anchors.centerIn: parent
+                    }
+
+                }
+            }
+            }
+
         }
 
         Rectangle {
@@ -86,11 +118,21 @@ Item {
                         MouseArea {
                             anchors.fill: parent;
                             onClicked:{
+
                                 listView.currentIndex = index;
                                 app.setIdDisponibilite(id_personne);
                                 ficheBenevole.model = app.fiche_benevole;
                                 app.setIdDoublons(id_personne);
                                 listeDoublons.model = app.personnes_doublons;
+
+                            }
+
+                            onEntered: {
+                                chargement.running = true;
+                            }
+
+                            onExited: {
+                                chargement.running = false;
                             }
                         }
                     }
@@ -409,7 +451,7 @@ Item {
                     anchors.top: ficheDoublon.bottom
                     anchors.topMargin: (ficheDoublon.anchors.bottomMargin - height)/2
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Accepter"
+                    text: "Inscrire cette fiche et rejeter l'autre"
                     visible: ficheDoublon.model ? true : false
                     onClicked : { }
                 }

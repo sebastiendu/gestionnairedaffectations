@@ -469,6 +469,7 @@ void GestionnaireDAffectations::setIdAffectation(int id) {
 
 
 void GestionnaireDAffectations::setIdDisponibilite(int id) {
+
     m_id_disponibilite = id;
     QSqlQuery query = m_fiche_benevole->query(); //On demande la fiche d'un bénévole ayant un id precis
     query.bindValue(0, m_id_disponibilite); // Cet id correspond à l'id passé en parametre
