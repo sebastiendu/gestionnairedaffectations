@@ -80,8 +80,10 @@ Window {
                 onTriggered: {
                     app.enregistrerNouvelEvenement(
                         nom.text,
-                        datedebut.selectedDate, // + heuredebut.value, FIXME
-                        datefin.selectedDate, // + heurefin.value, FIXME
+                        datedebut.selectedDate,
+                        datefin.selectedDate,
+                        heuredebut.value,
+                        heurefin.value,
                         lieu.text,
                         app.liste_des_evenements.getIdFromIndex(id_evenement_precedent.currentIndex)
                     )
