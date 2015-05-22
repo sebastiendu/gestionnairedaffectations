@@ -22,18 +22,19 @@ void ToursParPosteModel::setIdEvenement(int idEvenement) {
                 int dureeEvenement = finEvenement - debutEvenement;
                 QSqlQuery queryPoste;
                 if (queryPoste.prepare(
-                            "select id, nom"
-                            " from poste"
+                            "select poste.id, poste.nom, min(debut) as debut, max(fin) as fin"
+                            " from poste left join tour on id_poste = poste.id"
                             " where poste.id_evenement = ?"
-                            " order by nom, id")) {
+                            " group by poste.id, poste.nom"
+                            " order by debut, fin")) {
                     queryPoste.addBindValue(idEvenement);
                     if (queryPoste.exec()) {
                         QSqlQuery queryTour;
                         if(queryTour.prepare("select concat_ws('|',"
-                                             " id_tour,"
-                                             " (extract(epoch from debut) - " + QString::number(debutEvenement) + ") / " + QString::number(dureeEvenement) + ","
-                                             " (extract(epoch from fin) - extract(epoch from debut)) / " + QString::number(dureeEvenement) + ","
-                                             " min, max, debut, fin, effectif, besoin, faim"
+                                             " id," // 0
+                                             " (extract(epoch from debut) - " + QString::number(debutEvenement) + ") / " + QString::number(dureeEvenement) + "," // 1
+                                             " (extract(epoch from fin) - extract(epoch from debut)) / " + QString::number(dureeEvenement) + "," // 2
+                                             " min, max, debut, fin, effectif, besoin, faim, taux" // 3 à 10
                                              ")"
                                              " from taux_de_remplissage_tour"
                                              " where id_poste=?"
