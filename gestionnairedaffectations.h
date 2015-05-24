@@ -45,7 +45,7 @@ class GestionnaireDAffectations : public QGuiApplication
 
     Q_PROPERTY(ToursParPosteModel *toursParPosteModel MEMBER m_toursParPosteModel NOTIFY toursParPosteModelChanged)
 
-
+    Q_PROPERTY(SqlQueryModel* sequence_emploi_du_temps MEMBER m_sequence_emploi_du_temps NOTIFY sequenceEmploiDuTempsChanged)
 
 public:
     GestionnaireDAffectations(int & argc, char ** argv);
@@ -150,6 +150,7 @@ signals:
     void heureCouranteChanged();
     void etatTourHeureChanged();
     void toursParPosteModelChanged();
+    void sequenceEmploiDuTempsChanged();
     void candidatureEnAttenteChanged();
     void ficheEvenementChanged();
     void responsablesChanged();
@@ -193,6 +194,7 @@ private:
     SqlQueryModel *m_responsables;
 
     ToursParPosteModel *m_toursParPosteModel;
+    SqlQueryModel *m_sequence_emploi_du_temps;
 
 
     // Variables Temporaires necessaires pour transmettre des informations d'une fenetre QML à une autre
