@@ -10,18 +10,46 @@ Item {
         anchors.fill: parent
         orientation: ListView.Horizontal
         model: app.sequence_emploi_du_temps
-        delegate: Text {
-            text: libelle_sequence
-            height: parent.parent.height
+        delegate: Rectangle {
+            height: parent.height
             width: proportion * parent.parent.width
-            color: "lightgray"
-            font.bold: true
-            style: Text.Outline
-            styleColor: "gray"
-            font.pixelSize: width
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            rotation: -90
+            color: "transparent"
+            Rectangle {
+                anchors.centerIn: parent
+                rotation: -90
+                width: parent.height
+                height: parent.width
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0;
+                        color: "#8f8f8f";
+                    }
+                    GradientStop {
+                        position: .25;
+                        color: "#9f9f9f";
+                    }
+                    GradientStop {
+                        position: .75;
+                        color: "#9f9f9f";
+                    }
+                    GradientStop {
+                        position: 1;
+                        color: "#8f8f8f";
+                    }
+                }
+                Text {
+                    anchors.fill: parent
+                    text: libelle_sequence
+                    color: "lightgray"
+                    font.bold: true
+                    style: Text.Outline
+                    styleColor: "gray"
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: height
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
         }
     }
     ListView {
@@ -29,9 +57,26 @@ Item {
         model: app.toursParPosteModel
         delegate: Component {
             Rectangle {
-                color: "transparent"
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0;
+                        color: "#80808088";
+                    }
+                    GradientStop {
+                        position: .25;
+                        color: "#8f8f8f88";
+                    }
+                    GradientStop {
+                        position: .75;
+                        color: "#8f8f8f88";
+                    }
+                    GradientStop {
+                        position: 1;
+                        color: "#80808088";
+                    }
+                }
                 height: parent.parent.height / (parent.parent.model.rowCount() + 1)
-                width: parent.parent.width
+                width: parent.width
                 Text {
                     anchors.fill: parent
                     text: nom
@@ -41,6 +86,7 @@ Item {
                     font.pixelSize: height
                     color: "white"
                     styleColor: "gray"
+                    font.letterSpacing: width / (20 * text.length)
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
                 }
@@ -54,7 +100,8 @@ Item {
                         width: parent.width * modelData.split('|')[2] // durée
                         height: parent.height
                         radius: 5
-                        border.color: modelData.split('|')[10] === '100' ? "darkgreen" : modelData.split('|')[10] > 100 ? "darkyellow"  : "darkred"
+                        //border.color: modelData.split('|')[10] === '100' ? "darkgreen" : modelData.split('|')[10] > 100 ? "#888800"  : "darkred" // taux
+                        //border.width: modelData.split('|')[10] / 100
                         color: modelData.split('|')[9] === '0' ? "green" : modelData.split('|')[9] < 0 ? "yellow"  : "red" // faim
                         opacity: 0.75
                         MouseArea {
