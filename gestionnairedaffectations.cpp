@@ -511,6 +511,19 @@ void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTim
 
 }
 
+void GestionnaireDAffectations::supprimerEvenement() {
+
+    QSqlQuery query;
+    query.prepare("DELETE FROM evenement WHERE id = :id");
+    query.bindValue(":id", idEvenement());
+    query.exec();
+
+    m_liste_des_evenements->query().exec();
+    setIdEvenementFromModelIndex(0);
+
+
+}
+
 void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
 {
     QFile file(url.toLocalFile());

@@ -140,7 +140,7 @@ ApplicationWindow { // Fenetre principale
 
         width: 400
         standardButtons: StandardButton.NoButton
-       // modality: Qt.ApplicationModal
+        // modality: Qt.ApplicationModal
 
         Connections {
             target: app
@@ -148,7 +148,7 @@ ApplicationWindow { // Fenetre principale
 
                 _inputFin.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")))
                 _inputDebut.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")))
-               console.log(Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin"))));
+                console.log(Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin"))));
             }
 
             onFermerFenetreProprietesEvenement : {
@@ -219,9 +219,29 @@ ApplicationWindow { // Fenetre principale
 
 
 
-    onAccepted: {
-        console.log(_inputNom.text);
+        onAccepted: {
+            console.log(_inputNom.text);
+        }
+
     }
+
+    MessageDialog {
+        id: supprimerEvenement
+        icon: StandardIcon.Warning
+        standardButtons: StandardButton.Yes |StandardButton.No
+            text: "Etes vous sur de vouloir supprimer l'événemeent <b><i>"
+                  + app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "nom")
+                  + "</b></i> ?"
+
+        onYes : {
+            app.supprimerEvenement();
+            supprimerEvenement.close();
+        }
+
+        onNo : {
+            supprimerEvenement.close();
+        }
+
 
     }
 
@@ -292,7 +312,7 @@ ApplicationWindow { // Fenetre principale
             }
             MenuItem {
                 text: qsTr("Supprimer")
-                onTriggered: console.log("TODO : Ouvrir l'interface de suppression de l'évènement");
+                onTriggered: supprimerEvenement.open();
             }
             MenuItem {
                 text: qsTr("Quitter")

@@ -66,6 +66,7 @@ public:
     Q_INVOKABLE void setResponsables();
 
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, int heureDebut, int heureFin, QString, int id_evenement_precedent);
+    Q_INVOKABLE void supprimerEvenement();
     Q_INVOKABLE void enregistrerPlanEvenement(QUrl url);
     Q_INVOKABLE void setDebutEvenement(QDateTime date, int heure, int minutes);
     Q_INVOKABLE void setFinEvenement(QDateTime date, int heure, int minutes);
