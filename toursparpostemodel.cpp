@@ -8,68 +8,42 @@ ToursParPosteModel::ToursParPosteModel(QObject *parent) :
 {
 }
 void ToursParPosteModel::setIdEvenement(int idEvenement) {
-    QSqlQuery queryEvenement;
-    if (queryEvenement.prepare("select"
-                               " extract(epoch from min(debut)) as debut,"
-                               " extract(epoch from max(fin)) as fin"
-                               " from poste left join tour on id_poste = poste.id"
-                               " where id_evenement = ?")) {
-        queryEvenement.addBindValue(idEvenement);
-        if (queryEvenement.exec()) {
-            if (queryEvenement.first()) {
-                int debutEvenement = queryEvenement.value("debut").toInt();
-                int finEvenement = queryEvenement.value("fin").toInt();
-                int dureeEvenement = finEvenement - debutEvenement;
-                QSqlQuery queryPoste;
-                if (queryPoste.prepare(
-                            "select poste.id, poste.nom, min(debut) as debut, max(fin) as fin"
-                            " from poste left join tour on id_poste = poste.id"
-                            " where poste.id_evenement = ?"
-                            " group by poste.id, poste.nom"
-                            " order by debut, fin")) {
-                    queryPoste.addBindValue(idEvenement);
-                    if (queryPoste.exec()) {
-                        QSqlQuery queryTour;
-                        if(queryTour.prepare("select concat_ws('|',"
-                                             " id," // 0
-                                             " (extract(epoch from debut) - " + QString::number(debutEvenement) + ") / " + QString::number(dureeEvenement) + "," // 1
-                                             " (extract(epoch from fin) - extract(epoch from debut)) / " + QString::number(dureeEvenement) + "," // 2
-                                             " min, max, debut, fin, effectif, besoin, faim, taux" // 3 à 10
-                                             ")"
-                                             " from taux_de_remplissage_tour"
-                                             " where id_poste=?"
-                                             " order by debut, fin")) {
-                            while (queryPoste.next()) {
-                                Poste poste;
-                                poste.id = queryPoste.value("id").toInt();
-                                poste.nom = queryPoste.value("nom").toString();
-                                queryTour.addBindValue(poste.id);
-                                if (queryTour.exec()) {
-                                    while (queryTour.next()) {
-                                        poste.tours.append(queryTour.value(0).toString());
-                                    }
-                                    postes.append(poste);
-                                } else {
-                                    qDebug() << "Echec d'execution de la requête de lecture des tours du poste" << poste.id << "(" << poste.nom << ") :" << queryTour.lastError();
-                                }
-                            }
-                        } else {
-                            qDebug() << "Echec de preparation de la requête de lecture des tours d'un poste :" << queryTour.lastError();
+    QSqlQuery queryPoste;
+    if (queryPoste.prepare(
+                "select id, nom"
+                " from postes_par_ordre_chronologique"
+                " where id_evenement = ?")) {
+        queryPoste.addBindValue(idEvenement);
+        if (queryPoste.exec()) {
+            QSqlQuery queryTour;
+            if(queryTour.prepare(
+                        "select concat_ws('|',"
+                        " id, position_relative, duree_relative, min, max, debut, fin, effectif, besoin, faim, taux"
+                         ")"
+                         " from tours_emploi_du_temps"
+                         " where id_poste=?")) {
+                while (queryPoste.next()) {
+                    Poste poste;
+                    poste.id = queryPoste.value("id").toInt();
+                    poste.nom = queryPoste.value("nom").toString();
+                    queryTour.addBindValue(poste.id);
+                    if (queryTour.exec()) {
+                        while (queryTour.next()) {
+                            poste.tours.append(queryTour.value(0).toString());
                         }
+                        postes.append(poste);
                     } else {
-                        qDebug() << "Echec d'execution de la requête de lecture des postes de l'evenement" << idEvenement << ":" << queryPoste.lastError();
+                        qDebug() << "Echec d'execution de la requête de lecture des tours du poste" << poste.id << "(" << poste.nom << ") :" << queryTour.lastError();
                     }
-                } else {
-                    qDebug() << "Echec de préparation de la requête de lecture des postes d'un évènement' :" << queryPoste.lastError();
                 }
             } else {
-                qDebug() << "Evenement numéro" << idEvenement << "introuvable";
+                qDebug() << "Echec de preparation de la requête de lecture des tours d'un poste :" << queryTour.lastError();
             }
         } else {
-            qDebug() << "Echec d'execution de la requête de récupération des dates de début et de fin de l'évènement" << idEvenement << ":" << queryEvenement.lastError();
+            qDebug() << "Echec d'execution de la requête de lecture des postes de l'evenement" << idEvenement << ":" << queryPoste.lastError();
         }
     } else {
-        qDebug() << "Echec de préparation de la requête de récupération des dates de début et de fin d'un évènement :" << queryEvenement.lastError();
+        qDebug() << "Echec de préparation de la requête de lecture des postes d'un évènement' :" << queryPoste.lastError();
     }
 }
 
