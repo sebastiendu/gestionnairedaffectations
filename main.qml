@@ -332,7 +332,7 @@ ApplicationWindow { // Fenetre principale
                 onTriggered: app.genererTableauRemplissage();
             }
             MenuItem {
-                text: qsTr("Fiches à problèmes")
+                text: qsTr("Bénévoles sans tour de travail")
                 onTriggered: app.genererFichesProblemes();
             }
             MenuItem {

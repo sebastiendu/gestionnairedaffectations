@@ -30,6 +30,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* fiche_poste_tour MEMBER m_fiche_poste_tour NOTIFY fiche_posteTourChanged)
     Q_PROPERTY(SqlQueryModel* tour_benevoles MEMBER m_tour_benevole NOTIFY tourChanged)
     Q_PROPERTY(SqlQueryModel* affectations MEMBER m_affectations NOTIFY affectationsChanged)
+    Q_PROPERTY(SqlQueryModel* lotsDejaCrees MEMBER m_lotsDejaCrees NOTIFY lotDejaCreesChanged)
     Q_PROPERTY(QSortFilterProxyModel* planCourant MEMBER m_plan NOTIFY planChanged)
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
     Q_PROPERTY(QSortFilterProxyModel* poste_et_tour MEMBER m_poste_et_tour NOTIFY posteEtTourChanged)
@@ -93,8 +94,7 @@ public:
                                       QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
                                       QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
                                       QString commentaireBenevole);
-    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees);
-
+    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees); 
 
     Q_INVOKABLE float getRatioX();
     Q_INVOKABLE float getRatioY();
@@ -149,6 +149,7 @@ signals:
     void planMisAJour();
     void heureCouranteChanged();
     void etatTourHeureChanged();
+    void lotDejaCreesChanged();
     void toursParPosteModelChanged();
     void sequenceEmploiDuTempsChanged();
     void candidatureEnAttenteChanged();
@@ -175,6 +176,7 @@ private:
     SqlQueryModel *m_tour_benevole;
     SqlQueryModel *m_affectations;
     SqlQueryModel *m_postes_tours_affectations;
+    SqlQueryModel *m_lotsDejaCrees;
     int m_id_disponibilite;
     int m_id_poste;
     int m_id_tour;

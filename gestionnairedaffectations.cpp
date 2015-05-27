@@ -20,7 +20,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
     qmlRegisterType<ToursParPosteModel>("fr.ldd.qml", 1, 0, "ToursParPosteModel");
 
-    qInstallMessageHandler(gestionDesMessages);
+    //qInstallMessageHandler(gestionDesMessages);
 
     m_settings = new Settings;
 
@@ -45,6 +45,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_horaires = new SqlQueryModel;
     m_etat_tour_heure = new QSortFilterProxyModel(this);
     m_etat_tour_heure_sql = new SqlQueryModel;
+    m_lotsDejaCrees = new SqlQueryModel;
     m_candidatures_en_attente =  new SqlQueryModel;
     m_personnes_doublons = new SqlQueryModel;
     m_responsables = new SqlQueryModel;
@@ -217,6 +218,14 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.bindValue(":fin",m_heure_courante.toString("yyyy-MM-d h:m:s"));
         query.exec();
         m_etat_tour_heure_sql->setQuery(query);
+
+        query.prepare("select date_de_creation, titre, traite, id, cle from lot;");
+        query.exec();
+        m_lotsDejaCrees->setQuery(query);
+
+     /*   m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
+        m_etat_tour_heure->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        m_etat_tour_heure->setFilterKeyColumn(-1); */
 
         query.prepare("select debut, fin from evenement where id=?");
         query.addBindValue(idEvenement());
@@ -956,9 +965,12 @@ void GestionnaireDAffectations::setIdDoublons(int id_doublon) {
 
 QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool proposees, bool relancees)
 {
-    QString adresseEmail;
+    QString adresseEmail; // L'adresse email qui sera retournée après génération
+
     QVariant prefixe = m_settings->value("email/prefixe");
+
     QVariant domaine = m_settings->value("email/domaine");
+
     if (prefixe.isValid() && domaine.isValid()) {
         if (possibles or proposees or relancees) {
             QSqlDatabase database = QSqlDatabase::database();
@@ -966,7 +978,7 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
                 QStringList titre;
                 if (possibles) titre << "possibles";
                 if (proposees) titre << "déjà proposées";
-                if (proposees) titre << "déjà proposées plusieurs fois";
+                if (relancees) titre << "déjà proposées plusieurs fois";
                 QSqlQuery query;
                 if (query.prepare("insert into lot(titre) values(?) returning cle")) {
                     query.addBindValue("Affectations " + titre.join(" ou "));
@@ -975,6 +987,7 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
                         query.next();
                         QVariant cle = query.value(0);
                         adresseEmail = prefixe.toString() + '+' + id.toString() + '_' + cle.toString() + '@' + domaine.toString();
+
                         QStringList conditions;
                         if (possibles) conditions << "statut='possible'";
                         if (proposees) conditions << "statut='proposee' and id not in (select id from lot_affectation where traite and reussi)";
@@ -988,6 +1001,11 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
                             query.addBindValue(id.toInt());
                             if (query.exec()) {
                                 database.commit();
+
+                                query.prepare("select date_de_creation, titre, traite, id, cle from lot;");
+                                query.exec();
+                                m_lotsDejaCrees->setQuery(query);
+
                             } else {
                                 qCritical() << "Impossible d'executer la requête de population du lot d'affectations : " << query.lastError();
                                 database.rollback();
@@ -1472,7 +1490,7 @@ void GestionnaireDAffectations::genererFichesProblemes()
 {
     // FICHIER //
 
-    QTemporaryFile* f = new QTemporaryFile("Fiche_a_problemes_XXXXXX.odt");
+    QTemporaryFile* f = new QTemporaryFile("Fiche_bénévoles_sans_tour_de_travail_XXXXXX.odt");
     f->open();
 
     // REQUETE //
