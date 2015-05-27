@@ -42,13 +42,22 @@ Window {
         id: _descriptionP
 
         anchors.top: _description.bottom
-        anchors.topMargin: 10
-        anchors.bottom: _button.top
-        anchors.bottomMargin: 10
+        anchors.topMargin: 20
         width: parent.width * 0.90
         anchors.left: parent.left
         anchors.leftMargin:  parent.width * 0.05
 
+    }
+
+    CheckBox {
+        id: autonome
+        anchors.top: _descriptionP.bottom
+        anchors.left: parent.left
+        anchors.topMargin: 10
+        anchors.leftMargin: (parent.width - width)/2
+        anchors.bottom: _button.top
+        anchors.bottomMargin: 10
+        text: "Le poste est autonome"
     }
 
     Button {
@@ -60,7 +69,7 @@ Window {
                 console.log("Erreur, veuillez remplir les deux champs");
             }
             else{
-                app.insererPoste(_nomP.text, _descriptionP.text , app.getRatioX() , app.getRatioY());
+                app.insererPoste(_nomP.text, _descriptionP.text , autonome.checked, app.getRatioX() , app.getRatioY());
             }
             nouveauPoste.close();
         }

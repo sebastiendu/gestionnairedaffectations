@@ -14,6 +14,7 @@ Item {
     anchors.fill: parent
 
     Rectangle {
+        id: contenu
         anchors.fill : parent
 
         color: "white"
@@ -271,60 +272,73 @@ Item {
                 //anchors.horizontalCenter: parent.horizontalCenter
                 text: "Enregistrer"
                 onClicked: {
-                     app.modifierNomPoste(_nomPoste.text)
-                     app.modifierDescriptionPoste(_descriptionPoste.text)
-                     app.rechargerPlan();
+                    app.modifierNomPoste(_nomPoste.text)
+                    app.modifierDescriptionPoste(_descriptionPoste.text)
+                    app.rechargerPlan();
                 }
 
 
             }
 
-            TableView {
-                id: tableauResponsable
-                height: parent.height /6
+            RectangleTitre {
+
+                id: blockResponsable
+                couleur : "#bdc3c7"
+                titre: "Responsable"
+                height: tableauResponsable.height + ajouterResponsable.height + tableauResponsable.anchors.margins + 5
                 anchors.top: _btnSauvegarderChangements.bottom
-                anchors.topMargin: 20
+                anchors.topMargin: 10
                 width:parent.width *0.95
                 anchors.horizontalCenter: parent.horizontalCenter
-                sortIndicatorVisible: true
 
-                TableViewColumn{ role: "nom"  ; title: "Nom" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/5)-1;}
-                TableViewColumn{ role: "prenom" ; title: "Prenom" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/5)-1;}
-                TableViewColumn{ role: "portable"  ; title: "Téléphone" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/4)-1;}
-                TableViewColumn{ role: "email" ; title: "Email" ; elideMode: Text.ElideMiddle}
+                TableView {
+                    id: tableauResponsable
+                    height: contenu.height/6
+                    anchors.top: parent.top
+                    anchors.margins: 10
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    sortIndicatorVisible: true
 
-            }
+                    TableViewColumn{ role: "nom"  ; title: "Nom" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/5)-1;}
+                    TableViewColumn{ role: "prenom" ; title: "Prenom" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/5)-1;}
+                    TableViewColumn{ role: "portable"  ; title: "Téléphone" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/4)-1;}
+                    TableViewColumn{ role: "email" ; title: "Email" ; elideMode: Text.ElideMiddle}
+
+                }
 
 
-            ComboBox {
-                id: choixResponsable
-                editable: true
-                model: app.benevoles_disponibles
+                ComboBox {
+                    id: choixResponsable
+                    editable: true
+                    model: app.benevoles_disponibles
 
-                anchors.right: ajouterResponsable.left
-                anchors.rightMargin: 10
-                anchors.top: tableauResponsable.bottom
-                width: parent.width*0.50
-                textRole: "nom_personne"
+                    anchors.right: ajouterResponsable.left
+                    anchors.rightMargin: 10
+                    anchors.top: tableauResponsable.bottom
+                    width: parent.width*0.50
+                    textRole: "nom_personne"
 
-                onCurrentIndexChanged: {
+                    onCurrentIndexChanged: {
                         console.log(currentIndex) // On appelle la fonction permettant entre autre de charger toutes les informations du nouvel évenement
                     }
 
-            }
+                }
 
-            Button {
-                id: ajouterResponsable
-                anchors.top: choixResponsable.top
-                anchors.right: rejeterResponsable.left
-                text: " + "
-            }
+                Button {
+                    id: ajouterResponsable
+                    anchors.top: choixResponsable.top
+                    anchors.right: rejeterResponsable.left
+                    text: " + "
+                }
 
-            Button {
-                id: rejeterResponsable
-                anchors.top: choixResponsable.top
-                anchors.right: tableauResponsable.right
-                text: " - "
+                Button {
+                    id: rejeterResponsable
+                    anchors.top: choixResponsable.top
+                    anchors.right: parent.right
+                    text: " - "
+                }
+
             }
 
             TableView {
@@ -342,7 +356,7 @@ Item {
                 width:parent.width *0.95
                 height: parent.height * 0.30
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top:choixResponsable.bottom
+                anchors.top:blockResponsable.bottom
                 anchors.topMargin: 25
                 selectionMode: SelectionMode.SingleSelection
                 TableViewColumn{ role: "id_tour"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:(3*(tableauTours.width/10))-1; visible: false;delegate: id_tour}
@@ -435,6 +449,7 @@ Item {
                             id: nouveauNombre
                             anchors.fill: parent
                             text: styleData.value
+                            color: styleData.selected ? "white" : "black"
                             // activeFocusOnPress: false
                             //   selectByMouse: true
                             horizontalAlignment: TextInput.AlignHCenter
@@ -443,6 +458,8 @@ Item {
                                 if(styleData.value != nouveauNombre.text)
                                 {
                                     app.modifierTourMinMax(styleData.role, nouveauNombre.text, tableauTours.model.getDataFromModel(styleData.row,"id_tour"))
+                                    font.underline = "true"
+
                                     console.log("On enregistre");
                                 }
                                 else
@@ -514,7 +531,7 @@ Item {
                 onClicked: {
                     app.insererTour(tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"fin"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"min"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"max"))
                     tableauTours.selection.select(tableauTours.rowCount-1);
-            }
+                }
             }
 
             Button {

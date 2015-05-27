@@ -35,15 +35,16 @@ Item {
                 Rectangle {
                     color: "white"
                     border.color: "black"
-                    width: 200
+                    width: _texteChargement.width+50
                     height: 50
                     visible: chargement.running
                     Text {
-
+                        id: _texteChargement
                         text: "Recherche de possibles doublons…"
                         visible: chargement.running
                         anchors.centerIn: parent
                     }
+
 
                 }
             }

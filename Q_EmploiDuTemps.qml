@@ -49,6 +49,7 @@ Item {
         }
     }
     ListView {
+        id: listeTour
         anchors.fill: parent
         model: app.toursParPosteModel
         delegate: Component {
@@ -104,9 +105,52 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: console.info("setIdTour(" + modelData.split('|')[0] + ") (TODO)")
+
+                            onEntered: {
+                                 info.visible = true
+                                 info.y = y
+                                 //resumeTour.text = parent.index
+                                 titreTour.text = id
+                            }
+                            onExited: {
+                                info.visible = false
+                            }
                         }
                     }
                 }
+
+
+
+                }
+            }
+
+        Rectangle {
+            id: info
+            color: "white"
+            radius:5
+            border.color: "black"
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.leftMargin: parent.width*0.3
+            width: parent.width*0.4
+            visible: false
+            height: 50
+
+            Text {
+                id: titreTour
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.leftMargin: 15
+                anchors.topMargin: 10
+
+            }
+
+            Text {
+                id: resumeTour
+                anchors.top: titreTour.bottom
+                anchors.left: parent.left
+                anchors.leftMargin: 15
+                anchors.topMargin: 10
             }
         }
     }

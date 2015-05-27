@@ -73,7 +73,7 @@ public:
     Q_INVOKABLE void updateEvenement(QString nom, QString lieu, bool archive);
 
 
-    Q_INVOKABLE void insererPoste(QString,QString,float,float);
+    Q_INVOKABLE void insererPoste(QString,QString,bool, float,float);
     Q_INVOKABLE void supprimerPoste(int);
     Q_INVOKABLE void rafraichirStatistiquePoste(int n, QString nom);
     Q_INVOKABLE void modifierPositionPoste(float x,float y);

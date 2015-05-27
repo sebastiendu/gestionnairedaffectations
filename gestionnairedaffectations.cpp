@@ -5,7 +5,8 @@
 #include <QtDebug>
 #include <QQuickView>
 #include <QXmlSimpleReader>
-#include "gestionnairedaffectations.h"
+#include "gestionnairedaffectations.h"+
+
 
 
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
@@ -605,11 +606,12 @@ void GestionnaireDAffectations::mettreAJourModelPlan(){
     qDebug() << "Nombre de postes à ce moment: " << m_postes->rowCount();
 }
 
-void GestionnaireDAffectations::insererPoste(QString poste, QString description, float posx, float posy) {
+void GestionnaireDAffectations::insererPoste(QString poste, QString description, bool autonome, float posx, float posy) {
     QSqlQuery query;
-    query.prepare("INSERT INTO poste (id_evenement,nom,description,posx,posy) VALUES (:id_evenement, :poste, :description, :posx, :posy);");
+    query.prepare("INSERT INTO poste (id_evenement,nom,description,posx,posy,autonome) VALUES (:id_evenement, :poste, :description, :posx, :posy, :autonome);");
     query.bindValue(":id_evenement",idEvenement());
     query.bindValue(":poste",poste);
+    query.bindValue(":autonome",autonome);
     query.bindValue(":description",description);
     query.bindValue(":posx",posx);
     query.bindValue(":posy",posy);

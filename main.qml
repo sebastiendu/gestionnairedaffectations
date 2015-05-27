@@ -247,6 +247,7 @@ ApplicationWindow { // Fenetre principale
 
     Dialog {
         id: parametresCourriel
+        width: prefixe.width+_variable.width+domaine.width+20
         modality: Qt.ApplicationModal
         standardButtons: StandardButton.Ok | StandardButton.Cancel
         title: "Paramètres de courriel"
@@ -262,6 +263,8 @@ ApplicationWindow { // Fenetre principale
             }
 
             Text {
+                id: _variable
+                anchors.verticalCenter: prefixe.verticalCenter
                 text: "+<i>variable</i>@"
             }
             TextField {
@@ -318,12 +321,6 @@ ApplicationWindow { // Fenetre principale
                 text: qsTr("Quitter")
                 onTriggered: Qt.quit();
             }
-        }
-        Menu {
-            title: qsTr("&Edition")
-        }
-        Menu {
-            title: qsTr("&Affichage")
         }
 
         Menu {

@@ -5,10 +5,11 @@ import QtQuick.Controls 1.2
 Item {
 
     property string titre: ""
+    property string couleur : "black"
 
     Rectangle {
 
-        border.color: "black"
+        border.color: couleur
         radius: 5
         anchors.fill: parent
 
