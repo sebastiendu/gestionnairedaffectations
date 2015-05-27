@@ -158,20 +158,33 @@ function nomJourEtDate (date)
 
 }
 
+WorkerScript.onMessage = function(message) {
+    if(message.run === true) {
+           var i = 2;
+    }
+    WorkerScript.sendMessage({run : false});
+}
+
+
+function changerEvenement() {
+     app.setIdEvenementFromModelIndex(tableauEvenement.currentRow)
+}
+
+
 
 function definirCouleurCercleNom (statut) {
-    if(statut == "acceptee")
+    if(statut == "acceptee" || statut == "validee")
         return "green";
-    else if(statut == "rejetee")
+    else if(statut == "rejetee" || statut == "annulee")
         return "red"
     else
         return "orange";
 }
 
 function couleurCercle(statut){
-    if(statut == "acceptee")
+    if(statut == "acceptee" || statut == "validee")
         return "green";
-    else if(statut == "rejetee")
+    else if(statut == "rejetee" || statut == "annulee")
         return "red"
     else
         return "orange";
@@ -202,9 +215,6 @@ function heureMinutes(dateRecu) {
 
 
 
-
-
-
 function afficherFenetreNouveauPoste() {
     var component = Qt.createComponent("nouveauPoste.qml")
     if( component.status !== Component.Ready )
@@ -230,14 +240,26 @@ function afficherFenetreSupprimerPoste() {
 }
 
 function afficherFenetreAjouterTour(champ, valeur,idtour,h,m) {
-    var component = Qt.createComponent("CalendrierTour.qml")
+    var component = Qt.createComponent("Calendrier.qml")
     if( component.status !== Component.Ready )
     {
         if( component.status === Component.Error )
             console.debug("Error:"+ component.errorString() );
         return;
     }
-    var window = component.createObject(gestionDesAffectations, {"champ":champ, "valeur": valeur, "idtour": idtour, "heureRecu":h,"minutesRecu":m })
+    var window = component.createObject(gestionDesAffectations, {"champ":champ,"attribut": "tour", "valeur": valeur, "idtour": idtour, "heureRecu":h,"minutesRecu":m })
+    window.show() // On ouvre la fenetre d'ajout du nouveau poste
+}
+
+function afficherFenetreCalendrier(champ, valeur,h,m) {
+    var component = Qt.createComponent("Calendrier.qml")
+    if( component.status !== Component.Ready )
+    {
+        if( component.status === Component.Error )
+            console.debug("Error:"+ component.errorString() );
+        return;
+    }
+    var window = component.createObject(gestionDesAffectations, {"champ": champ, "attribut": "evenement", "valeur": valeur,  "heureRecu":h,"minutesRecu":m })
     window.show() // On ouvre la fenetre d'ajout du nouveau poste
 }
 

@@ -11,7 +11,7 @@
         <file>nouveauPoste.qml</file>
         <file>supprimerPoste.qml</file>
         <file>RectangleTitre.qml</file>
-        <file>CalendrierTour.qml</file>
+        <file>Calendrier.qml</file>
         <file>test.qml</file>
         <file>Q_AffectationsListe.qml</file>
         <file>Trait.qml</file>
@@ -24,5 +24,6 @@
         <file>Q_EmploiDuTemps.qml</file>
         <file>variables.js</file>
         <file>DatePicker.qml</file>
+        <file>Q_SolliciterAnciensBenevoles.qml</file>
     </qresource>
 </RCC>

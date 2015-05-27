@@ -93,10 +93,13 @@ Item {
             }
 
             model: app.benevoles_disponibles
-            highlight: Rectangle { z:5;color: "blue"; radius: 5; opacity: 0.5; width: listeDesDisponibles.width ; height:13 ;y: listeDesDisponibles.currentItem.y;x: listeDesDisponibles.currentItem.x}
+            highlight: Rectangle { visible: (listeDesDisponibles.currentIndex == -1 )? false: true; z:5;color: "blue"; radius: 5; opacity: 0.5; width: listeDesDisponibles.width ; height:13 ;y: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.y;x: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.x}
             focus: true
             highlightFollowsCurrentItem: false
 
+        }
+        Component.onCompleted: {
+            listeDesDisponibles.currentIndex = -1;
         }
 
 
@@ -207,7 +210,7 @@ Item {
                     anchors.left: parent.left
                     anchors.leftMargin: 20;
                     text: Fonctions.dateTour(debut,fin) +
-                          nombre_affectations + "/" +max  + "\t" + "(min: " + min + ", max: " + max +") \t"
+                          (nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees) + "/" +max  + "\t" + "(min: " + min + ", max: " + max +") \t"
 
 
                 }
@@ -221,7 +224,7 @@ Item {
                         height: 8
                         valeurmin: min
                         valeurmax: max
-                        valeur: nombre_affectations
+                        valeur: (nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees)
                         couleurDefinie: ( nombre_affectations_proposees != 0 ) ? "orange" : ""
                     }
 
@@ -245,12 +248,16 @@ Item {
                 section.delegate: sectionHeading
 
                 clip: true
-                highlight: Rectangle { z:5; color: "blue"; radius: 5; opacity: 0.5; width: listePoste.width ; height:13 ;y: listePoste.currentItem.y}
+                highlight: Rectangle { visible: (listePoste.currentIndex == -1)? false: true; z: 5; color: "blue"; radius: 5; opacity: 0.5; width: listePoste.width ; height:13 ;y: (listePoste.currentIndex == -1)? 0:listePoste.currentItem.y}
                 highlightFollowsCurrentItem: false
                 focus: true
 
 
 
+            }
+
+            Component.onCompleted: {
+                listePoste.currentIndex = -1;
             }
 
             ScrollBar {

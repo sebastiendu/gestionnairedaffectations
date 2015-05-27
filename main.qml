@@ -22,6 +22,7 @@ ApplicationWindow { // Fenetre principale
     color: "#ffffff"
 
 
+
     Action {
         id: nouvelEvenement
         text: qsTr("&Nouveau")
@@ -66,6 +67,164 @@ ApplicationWindow { // Fenetre principale
         tooltip: "Définir les paramètres d'envoi des messages de courriel par lot"
         onTriggered: parametresCourriel.open()
     }
+
+
+    Action {
+        id: actionOuvrirEvenement
+        text: qsTr("Ouvrir un Événement")
+        onTriggered: fenetreOuvrirEvenement.open()
+    }
+
+    Dialog {
+        id: fenetreOuvrirEvenement
+
+        width: 700
+
+        TableView { // Le menu déroulant permettant de sélectionner l'événement
+            id: tableauEvenement
+            // height:50
+            anchors.right: parent.right
+            anchors.rightMargin: 0
+            anchors.left: parent.left
+            anchors.leftMargin: 0
+            anchors.top: parent.top
+            anchors.topMargin: 0
+
+            model: app.liste_des_evenements // On charge la liste des évenement du menu déroulant
+            selectionMode: SelectionMode.SingleSelection
+            TableViewColumn{ role: "id"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:((tableauEvenement.width/10))-1; visible: false;}
+            TableViewColumn{ role: "nom"  ; title: "Nom" ; horizontalAlignment: Text.AlignHCenter;width:3*(tableauEvenement.width/10)-1}
+            TableViewColumn{ role: "archive" ; title: "Archivé" ; horizontalAlignment: Text.AlignHCenter;width:(1.5*tableauEvenement.width/10)-1;}
+            TableViewColumn{ role: "debut"  ; title: "Debut" ;  horizontalAlignment: Text.AlignHCenter; width:(2*(tableauEvenement.width/10))-1; delegate: Text { text: Fonctions.dateFR(styleData.value);elide:styleData.elideMode;color: (styleData.selected)? "white" : "black"}}
+            TableViewColumn{ role: "fin" ; title: "Fin" ; horizontalAlignment: Text.AlignHCenter;width:(2*(tableauEvenement.width/10))-1; delegate: Text { text: Fonctions.dateFR(styleData.value);elide:styleData.elideMode; color: (styleData.selected)? "white" : "black"}}
+            TableViewColumn{ role: "lieu"  ; title: "Lieu" ; horizontalAlignment: Text.AlignHCenter;width:(1.5*tableauEvenement.width/10)-1;}
+
+            rowDelegate: Rectangle {
+
+                color: styleData.selected ? Qt.rgba(0,0,1,0.5) : "white"
+                MouseArea {
+                    anchors.fill: parent
+                    onDoubleClicked: {
+
+                        app.setIdEvenementFromModelIndex(styleData.row)
+                        fenetreOuvrirEvenement.close();
+
+
+
+                    }
+
+                    onClicked: {
+                        tableauEvenement.currentRow = styleData.row
+                        tableauEvenement.selection.clear();
+                        tableauEvenement.selection.select(styleData.row);
+                    }
+                }
+            }
+
+
+        }
+
+
+
+        onAccepted : {
+
+            if(tableauEvenement.currentRow != -1) app.setIdEvenementFromModelIndex(tableauEvenement.currentRow);
+            fenetreOuvrirEvenement.close();
+
+        }
+
+    }
+
+    Dialog {
+        id: proprietesEvenement
+
+        width: 400
+        standardButtons: StandardButton.NoButton
+       // modality: Qt.ApplicationModal
+
+        Connections {
+            target: app
+            onListe_des_evenementsChanged: {
+
+                _inputFin.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")))
+                _inputDebut.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")))
+               console.log(Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin"))));
+            }
+
+            onFermerFenetreProprietesEvenement : {
+                proprietesEvenement.close();
+            }
+
+
+        }
+
+
+        Text { id: _nom; text: "Nom: \t";anchors.left: parent.left;anchors.leftMargin: 20 }
+        TextField {id: _inputNom; anchors.left: _nom.right; width: 200; text: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "nom");anchors.leftMargin: 20}
+        Text { text: "Lieu: \t" ;id: _lieu; anchors.top: _nom.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+        TextField { id: _inputLieu; anchors.left: _lieu.right; width: 200;  anchors.top: _nom.bottom; text: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "lieu");anchors.topMargin:20;anchors.leftMargin: 20}
+        Text { text: "Debut: \t"; id: _debut; anchors.top: _lieu.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+        TextField {id: _inputDebut; anchors.left: _debut.right;  readOnly: true; width: 200;  anchors.top: _lieu.bottom; text: Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")));anchors.topMargin:20;anchors.leftMargin: 20}
+        Button {
+            id: boutonCalendrierDebut
+            anchors.top: _inputDebut.top
+            anchors.left: _inputDebut.right
+            anchors.leftMargin: 10
+            width: 30
+            text: "v"
+            onClicked : { Fonctions.afficherFenetreCalendrier("debut",app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut"),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")).getHours(),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")).getMinutes())}
+        }
+
+        Text { text: "Fin: \t";id: _fin; anchors.top: _debut.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+        TextField{ id: _inputFin; anchors.top: _debut.bottom;  readOnly: true; width: 200; anchors.left: _fin.right; text: Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")));anchors.topMargin:20;anchors.leftMargin: 20}
+        Button {
+            id: boutonCalendrierFin
+            anchors.top: _inputFin.top
+            anchors.left: _inputFin.right
+            anchors.leftMargin: 10
+            width: 30
+            text: "v"
+            onClicked : { Fonctions.afficherFenetreCalendrier("fin",app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin"),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")).getHours(),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")).getMinutes())}
+        }
+
+        Text { text: "Archivé: \t" ; id: _archive; anchors.top: _fin.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
+        CheckBox { id: _checkboxArchive; anchors.top: _fin.bottom; anchors.left: _archive.right;anchors.topMargin:20;anchors.leftMargin: 20; checked: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "archive") }
+
+        Button {
+            id: _boutonChangerPlan
+            text: "Changer le plan de l'événement"
+            anchors.top: _checkboxArchive.bottom
+            anchors.topMargin: 20
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            onClicked:  { planEvenement.open()}
+        }
+
+        Button {
+            id: _boutonEnregistrer
+            anchors.top: _boutonChangerPlan.bottom
+            anchors.topMargin: 20
+            anchors.left: parent.left
+            anchors.leftMargin: (proprietesEvenement.width - width) /2
+            width: 200
+            text: "Enregistrer"
+            //text: app.liste_des_evenements.getDataFromModel(app.idEvenement, "id")
+
+            onClicked : {
+                app.updateEvenement(_inputNom.text, _inputLieu.text, _checkboxArchive.checked);
+            }
+
+
+        }
+
+
+
+    onAccepted: {
+        console.log(_inputNom.text);
+    }
+
+    }
+
     Dialog {
         id: parametresCourriel
         modality: Qt.ApplicationModal
@@ -120,30 +279,17 @@ ApplicationWindow { // Fenetre principale
         app.settings.setValue("height", height)
     }
 
-    ComboBox { // Le menu déroulant permettant de sélectionner l'événement
-        id: selecteurEvenement
-        // height:50
-        anchors.right: parent.right
-        anchors.rightMargin: 0
-        anchors.left: parent.left
-        anchors.leftMargin: 0
-        anchors.top: parent.top
-        anchors.topMargin: 0
-
-        model: app.liste_des_evenements // On charge la liste des évenement du menu déroulant
-        currentIndex: app.getEvenementModelIndex() // Par defaut le menu déroulant est sur l'index courant
-        textRole: "nom"
-        onCurrentIndexChanged: {
-            app.setIdEvenementFromModelIndex(currentIndex) // On appelle la fonction permettant entre autre de charger toutes les informations du nouvel évenement
-        }
-
-    }
 
     menuBar: MenuBar { // La barre de menu
         Menu {
             title: qsTr("&Évenement")
             MenuItem { action: nouvelEvenement }
+            MenuItem { action: actionOuvrirEvenement }
             MenuItem { action: planDeLEvenement }
+            MenuItem {
+                text: qsTr("Propriétés")
+                onTriggered: proprietesEvenement.open();
+            }
             MenuItem {
                 text: qsTr("Supprimer")
                 onTriggered: console.log("TODO : Ouvrir l'interface de suppression de l'évènement");
@@ -202,7 +348,7 @@ ApplicationWindow { // Fenetre principale
 
     TabView { // Les differents onglets
         id: onglet
-        anchors.top: selecteurEvenement.bottom
+        anchors.top: parent.top
         anchors.right: parent.right
         anchors.rightMargin: 0
         anchors.left: parent.left
@@ -226,8 +372,8 @@ ApplicationWindow { // Fenetre principale
             id: solliciterAnciensBenevoles
             title: "Solliciter d'anciens bénévoles"
 
-            Rectangle {
-                color: "yellow"
+
+            Q_SolliciterAnciensBenevoles {
 
             }
         }
@@ -325,17 +471,26 @@ ApplicationWindow { // Fenetre principale
         target: app
         onWarning: {
             messageDErreur.icon = StandardIcon.Warning
+            messageDErreur.title = "Avertissement"
             messageDErreur.text=msg
+            messageDErreur.informativeText=info
+            messageDErreur.detailedText=detail
             messageDErreur.visible=true
         }
         onCritical: {
             messageDErreur.icon = StandardIcon.Critical
+            messageDErreur.title = "Erreur critique"
             messageDErreur.text=msg
+            messageDErreur.informativeText=info
+            messageDErreur.detailedText=detail
             messageDErreur.visible=true
         }
         onFatal: {
             messageDErreur.icon = StandardIcon.Fatal
+            messageDErreur.title = "Erreur fatale"
             messageDErreur.text=msg
+            messageDErreur.informativeText=info
+            messageDErreur.detailedText=detail
             messageDErreur.visible=true
         }
     }

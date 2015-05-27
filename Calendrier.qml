@@ -3,16 +3,19 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
 
 Window {
-    id: ajouterTour
-    title: "Ajouter un Tour"
+
+    title: titre
     width: 300
     height: date.height + heure.height + heure.anchors.topMargin
     modality: Qt.WindowModal
     property string champ: ""
-    property string valeur: ""
+    property string valeur: "" // La date
     property int idtour : 0 // L'id du tour à modifier
     property int heureRecu: 0
     property int minutesRecu : 0
+    property string titre: "Ajouter un tour"
+    property string attribut : "" // Peut etre tour ou evenement
+
 
     Calendar {
         id: date
@@ -47,8 +50,18 @@ Window {
 
 
     onClosing: {
-        if(champ == "debut") app.modifierTourDebut(date.selectedDate, heure.value, minute.value, idtour);
-        else if(champ == "fin") app.modifierTourFin(date.selectedDate, heure.value, minute.value, idtour);
+        if(attribut == "tour")
+        {
+            console.log("tour");
+            if(champ == "debut") app.modifierTourDebut(date.selectedDate, heure.value, minute.value, idtour);
+            else if(champ == "fin") app.modifierTourFin(date.selectedDate, heure.value, minute.value, idtour);
+        }
+        else if(attribut == "evenement")
+        {
+            console.log("evnt");
+            if(champ == "debut") app.setDebutEvenement(date.selectedDate, heure.value, minute.value, idtour);
+            else if(champ == "fin") app.setFinEvenement(date.selectedDate, heure.value, minute.value, idtour);
+        }
     }
 
 }

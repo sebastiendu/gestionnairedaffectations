@@ -1,174 +1,113 @@
-/**
- * This element shows a timetable for a week divided into
- * days. The days are divided into 7 two-hour time slots.
- *
- * An event can be added into each of these slots, which will
- * emit the eventAdded signal.
- *
- * Currently only one event can be added to a single slot. They
- * can be removed, which will emit the eventRemoved signal.
- *
- * A model must be explicitly given to the model property. This is
- * kind of assumed to be a Timekeeper object.
- */
-import QtQuick 2.0
 import QtQuick 2.3
-import QtQuick.Window 2.2
-import QtQuick.Controls 1.2
-import fr.ldd.qml 1.0
-import QtWebKit 3.0
-import QtQuick.Controls.Styles 1.2
-import QtGraphicalEffects 1.0
-
-import "variables.js" as Variables
-import "fonctions.js" as Fonctions
 
 Item {
-    id:root
-
-    Rectangle {
-
-        id: blockParent
-
-
+    ListView {
+        id: joursView
         anchors.fill: parent
-        anchors.top: parent.top
-        anchors.left:parent.left
-
-
-
-        // Le rectangle contenant la liste des horaires
-        Rectangle {
-
-
-            id: blockEmploiTemps
-            anchors.fill: parent
-            clip: true
-            ListView {
-                id: listeDesHeures
-                anchors.fill: parent
-                anchors.top: parent.top
-                anchors.topMargin: 50
-                model: listeHeures
-                clip: true
-
-                delegate: Rectangle {
-                    //text: Fonctions.dateEmploiDuTemps(heure)
-                    // text: Fonctions.dateEmploiDuTemps(heure)+" \t \t "+Fonctions.dateFR(heure)+"\t \t"+heure.getHours();
-                    // Si heure = 00 ou debut nom du jour sinon heure seule
-
-                    Text {text: (heure == Date(app.heureMin.getTime())) ? Fonctions.nomJourEtDate(heure)+"\t" + Fonctions.heureMinutes(heure) : (heure.getHours() == 0 )? Fonctions.nomJourEtDate(heure)+"\t" + Fonctions.heureMinutes(heure) : "\t \t" + Fonctions.heureMinutes(heure) }
-                    height: 30
-
-                    GridView {
-                        id: thisGrid
-                        // model: app.planComplet
-                        delegate: Rectangle { width: 50; height: 30; border.color: "black"; color: debut == "" ? "white" : "lightblue";
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: { console.log(debut); }
-                            }
-
-                            Text {
-                                text: nom;
-                            }
-                        }
-                        width: blockParent.width
-                        Component.onCompleted: { app.heureCourante = heure ; thisGrid.model = app.etat_tour_heure;}
-                        //Component.onCompleted: { app.heure = heure; thisGrid.model = app.planCourant;}
+        orientation: ListView.Horizontal
+        model: app.sequence_emploi_du_temps
+        delegate: Rectangle {
+            height: parent.height
+            width: proportion * parent.parent.width
+            color: "transparent"
+            Rectangle {
+                anchors.centerIn: parent
+                rotation: -90
+                width: parent.height
+                height: parent.width
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0;
+                        color: "#8f8f8f";
                     }
-
-                }
-
-
-            }
-        }
-
-
-
-        // SELECT distinct * FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE t.debut < '2014-11-15 12:30:00+01' AND t.fin > '2014-11-15 12:30:00+01' or t.debut is null;
-        // Pour récuperer les postes sans rien
-
-        //SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < '2014-11-15 12:30:00+01' ANASC;fin > '2014-11-15 12:30:00+01') or t.debut is null ORDER BY nom A
-
-
-
-        // Le model contenant les horaires
-        ListModel {
-            id: listeHeures
-        }
-
-
-        // L'item permettant de charger le début, puis de peupler la liste
-        Item {
-            id: chargeurDeDebut
-
-            Component.onCompleted: {
-                console.log("Debut chargé") ;
-                Variables.setDebut("ok");
-
-                if(Variables.getFin()!="" && Variables.getDebut()!="")
-                {
-                    ajouterHoraires();
-                }
-
-                function ajouterHoraires()
-                {
-
-                    var heureCourante = new Date(app.heureMin.getTime());
-                    var heureDeFin = new Date(app.heureMax.getTime());
-
-                    listeHeures.append({"heure": heureCourante}); // On met la 1ere heure en tete de liste
-
-                    while(heureCourante < heureDeFin)// while(heureCourante<fin)
-                    {
-                        heureCourante.setHours (heureCourante.getHours() + 1 );
-                        listeHeures.append({"heure": heureCourante});
+                    GradientStop {
+                        position: .25;
+                        color: "#9f9f9f";
                     }
-
-                    listeHeures.append({"heure": heureDeFin});
+                    GradientStop {
+                        position: .75;
+                        color: "#9f9f9f";
+                    }
+                    GradientStop {
+                        position: 1;
+                        color: "#8f8f8f";
+                    }
+                }
+                Text {
+                    anchors.fill: parent
+                    text: libelle_sequence
+                    color: "lightgray"
+                    font.bold: true
+                    style: Text.Outline
+                    styleColor: "gray"
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: height
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                 }
             }
         }
-
-
-        // L'item permettant de charger la fin, puis de peupler la liste
-        Item {
-            id: chargeurDeFin
-            Component.onCompleted: {
-                console.log("Fin chargé") ;
-                Variables.setFin("ok");
-
-                if(Variables.getFin()!="" && Variables.getDebut()!="")
-                {
-                    ajouterHoraires();
-                }
-
-                function ajouterHoraires()
-                {
-
-                    var heureCourante = new Date(app.heureMin.getTime());
-                    var heureDeFin = new Date(app.heureMax.getTime());
-
-                    listeHeures.append({"heure": heureCourante}); // On met la 1ere heure en tete de liste
-
-                    while(heureCourante < heureDeFin)// while(heureCourante<fin)
-                    {
-                        heureCourante.setHours (heureCourante.getHours() + 1 );
-                        listeHeures.append({"heure": heureCourante});
-                    }
-
-                    listeHeures.append({"heure": heureDeFin});
-                }
-            }
-        }
-
-
-
-
-
-
-
     }
-
+    ListView {
+        anchors.fill: parent
+        model: app.toursParPosteModel
+        delegate: Component {
+            Rectangle {
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0;
+                        color: "#80808088";
+                    }
+                    GradientStop {
+                        position: .25;
+                        color: "#8f8f8f88";
+                    }
+                    GradientStop {
+                        position: .75;
+                        color: "#8f8f8f88";
+                    }
+                    GradientStop {
+                        position: 1;
+                        color: "#80808088";
+                    }
+                }
+                height: parent.parent.height / (parent.parent.model.rowCount() + 1)
+                width: parent.width
+                Text {
+                    anchors.fill: parent
+                    text: nom
+                    font.bold: true
+                    style: Text.Outline
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: height
+                    color: "white"
+                    styleColor: "gray"
+                    font.letterSpacing: width / (20 * text.length)
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                }
+                Repeater {
+                    model: tours // styleData.value
+                    // 0 id, 1 debut, 2 durée, 3 min, 4 max, 5 debut, 6 fin, 7 effectif, 8 besoin, 9 faim, 10 taux
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.leftMargin: parent.width * modelData.split('|')[1] // debut
+                        width: parent.width * modelData.split('|')[2] // durée
+                        height: parent.height
+                        radius: 5
+                        //border.color: modelData.split('|')[10] === '100' ? "darkgreen" : modelData.split('|')[10] > 100 ? "#888800"  : "darkred" // taux
+                        //border.width: modelData.split('|')[10] / 100
+                        color: modelData.split('|')[9] === '0' ? "green" : modelData.split('|')[9] < 0 ? "yellow"  : "red" // faim
+                        opacity: 0.75
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: console.info("setIdTour(" + modelData.split('|')[0] + ") (TODO)")
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

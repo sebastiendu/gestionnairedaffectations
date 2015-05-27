@@ -11,6 +11,7 @@
 #include <QProcess>
 #include <QTemporaryFile>
 #include <QUrl>
+#include "toursparpostemodel.h"
 
 class GestionnaireDAffectations : public QGuiApplication
 {
@@ -24,6 +25,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QSortFilterProxyModel* benevoles_disponibles MEMBER m_benevoles_disponibles NOTIFY benevoles_disponiblesChanged)
     Q_PROPERTY(SqlQueryModel* postes MEMBER m_postes NOTIFY postesChanged)
     Q_PROPERTY(SqlQueryModel* fiche_benevole MEMBER m_fiche_benevole NOTIFY fiche_benevoleChanged)
+    Q_PROPERTY(SqlQueryModel* fiche_personne MEMBER m_fiche_personne)
     Q_PROPERTY(SqlQueryModel* fiche_poste MEMBER m_fiche_poste NOTIFY fiche_posteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_poste_tour MEMBER m_fiche_poste_tour NOTIFY fiche_posteTourChanged)
     Q_PROPERTY(SqlQueryModel* tour_benevoles MEMBER m_tour_benevole NOTIFY tourChanged)
@@ -36,7 +38,15 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QSortFilterProxyModel* etat_tour_heure MEMBER m_etat_tour_heure  NOTIFY etatTourHeureChanged)
     Q_PROPERTY(QDateTime heureCourante MEMBER m_heure_courante NOTIFY heureCouranteChanged)
 
+    Q_PROPERTY(SqlQueryModel* responsables MEMBER m_responsables NOTIFY responsablesChanged)
 
+
+    Q_PROPERTY(SqlQueryModel* candidatures_en_attente MEMBER m_candidatures_en_attente NOTIFY candidatureEnAttenteChanged)
+    Q_PROPERTY(SqlQueryModel* personnes_doublons MEMBER m_personnes_doublons)
+
+    Q_PROPERTY(ToursParPosteModel *toursParPosteModel MEMBER m_toursParPosteModel NOTIFY toursParPosteModelChanged)
+
+    Q_PROPERTY(SqlQueryModel* sequence_emploi_du_temps MEMBER m_sequence_emploi_du_temps NOTIFY sequenceEmploiDuTempsChanged)
 
 public:
     GestionnaireDAffectations(int & argc, char ** argv);
@@ -48,13 +58,19 @@ public:
     Q_INVOKABLE QString messageDErreurDeLaBase();
     Q_INVOKABLE void setIdEvenementFromModelIndex(int);
     Q_INVOKABLE int getEvenementModelIndex();
+
     Q_INVOKABLE void setIdPoste(int);
     Q_INVOKABLE void setIdPosteTour(int);
     Q_INVOKABLE void setIdTour(int);
     Q_INVOKABLE void setIdDisponibilite(int);
     Q_INVOKABLE void setIdAffectation(int);
-    Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, QString, int id_evenement_precedent);
+    Q_INVOKABLE void setResponsables();
+
+    Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, int heureDebut, int heureFin, QString, int id_evenement_precedent);
     Q_INVOKABLE void enregistrerPlanEvenement(QUrl url);
+    Q_INVOKABLE void setDebutEvenement(QDateTime date, int heure, int minutes);
+    Q_INVOKABLE void setFinEvenement(QDateTime date, int heure, int minutes);
+    Q_INVOKABLE void updateEvenement(QString nom, QString lieu, bool archive);
 
 
     Q_INVOKABLE void insererPoste(QString,QString,float,float);
@@ -78,8 +94,7 @@ public:
                                       QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
                                       QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
                                       QString commentaireBenevole);
-    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees);
-
+    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees); 
 
     Q_INVOKABLE float getRatioX();
     Q_INVOKABLE float getRatioY();
@@ -91,6 +106,8 @@ public:
     Q_INVOKABLE QString getNomPoste();
 
 
+    Q_INVOKABLE void setIdDoublons(int id);
+    Q_INVOKABLE void setIdPersonne(int id);
 
     Q_INVOKABLE void genererFichesDePostes();
     Q_INVOKABLE void genererCarteBenevoles();
@@ -98,16 +115,18 @@ public:
     Q_INVOKABLE void genererFichesProblemes();
     Q_INVOKABLE void genererExportGeneral();
 
+
+
     int age(QDate dateDeNaissance,QDate dateRepere);
     void faireUnRetourALaLigne(QProcess* unPandoc);
     void afficherEntete(QProcess* unPandoc, QSqlQuery uneQuery);
     bool terminerGenerationEtat(QProcess* unPandoc, QTemporaryFile *unFichier);
-    //   Q_INVOKABLE void faireInscription(int); : TODO : Permettre l'inscription d'un  bénévole
+
 
 signals:
-    void warning(const QString &msg);
-    void critical(const QString &msg);
-    void fatal(const QString &msg);
+    void warning(const QString &msg, const QString &info, const QString &detail);
+    void critical(const QString &msg, const QString &info, const QString &detail);
+    void fatal(const QString &msg, const QString &info, const QString &detail);
     void heureChanged();
     void heureMinChanged();
     void heureMaxChanged();
@@ -131,6 +150,12 @@ signals:
     void heureCouranteChanged();
     void etatTourHeureChanged();
     void lotDejaCreesChanged();
+    void toursParPosteModelChanged();
+    void sequenceEmploiDuTempsChanged();
+    void candidatureEnAttenteChanged();
+    void ficheEvenementChanged();
+    void responsablesChanged();
+    void fermerFenetreProprietesEvenement();
 
 
 
@@ -144,7 +169,8 @@ private:
     SqlQueryModel *m_postes;
     QSortFilterProxyModel *m_benevoles_disponibles;
     SqlQueryModel *m_benevoles_disponibles_sql;
-    SqlQueryModel *m_fiche_benevole;
+    SqlQueryModel *m_fiche_benevole; // Est associé à une disponibilité
+    SqlQueryModel *m_fiche_personne; // Est associé à une personne
     SqlQueryModel *m_fiche_poste;
     SqlQueryModel *m_fiche_poste_tour;
     SqlQueryModel *m_tour_benevole;
@@ -164,6 +190,14 @@ private:
     QSortFilterProxyModel *m_poste_et_tour;
     QSortFilterProxyModel *m_etat_tour_heure;
     SqlQueryModel *m_etat_tour_heure_sql;
+    SqlQueryModel *m_candidatures_en_attente;
+    SqlQueryModel *m_personnes_doublons;
+
+    SqlQueryModel *m_responsables;
+
+    ToursParPosteModel *m_toursParPosteModel;
+    SqlQueryModel *m_sequence_emploi_du_temps;
+
 
     // Variables Temporaires necessaires pour transmettre des informations d'une fenetre QML à une autre
     float ratioX; // Stocke temporairement la position x cliquée sur la carte ( entre 0 et 1 , -1 si rien n'a été cliqué )
