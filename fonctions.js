@@ -272,7 +272,146 @@ function createSpriteObjects(rect,x,y) {
         component.statusChanged.connect(finishCreation);
 }
 
+function construireEmail(id,cle,prefixe,domaine)
+{
+    var mail;
+    mail = prefixe+'+'+id+'_'+cle+'@'+domaine;
+    return mail;
+}
 
+function expire(date)
+{
+    var dateRecue = new Date(date);
+    dateRecue.setHours(dateRecue.getHours()-2); // "-2" Pour péter le GMT
+    var dateCourante = new Date();
+    var dateJourPrecedent = new Date();
+    dateJourPrecedent.setHours(dateCourante.getHours() - 24);
+
+    if (dateJourPrecedent > dateRecue)
+        return true;
+    else
+        return false;
+
+    // Dans le cas ou on change d'année
+    /*if (dateRecue.getFullYear() != dateCourante.getFullYear())
+    {
+        if (dateRecue.getFullYear() == dateCourante.getFullYear()-1)
+        {
+            if (dateRecue.getMonth() == 11 && dateCourante.getMonth() == 0)
+            {
+                if (dateRecue.getDate() == 31 && dateCourante.getDate() == 1)
+                {
+                    // Création à 20:00 : Consultation à 21:00
+                    if (dateRecue.getHours() < dateCourante.getHours())
+                    {
+                        return false;
+                    }
+
+                    // Création à 20h:00 : Consultation à 19h:00
+                    else if (dateRecue.getHours() > dateCourante.getHours())
+                    {
+                        return true;
+                    }
+
+                    else if (dateRecue.getHours() == dateCourante.getHours())
+                    {
+                        // Création à 19h02 : Consultation à 19h04
+                        if (dateRecue.getMinutes() < dateCourante.getMinutes())
+                        {
+                            return false;
+                        }
+
+                        //Création à 19h50 consultation à 19h02
+                        else if (dateRecue.getMinutes() > dateCourante.getMinutes())
+                        {
+                            return true;
+                        }
+
+                        // Création à 19h05 : Consultation à 19h05
+                        else if (dateRecue.getMinutes() == dateCourante.getMinutes())
+                        {
+                            return false; // Choix arbitraire
+                        }
+                    }
+                }
+
+                else
+                {
+                    return false;
+                }
+            }
+
+            else
+            {
+                return false;
+            }
+        }
+
+        else
+        {
+            return false;
+        }
+    }
+
+    else if (dateRecue.getFullYear() == dateCourante.getFullYear())
+    {
+        if (dateRecue.getMonth() != dateCourante.getMonth())
+        {   // Création en Octobre Consultation en Novembre
+            if (dateRecue.getMonth() == dateCourante.getMonth()-1)
+            {
+
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (dateRecue.getDate() < dateCourante.getDate()-1)
+            {
+
+            }
+            else
+            {
+                if (dateRecue.getDate() == dateCourante.getDate()-1)
+                {
+                    if (dateRecue.getHours() < dateCourante.getHours())
+                    {
+                        return false;
+                    }
+                    else if (dateRecue.getHours() == dateCourante.getHours())
+                    {
+                        if (dateRecue.getMinutes() < dateCourante.getMinutes())
+                        {
+
+                        }
+                        else if (dateRecue.getMinutes() > dateCourante.getMinutes())
+                        {
+
+                        }
+                        else if (dateRecue.getMinutes() == dateCourante.getMinutes())
+                    }
+                    else if (dateRecue.getHours() > dateCourante.getHours())
+                    {
+
+                    }
+                }
+                if (dateRecue.getDate() == dateCourante.getDate())
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    else
+    {
+            return false;
+    }*/
+
+
+}
 
 function min(a,b){
     if(a<b) return a;
