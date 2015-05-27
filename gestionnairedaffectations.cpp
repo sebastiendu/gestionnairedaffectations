@@ -615,6 +615,11 @@ void GestionnaireDAffectations::mettreAJourModelPlan(){
     qDebug() << "Nombre de postes à ce moment: " << m_postes->rowCount();
 }
 
+/*
+void GestionnaireDAffectations::ajouterResponsable(int id){
+
+} */
+
 void GestionnaireDAffectations::insererPoste(QString poste, QString description, bool autonome, float posx, float posy) {
     QSqlQuery query;
     query.prepare("INSERT INTO poste (id_evenement,nom,description,posx,posy,autonome) VALUES (:id_evenement, :poste, :description, :posx, :posy, :autonome);");
@@ -940,6 +945,19 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     qDebug() << languesBenevole;
     qDebug() << competencesBenevole;
     qDebug() << commentaireBenevole;
+
+    if(adresseBenevole == "") adresseBenevole = " ";
+    if(codePostalBenevole == "") codePostalBenevole = " ";
+    if(communeBenevole == "") communeBenevole = " ";
+    if(numPortableBenevole == "") numPortableBenevole = " ";
+    if(numDomicileBenevole == "") numDomicileBenevole = " ";
+    if(courrielBenevole == "") courrielBenevole = " ";
+    if(professionBenevole == "") numDomicileBenevole = " ";
+    if(datenaissanceBenevole == "") datenaissanceBenevole = " ";
+    if(competencesBenevole == "") competencesBenevole = " ";
+
+    if(languesBenevole == "") languesBenevole = " ";
+    if(commentaireBenevole == "") commentaireBenevole = " ";
 
     query.prepare("INSERT INTO personne (nom ,prenom, adresse , code_postal,ville,portable,domicile,email ,date_naissance, profession ,competences,avatar,langues,commentaire) VALUES (:nom , :prenom, :adresse , :code_postal,:ville, :portable, :domicile, :email , :date_naissance,  :profession , :competences, :avatar, :langues, :commentaire)");
     query.bindValue(":nom",nomBenevole);

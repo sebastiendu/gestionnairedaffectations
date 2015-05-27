@@ -104,16 +104,16 @@ Item {
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: console.info("setIdTour(" + modelData.split('|')[0] + ") (TODO)")
-
-                            onEntered: {
-                                 info.visible = true
-                                 info.y = y
-                                 //resumeTour.text = parent.index
-                                 titreTour.text = id
-                            }
-                            onExited: {
-                                info.visible = false
+                            onClicked: {
+                                fenetre.visible = true
+                                console.info("setIdTour(" + modelData.split('|')[0] + ") (TODO)");
+                                console.info("setIdTour(" + modelData.split('|')[1] + ") (TODO)");
+                                console.info("setIdTour(" + modelData.split('|')[2] + ") (TODO)");
+                                console.info("setIdTour(" + modelData.split('|')[3] + ") (TODO)");
+                                console.info("setIdTour(" + modelData.split('|')[4] + ") (TODO)");
+                                console.info("setIdTour(" + modelData.split('|')[5] + ") (TODO)");
+                                console.info("setIdTour(" + modelData.split('|')[6] + ") (TODO)");
+                                console.info("setIdTour(" + modelData.split('|')[7] + ") (TODO)");
                             }
                         }
                     }
@@ -153,5 +153,33 @@ Item {
                 anchors.topMargin: 10
             }
         }
+    }
+
+    Rectangle {
+        id : fenetre
+        visible: false
+        color: white
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: parent.height*0.20
+        anchors.leftMargin: parent.width*0.25
+        width: parent.width*0.50
+        height: parent.height*0.50
+
+        Text{
+            visible: fenetre.visible
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: 10
+            anchors.rightMargin: 10
+            font.pixelSize: 18
+            text: "X"
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked : fenetre.visible = false
+            }
+        }
+
     }
 }

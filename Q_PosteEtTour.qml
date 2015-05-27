@@ -321,6 +321,7 @@ Item {
 
                     onCurrentIndexChanged: {
                         console.log(currentIndex) // On appelle la fonction permettant entre autre de charger toutes les informations du nouvel évenement
+                        console.log(nom_personne);
                     }
 
                 }
@@ -330,6 +331,7 @@ Item {
                     anchors.top: choixResponsable.top
                     anchors.right: rejeterResponsable.left
                     text: " + "
+                    onClicked: { console.log(choixResponsable.currentIndex)}
                 }
 
                 Button {
