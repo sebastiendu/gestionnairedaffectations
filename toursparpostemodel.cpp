@@ -18,7 +18,7 @@ void ToursParPosteModel::setIdEvenement(int idEvenement) {
             QSqlQuery queryTour;
             if(queryTour.prepare(
                         "select concat_ws('|',"
-                        " id, position_relative, duree_relative, min, max, debut, fin, effectif, besoin, faim, taux"
+                        " id, position_relative, duree_relative, min, max, debut, fin, effectif, besoin, faim, taux,id_poste"
                          ")"
                          " from tours_emploi_du_temps"
                          " where id_poste=?")) {

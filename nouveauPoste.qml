@@ -8,7 +8,7 @@ Window {
     id: nouveauPoste
     title: "Nouveau Poste"
     width: 400
-    height: 300
+    height: 330
     minimumWidth: 300
     minimumHeight: 200
 

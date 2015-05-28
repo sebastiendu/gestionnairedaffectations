@@ -281,6 +281,7 @@ ApplicationWindow { // Fenetre principale
         tooltip: "Charger le plan de l'évènement"
         onTriggered: planEvenement.open()
     }
+
     FileDialog {
         id: planEvenement
         title: "Chargement du plan de l'évènement"
@@ -293,6 +294,7 @@ ApplicationWindow { // Fenetre principale
         }
         modality: Qt.ApplicationModal
     }
+
 
 
     onClosing: {

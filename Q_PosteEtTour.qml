@@ -36,7 +36,7 @@ Item {
             Connections {
                 target: app
                 onPlanMisAJour: {
-                    console.log("TODO : recharger l'image");
+                   // planPosteEtTours.source = "image://plan/" + app.idEvenement
                 }
             }
 
@@ -361,7 +361,7 @@ Item {
                 anchors.top:blockResponsable.bottom
                 anchors.topMargin: 25
                 selectionMode: SelectionMode.SingleSelection
-                TableViewColumn{ role: "id_tour"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:(3*(tableauTours.width/10))-1; visible: false;delegate: id_tour}
+                TableViewColumn{ role: "id"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:(3*(tableauTours.width/10))-1; visible: false;delegate: id_tour}
                 TableViewColumn{ role: "debut"  ; title: "Debut du tour" ;  horizontalAlignment: Text.AlignHCenter; width:(4*(tableauTours.width/10))-1;delegate: debut}
                 TableViewColumn{ role: "fin" ; title: "Fin du tour" ; horizontalAlignment: Text.AlignHCenter;width:(4*(tableauTours.width/10))-1; delegate: fin}
                 TableViewColumn{ role: "min"  ; title: "Min" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/10)-1; delegate: nombre}
@@ -383,6 +383,7 @@ Item {
                             anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.leftMargin: 10
+                            color: styleData.selected ? "white" : "black"
                             text: Fonctions.dateFR(styleData.value)
                         }
 
@@ -396,7 +397,7 @@ Item {
                             anchors.leftMargin: parent.width*0.05
                             width: parent.width*0.15
                             text: "v"
-                            onClicked : { Fonctions.afficherFenetreAjouterTour("debut",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id_tour"),styleData.value.getHours(),styleData.value.getMinutes())}
+                            onClicked : { Fonctions.afficherFenetreAjouterTour("debut",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id"),styleData.value.getHours(),styleData.value.getMinutes())}
                         }
 
 
@@ -417,6 +418,7 @@ Item {
                             anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.leftMargin: 10
+                            color: styleData.selected ? "white" : "black"
                             text: Fonctions.dateFR(styleData.value)
                         }
 
@@ -430,7 +432,7 @@ Item {
                             anchors.leftMargin: parent.width*0.05
                             width: parent.width*0.15
                             text: "v"
-                            onClicked : { Fonctions.afficherFenetreAjouterTour("fin",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id_tour"),styleData.value.getHours(),styleData.value.getMinutes())}
+                            onClicked : { Fonctions.afficherFenetreAjouterTour("fin",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id"),styleData.value.getHours(),styleData.value.getMinutes())}
                         }
 
 
@@ -531,8 +533,15 @@ Item {
                 anchors.right: _btnSupprimerTour.left
                 anchors.topMargin: 5
                 onClicked: {
-                    app.insererTour(tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"fin"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"min"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"max"))
-                    tableauTours.selection.select(tableauTours.rowCount-1);
+                    if(tableauTours.rowCount == 0)
+                    {
+                        app.insererTour(app.heureMin,1,1);
+                        tableauTours.selection.select(0);
+                    }
+                    else {
+                        app.insererTour(tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"fin"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"min"),tableauTours.model.getDataFromModel(tableauTours.rowCount-1,"max"))
+                        tableauTours.selection.select(tableauTours.rowCount-1);
+                    }
                 }
             }
 

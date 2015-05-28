@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import "fonctions.js" as Fonctions
 
 Item {
     ListView {
@@ -89,7 +90,7 @@ Item {
                 }
                 Repeater {
                     model: tours // styleData.value
-                    // 0 id, 1 debut, 2 durée, 3 min, 4 max, 5 debut, 6 fin, 7 effectif, 8 besoin, 9 faim, 10 taux
+                    // 0 id, 1 debut, 2 durée, 3 min, 4 max, 5 debut, 6 fin, 7 effectif, 8 besoin, 9 faim, 10 taux, 11 id_poste
                     Rectangle {
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -107,13 +108,14 @@ Item {
                             onClicked: {
                                 fenetre.visible = true
                                 console.info("setIdTour(" + modelData.split('|')[0] + ") (TODO)");
-                                console.info("setIdTour(" + modelData.split('|')[1] + ") (TODO)");
-                                console.info("setIdTour(" + modelData.split('|')[2] + ") (TODO)");
-                                console.info("setIdTour(" + modelData.split('|')[3] + ") (TODO)");
-                                console.info("setIdTour(" + modelData.split('|')[4] + ") (TODO)");
-                                console.info("setIdTour(" + modelData.split('|')[5] + ") (TODO)");
-                                console.info("setIdTour(" + modelData.split('|')[6] + ") (TODO)");
-                                console.info("setIdTour(" + modelData.split('|')[7] + ") (TODO)");
+                                app.setIdTourPoste(modelData.split('|')[0]);
+
+                                nomPoste.text = app.fiche_poste_tour.getDataFromModel(0,"nom");
+                                date.text = Fonctions.dateTour(new Date(app.fiche_poste_tour.getDataFromModel(0,"debut")),new Date(app.fiche_poste_tour.getDataFromModel(0,"fin"))).trim();
+                               // fin.text = app.fiche_poste_tour.getDataFromModel(0,"fin");
+
+                                affectationsOk.text = (app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees") == "" ) ? "0" : app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees");
+                                affectationsMax.text = " / " + app.fiche_poste_tour.getDataFromModel(0,"max");
                             }
                         }
                     }
@@ -158,7 +160,7 @@ Item {
     Rectangle {
         id : fenetre
         visible: false
-        color: white
+        color: "white"
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.topMargin: parent.height*0.20
@@ -180,6 +182,42 @@ Item {
                 onClicked : fenetre.visible = false
             }
         }
+
+
+            Text {
+                id: nomPoste
+                anchors.top: parent.top
+                anchors.topMargin: 5
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width/2 - width/2
+                font.pixelSize: 18
+                font.bold: true
+            }
+
+            Text {
+                id: date
+                anchors.top: nomPoste.bottom
+                anchors.topMargin: 10
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width/2 - width/2
+            }
+
+            Text {
+                id: affectationsOk
+                anchors.top: date.bottom
+                anchors.topMargin:10
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width*0.4
+            }
+
+            Text {
+                id: affectationsMax
+                anchors.top: affectationsOk.top
+                anchors.left: affectationsOk.right
+                anchors.leftMargin: 10
+            }
+
+
 
     }
 }

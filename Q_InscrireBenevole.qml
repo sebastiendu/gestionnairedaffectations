@@ -9,242 +9,228 @@ Item {
     anchors.fill: parent
 
     Rectangle {
+        id: block
         anchors.fill: parent
-        color: "#2ecc71"
+        // color: "#2ecc71"
 
-        Label {
-            id: l_nomBenevole
-            text: "Nom: "
+        RectangleTitre {
+            id: blockInformations
             anchors.top: parent.top
-            anchors.topMargin:29
             anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
+            anchors.topMargin: 20
+            anchors.leftMargin: 10
+            width: parent.width*0.5 -10
+            titre: "Informations"
+            couleur : "#bdc3c7"
+            height: 550
+
+            LabelTextField {
+                id: _nomBenevole
+                texte: "Nom"
+                anchors.top: parent.top
+                anchors.topMargin:30
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+            LabelTextField {
+                id: _prenomBenevole
+                texte: "Prenom"
+                anchors.top: _nomBenevole.bottom
+                anchors.topMargin:10
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+            LabelTextField {
+                id: _adresseBenevole
+                texte: "Adresse Postale"
+                anchors.top: _prenomBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+
+            LabelTextField {
+                id: _codePostalBenevole
+                texte: "Code postal"
+                anchors.top: _adresseBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+
+            LabelTextField {
+                id: _communeBenevole
+                texte: "Commune"
+                anchors.top: _codePostalBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+            LabelTextField {
+                id: _courrielBenevole
+                texte: "Courriel"
+                anchors.top: _communeBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+
+            LabelTextField {
+                id: _numPortableBenevole
+                texte: "Numero de portable"
+                anchors.top: _courrielBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+
+            LabelTextField {
+                id: _numDomicileBenevole
+                texte: "Numero du domicile"
+                anchors.top: _numPortableBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+
+            LabelTextField {
+                id: _professionBenevole
+                texte: "Profession"
+                anchors.top: _numDomicileBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+
+            LabelTextField {
+                id: _datenaissanceBenevole
+                texte: "Date de naissance "
+                placeHolder: "AAAA-MM-JJ"
+                memeTexte: false
+                anchors.top: _professionBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+            LabelTextField {
+                id: _languesBenevole
+                texte: "Langues"
+                anchors.top: _datenaissanceBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+
+            LabelTextField {
+                id: _competencesBenevole
+                texte: "Competences"
+                anchors.top: _languesBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+            Label {
+                id: l_commentaireBenevole
+                text: "Commentaire: "
+                anchors.top: _competencesBenevole.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width * 0.30
+            }
+
+            TextArea {
+                id: _commentaireBenevole
+
+                anchors.top: _competencesBenevole.bottom
+                anchors.topMargin:5
+                anchors.left: l_commentaireBenevole.right
+                anchors.leftMargin: 10
+                height: 100;
+            }
         }
 
-        TextField {
-            id: _nomBenevole
-            placeholderText: "Nom"
+
+        RectangleTitre {
+            id: blockDisponibilite
+            titre: "Disponibilité"
             anchors.top: parent.top
-            anchors.topMargin:25
-            anchors.left: l_nomBenevole.right
-        }
+            anchors.topMargin: blockInformations.anchors.topMargin
+            anchors.left: blockInformations.right
+            anchors.leftMargin: 5
+            width: blockInformations.width
+            height: blockInformations.height
+            couleur : "#bdc3c7"
 
-        Label {
-            id: l_prenomBenevole
-            text: "Prenom: "
-            anchors.top: _nomBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
+            LabelTextField {
+                id: _joursEtHeuresDispo
+                texte: "Jours et heures "
+                anchors.top: parent.top
+                anchors.topMargin:30
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width *0.2
+                taille: 300
 
-        TextField {
-            id: _prenomBenevole
-            placeholderText: "Prenom"
-            anchors.top: _nomBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_prenomBenevole.right
-        }
+            }
 
-        Label {
-            id: l_adresseBenevole
-            text: "Adresse Postale: "
-            anchors.top: _prenomBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
+            LabelTextField {
+                id: _listeAmis
+                texte: "Liste amis"
+                anchors.top: _joursEtHeuresDispo.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width *0.2
+                taille: 300
 
-        TextField {
-            id: _adresseBenevole
-            placeholderText: "Adresse"
-            anchors.top: _prenomBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_prenomBenevole.right
-        }
+            }
 
-        Label {
-            id: l_codePostalBenevole
-            text: "Code postal: "
-            anchors.top: _adresseBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
+            LabelTextField {
+                id: _typePoste
+                texte: "Type de poste souhaité"
+                anchors.top: _listeAmis.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width *0.2
+                taille: 300
 
-        TextField {
-            id: _codePostalBenevole
-            placeholderText: "Code Postal"
-            anchors.top: _adresseBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_codePostalBenevole.right
-        }
+            }
 
-        Label {
-            id: l_communeBenevole
-            text: "Commune: "
-            anchors.top: _codePostalBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
+            LabelTextField {
+                id: _commentaireDisponibilite
+                texte: "Commentaire"
+                anchors.top: _typePoste.bottom
+                anchors.topMargin:9
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width *0.2
+                taille: 300
 
-        TextField {
-            id: _communeBenevole
-            anchors.top: _codePostalBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_communeBenevole.right
-        }
+            }
 
-        Label {
-            id: l_courrielBenevole
-            text: "Courriel: "
-            anchors.top: _communeBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
-
-        TextField {
-            id: _courrielBenevole
-            placeholderText: "Adresse courriel"
-            anchors.top: _communeBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_courrielBenevole.right
-        }
-
-        Label {
-            id: l_numPortableBenevole
-            text: "Numero de portable: "
-            anchors.top: _courrielBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
-
-        TextField {
-            id: _numPortableBenevole
-            placeholderText: "Portable"
-            anchors.top: _courrielBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_numPortableBenevole.right
-        }
-
-        Label {
-            id: l_numDomicileBenevole
-            text: "Numero du domicile: "
-            anchors.top: _numPortableBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
-
-        TextField {
-            id: _numDomicileBenevole
-            placeholderText: "Numero du domicile"
-            anchors.top: _numPortableBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_numDomicileBenevole.right
-        }
-
-        Label {
-            id: l_professionBenevole
-            text: "Profession: "
-            anchors.top: _numDomicileBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
-
-        TextField {
-            id: _professionBenevole
-            placeholderText: "Profession"
-            anchors.top: _numDomicileBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_professionBenevole.right
-        }
-
-        Label {
-            id: l_datenaissanceBenevole
-            text: "Date de naissance "
-            anchors.top: _professionBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
-
-        TextField {
-            id: _datenaissanceBenevole
-            placeholderText: "AAAA-MM-JJ"
-            anchors.top: _professionBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_datenaissanceBenevole.right
-        }
-
-        Label {
-            id: l_languesBenevole
-            text: "Langues: "
-            anchors.top: _datenaissanceBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
-
-        TextField {
-            id: _languesBenevole
-            placeholderText: "Langues"
-            anchors.top: _datenaissanceBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_languesBenevole.right
-        }
-
-        Label {
-            id: l_competencesBenevole
-            text: "Competences: "
-            anchors.top: _languesBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
-
-        TextField {
-            id: _competencesBenevole
-            placeholderText: "Competence"
-            anchors.top: _languesBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_competencesBenevole.right
-        }
-
-        Label {
-            id: l_commentaireBenevole
-            text: "Commentaire: "
-            anchors.top: _competencesBenevole.bottom
-            anchors.topMargin:9
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width * 0.40
-        }
-
-        TextArea {
-            id: _commentaireBenevole
-
-            anchors.top: _competencesBenevole.bottom
-            anchors.topMargin:5
-            anchors.left: l_competencesBenevole.right
-            height: 100;
         }
 
         Button {
             text: "Inscrire le bénévole"
-            anchors.top: _commentaireBenevole.bottom
+            anchors.top: blockDisponibilite.bottom
             anchors.topMargin: 25
 
             anchors.horizontalCenter: parent.horizontalCenter
 
             onClicked: { console.log("TODO: Faire la requete d'inscription (attendre modification de la base");
-                app.inscrireBenevole(_nomBenevole.text, _prenomBenevole.text, _adresseBenevole.text,
-                                     _codePostalBenevole.text, _communeBenevole.text,_courrielBenevole.text,
-                                     _numPortableBenevole.text, _numDomicileBenevole.text, _professionBenevole.text,
-                                     _datenaissanceBenevole.text, _languesBenevole.text, _competencesBenevole.text,
+                app.inscrireBenevole(_nomBenevole.valeur, _prenomBenevole.valeur, _adresseBenevole.valeur,
+                                     _codePostalBenevole.valeur, _communeBenevole.valeur,_courrielBenevole.valeur,
+                                     _numPortableBenevole.valeur, _numDomicileBenevole.valeur, _professionBenevole.valeur,
+                                     _datenaissanceBenevole.valeur, _languesBenevole.valeur, _competencesBenevole.valeur,
                                      _commentaireBenevole.text );
 
                 // strdate et strfdate
@@ -252,4 +238,5 @@ Item {
         }
 
     }
+
 }

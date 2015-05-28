@@ -25,5 +25,6 @@
         <file>variables.js</file>
         <file>DatePicker.qml</file>
         <file>Q_SolliciterAnciensBenevoles.qml</file>
+        <file>LabelTextField.qml</file>
     </qresource>
 </RCC>

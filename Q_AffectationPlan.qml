@@ -75,17 +75,18 @@ Item  {
                 anchors.right: parent.right
                 anchors.left: parent.left
                 clip: true
-                spacing : 10
 
 
                 delegate: Rectangle { // Corresponds au block contenant le nom... La  ListView contient donc plusieurs de ces blocks
-                    height: 13
+                    height: _nomPrenom.height + _nomPrenom.anchors.topMargin
                     anchors.left: parent.left
                     anchors.right: parent.right
                     z:3
 
                     Text {
+                        id: _nomPrenom
                         anchors.top: parent.top
+                        anchors.topMargin: 10
                         anchors.left: parent.left
                         anchors.leftMargin: 20
                         width: parent.width * 0.70
@@ -93,7 +94,9 @@ Item  {
                         horizontalAlignment: Text.Left
                     }
                     Text {
+                        id: _nombreAffectations
                         anchors.top: parent.top
+                        anchors.topMargin: 10
                         anchors.right: parent.right
                         text: nombre_affectations
                         horizontalAlignment: Text.Left
@@ -110,7 +113,7 @@ Item  {
                 }
 
                 model: app.benevoles_disponibles
-                highlight: Rectangle { visible: (listeDesDisponibles.currentIndex == -1 )? false: true; z:5;color: "blue"; radius: 5; opacity: 0.5; width: listeDesDisponibles.width ; height:13 ;y: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.y;x: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.x}
+                highlight: Rectangle { visible: (listeDesDisponibles.currentIndex == -1 )? false: true; z:5;color: "blue"; radius: 5; opacity: 0.5; width: listeDesDisponibles.width ; height:13 ;y: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.y + 10;x: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.x}
                 focus: true
                 highlightFollowsCurrentItem: false
 
@@ -158,7 +161,7 @@ Item  {
                         Text { text: '\t' + code_postal + ' ' + ville}
                         Text { text: 'Contact :\t' + portable + " " + domicile }
                         Text { text: '\t' + email }
-                        Text { text: 'Âge :\t' + age + " ans" }
+                        Text { text: (age == null) ? 'Âge :\t' + age + " ans" : "" }
                         Text { text: 'Profession :\t' + profession }
                         Text { text: 'Id DISPO :\t' + id_disponibilite } // A ENKLEVER
                         Text {

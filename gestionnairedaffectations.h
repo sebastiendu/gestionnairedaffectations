@@ -60,7 +60,9 @@ public:
     Q_INVOKABLE int getEvenementModelIndex();
 
     Q_INVOKABLE void setIdPoste(int);
-    Q_INVOKABLE void setIdPosteTour(int);
+    Q_INVOKABLE void setIdPosteTour(int); // Permet de selectionner le poste les tours en ayant l'id du poste
+    Q_INVOKABLE void setIdTourPoste(int); // Permet de selectionner le tour et le poste en connaissant l'id du tour
+
     Q_INVOKABLE void setIdTour(int);
     Q_INVOKABLE void setIdDisponibilite(int);
     Q_INVOKABLE void setIdAffectation(int);
@@ -157,6 +159,7 @@ signals:
     void ficheEvenementChanged();
     void responsablesChanged();
     void fermerFenetreProprietesEvenement();
+    void inscriptionOk();
 
 
 
