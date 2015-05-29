@@ -19,6 +19,12 @@ Item {
                 ficheBenevole.model = null;
                 sound.play();
             }
+
+            onCandidatureRejetee: {
+                listView.model =  app.candidatures_en_attente;
+                ficheBenevole.model = null;
+                // sadTrumpet.play()
+            }
         }
 
         SoundEffect {
@@ -288,6 +294,7 @@ Item {
                     width: parent.width * 0.30 -10
                     text: "Rejeter"
                     visible: (ficheBenevole.model) ? true: false
+                    onClicked: { app.rejeterCandidature() }
                 }
 
             }

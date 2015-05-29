@@ -49,8 +49,20 @@ Item {
             anchors.leftMargin: parent.width/2 - width/2
             width: parent.width
 
-             TableViewColumn{ horizontalAlignment: Text.AlignRight; width: 20 ;delegate: CheckBox { id: ck } }
-             TableViewColumn{ width: tableauDesEvenements.width -22; role: "nom" ; title: "nom" ; elideMode: Text.ElideMiddle}
+             //TableViewColumn{ horizontalAlignment: Text.AlignRight; width: 20 ;delegate: CheckBox { id: ck } }
+             TableViewColumn{
+                 width: tableauDesEvenements.width -22;
+                 role: "nom" ;
+                 title: "nom" ;
+                 elideMode: Text.ElideMiddle;
+                 delegate: CheckBox {
+                     id: ck;
+                     text: styleData.value
+                     onClicked: {
+                         Fonctions.tableauEvenement[styleData.row] = checked;
+                     }
+                 }
+             }
         }
 
 
@@ -72,12 +84,27 @@ Item {
             anchors.leftMargin: 10
             text: "Générer l'adresse mail"
             onClicked: {
+
+                // ===================
+                // On parse le tableau
+                // ===================
+                var contenu = "";
+                var i = 0;
+                for(i=0;i<tableauDesEvenements.rowCount;i++)
+                {
+                    if(Fonctions.tableauEvenement[i] == true){
+                        contenu += "" + tableauDesEvenements.model.getDataFromModel(i,"id")+"|";
+                    }
+                }
+                console.log(contenu);
+
+
                 var debut ="<a href='mailto:";
-                var mail = app.creerLotDAffectations(
+              /*  var mail = app.creerLotDAffectations(
                             _checkboxAffecationsJamaisSoumises.checked,
                             _checkboxAffecationsNonTraitees.checked,
                             _checkboxAffecationsRelance.checked
-                            );
+                            ); */
                 var fin = "'>";
                 var fin2 = "</a>";
                 _adresseEmail.text=debut+mail+fin+mail+fin2;

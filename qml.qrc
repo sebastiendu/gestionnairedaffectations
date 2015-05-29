@@ -28,5 +28,7 @@
         <file>LabelTextField.qml</file>
         <file>Ding_Sound_Effect.wav</file>
         <file>Sound.wav</file>
+        <file>doge.gif</file>
+        <file>new_sound.wav</file>
     </qresource>
 </RCC>

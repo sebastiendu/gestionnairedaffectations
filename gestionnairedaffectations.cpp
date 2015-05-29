@@ -1029,8 +1029,6 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
 
 void GestionnaireDAffectations::validerCandidature(){
 
-    qDebug() << "1" << m_id_disponibilite;
-
     QSqlQuery query;
     query.prepare("UPDATE disponibilite SET statut = 'validee' WHERE id = :id");
     query.bindValue(":id", m_id_disponibilite);
@@ -1044,15 +1042,35 @@ void GestionnaireDAffectations::validerCandidature(){
     m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_benevoles_disponibles->setFilterKeyColumn(-1);
 
-    qDebug() << "2" << query.lastError().text();
     query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
     query.bindValue(":id_evenement",idEvenement());
     query.exec();
     m_candidatures_en_attente->setQuery(query);
 
-    qDebug() << "3" << query.lastError().text();
     candidatureValidee();
 
+}
+
+void GestionnaireDAffectations::rejeterCandidature(){
+    QSqlQuery query;
+    query.prepare("UPDATE disponibilite SET statut = 'rejetee' WHERE id = :id");
+    query.bindValue(":id", m_id_disponibilite);
+    query.exec();
+
+    query.prepare("select * from benevoles_disponibles where id_evenement=?");
+    query.addBindValue(idEvenement());
+    query.exec();
+    m_benevoles_disponibles_sql->setQuery(query);
+    m_benevoles_disponibles->setSourceModel(m_benevoles_disponibles_sql);
+    m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_benevoles_disponibles->setFilterKeyColumn(-1);
+
+    query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
+    query.bindValue(":id_evenement",idEvenement());
+    query.exec();
+    m_candidatures_en_attente->setQuery(query);
+
+    candidatureRejetee();
 }
 
 void GestionnaireDAffectations::setIdDoublons(int id_doublon) {

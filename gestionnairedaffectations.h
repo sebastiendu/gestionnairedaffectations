@@ -113,6 +113,7 @@ public:
 
 
     Q_INVOKABLE void validerCandidature();
+    Q_INVOKABLE void rejeterCandidature();
     Q_INVOKABLE void setIdDoublons(int id);
     Q_INVOKABLE void setIdPersonne(int id);
 
@@ -165,7 +166,7 @@ signals:
     void fermerFenetreProprietesEvenement();
     void inscriptionOk();
     void candidatureValidee();
-
+    void candidatureRejetee();
 
 public slots:
     void mettreAJourModelPlan();

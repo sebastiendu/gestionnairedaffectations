@@ -6,6 +6,8 @@ import QtWebKit 3.0
 import QtQuick.Controls.Styles 1.2
 import QtGraphicalEffects 1.0
 import QtQuick.Dialogs 1.2
+import QtMultimedia 5.3
+
 
 import "fonctions.js" as Fonctions
 
@@ -73,6 +75,99 @@ ApplicationWindow { // Fenetre principale
         id: actionOuvrirEvenement
         text: qsTr("Ouvrir un Événement")
         onTriggered: fenetreOuvrirEvenement.open()
+    }
+
+    Rectangle {
+        id : enSavoirPlus
+        visible: false
+        color: "white"
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.topMargin: parent.height*0.20
+        anchors.leftMargin: parent.width*0.25
+        width: parent.width*0.50
+        height: 300
+        border.color: "#bdc3c7"
+        z: 500
+
+
+
+        MouseArea {
+            anchors.fill: parent
+
+            Rectangle {
+                anchors.fill: parent
+                color: "transparent"
+                Text {
+                    id: logo
+                    anchors.top: parent.top;
+                    anchors.left: parent.left;
+                    anchors.topMargin:  10;
+                    anchors.leftMargin:parent.width/2 - width/2;
+                    textFormat: Text.RichText
+                    text:"<a href='http://ldd.fr' style='text-decoration:none'><img src='http://www.ldd.fr/local/cache-vignettes/L92xH100/siteon0-c0f7c.png'/></a>"
+                    onLinkActivated: Qt.openUrlExternally(link)
+                }
+
+                Text {
+                    id: adresse
+                    anchors.top: logo.bottom
+                    anchors.topMargin:15
+                    anchors.left: parent.left
+                    anchors.leftMargin: parent.width/2 - width/2
+                    text: "Les Développements Durables<br>2 bis, rue des Visitandines<br>64100 Bayonne"
+
+                }
+
+                Rectangle {
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    width: 5
+                    height: 5
+                    color: "#bdc3c7"
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: sound.play()
+                    }
+
+                   /* SoundEffect {
+                        id: sound
+                        volume: 0.8
+                        source: "new_sound.wav"
+                    }
+                    == EASTER EGG
+                    */
+
+                }
+                /*
+                AnimatedImage {
+                    anchors.top: parent.top
+                    source: "doge.gif"
+                    visible: sound.playing
+                }
+                    == EASTER EGG
+                */
+
+            }
+
+            Text{
+                visible: enSavoirPlus.visible
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.topMargin: 10
+                anchors.rightMargin: 10
+                font.pixelSize: 18
+                text: "X"
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked : enSavoirPlus.visible = false
+                }
+            }
+        }
+
+
     }
 
     Dialog {
@@ -334,7 +429,9 @@ ApplicationWindow { // Fenetre principale
 
         Menu {
             title: qsTr("&Aide")
+            MenuItem { text: qsTr("En savoir plus …");onTriggered: enSavoirPlus.visible = true}
         }
+
 
         Menu {
             title: qsTr("&Générer Etat")

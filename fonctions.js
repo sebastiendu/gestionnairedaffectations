@@ -6,7 +6,7 @@ var bulleClique = false;
 var jourPrecedent= 0;
 var moisPrecedent = 0;
 var anneePrecedente = 0;
-
+var tableauEvenement = [];
 var jourPrecedentEmploiDuTemps = 0;
 
 function dateBarreStatut(dateRecu) {
