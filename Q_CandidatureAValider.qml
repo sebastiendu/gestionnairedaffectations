@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
-
+import QtMultimedia 5.3
 
 // import "fonctions.js" as Fonctions
 Item {
@@ -11,6 +11,21 @@ Item {
         anchors.fill: parent
         color: "#bdc3c7"
 
+        Connections {
+            target: app
+            onCandidatureValidee: {
+               listView.model =  app.candidatures_en_attente;
+                console.log("rechargement");
+                ficheBenevole.model = null;
+                sound.play();
+            }
+        }
+
+        SoundEffect {
+            id: sound
+            volume: 0.3
+            source: "Sound.wav"
+        }
 
         BusyIndicator {
             id: chargement
@@ -122,7 +137,7 @@ Item {
                             onClicked:{
 
                                 listView.currentIndex = index;
-                                app.setIdDisponibilite(id_personne);
+                                app.setIdDisponibilite(id_disponibilite);
                                 ficheBenevole.model = app.fiche_benevole;
                                 app.setIdDoublons(id_personne);
                                 listeDoublons.model = app.personnes_doublons;
@@ -260,6 +275,7 @@ Item {
                     width: parent.width * 0.70 - 15
                     text: "Inscrire ce bénévole"
                     visible: (ficheBenevole.model) ? true: false
+                    onClicked: app.validerCandidature();
 
             }
 

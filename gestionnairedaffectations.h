@@ -41,6 +41,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* responsables MEMBER m_responsables NOTIFY responsablesChanged)
 
 
+
     Q_PROPERTY(SqlQueryModel* candidatures_en_attente MEMBER m_candidatures_en_attente NOTIFY candidatureEnAttenteChanged)
     Q_PROPERTY(SqlQueryModel* personnes_doublons MEMBER m_personnes_doublons)
 
@@ -90,13 +91,15 @@ public:
     Q_INVOKABLE void modifierTourMinMax(QString type, int nombre, int id);
     Q_INVOKABLE void insererTour(QDateTime dateFinPrecedente, int min,int max);
     Q_INVOKABLE void supprimerTour(int id);
-    Q_INVOKABLE void desaffecterBenevole();
+    Q_INVOKABLE void desaffecterBenevole(int id);
     Q_INVOKABLE void affecterBenevole();
     Q_INVOKABLE void inscrireBenevole(QString nomBenevole, QString prenomBenevole, QString adresseBenevole,
                                       QString codePostalBenevole, QString communeBenevole, QString courrielBenevole,
                                       QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
                                       QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
-                                      QString commentaireBenevole);
+                                      QString commentaireBenevole, QString joursEtHeures, QString listeAmis, QString typePoste,
+                                      QString commentaireDisponibilite);
+
     Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees); 
 
     Q_INVOKABLE float getRatioX();
@@ -109,6 +112,7 @@ public:
     Q_INVOKABLE QString getNomPoste();
 
 
+    Q_INVOKABLE void validerCandidature();
     Q_INVOKABLE void setIdDoublons(int id);
     Q_INVOKABLE void setIdPersonne(int id);
 
@@ -160,7 +164,7 @@ signals:
     void responsablesChanged();
     void fermerFenetreProprietesEvenement();
     void inscriptionOk();
-
+    void candidatureValidee();
 
 
 public slots:

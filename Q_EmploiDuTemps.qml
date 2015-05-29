@@ -100,7 +100,7 @@ Item {
                         radius: 5
                         //border.color: modelData.split('|')[10] === '100' ? "darkgreen" : modelData.split('|')[10] > 100 ? "#888800"  : "darkred" // taux
                         //border.width: modelData.split('|')[10] / 100
-                        color: modelData.split('|')[9] === '0' ? "green" : modelData.split('|')[9] < 0 ? "yellow"  : "red" // faim
+                        color: modelData.split('|')[9] === '0' ? "green" : modelData.split('|')[9] < 0 ? "red"  : "yellow" // faim
                         opacity: 0.75
                         MouseArea {
                             anchors.fill: parent
@@ -114,8 +114,9 @@ Item {
                                 date.text = Fonctions.dateTour(new Date(app.fiche_poste_tour.getDataFromModel(0,"debut")),new Date(app.fiche_poste_tour.getDataFromModel(0,"fin"))).trim();
                                // fin.text = app.fiche_poste_tour.getDataFromModel(0,"fin");
 
-                                affectationsOk.text = (app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees") == "" ) ? "0" : app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees");
-                                affectationsMax.text = " / " + app.fiche_poste_tour.getDataFromModel(0,"max");
+                                affectationsOk.text = (app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees") == "" ) ? "aucune" : app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees");
+                                affectationsMax.text = "/ " + app.fiche_poste_tour.getDataFromModel(0,"max") + " (minimum: " + app.fiche_poste_tour.getDataFromModel(0,"min")+ ")";
+                                affectationsProposees.text = "<i>"+ app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_proposees") +" affectations proposées </i>"
                             }
                         }
                     }
@@ -126,35 +127,6 @@ Item {
                 }
             }
 
-        Rectangle {
-            id: info
-            color: "white"
-            radius:5
-            border.color: "black"
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.leftMargin: parent.width*0.3
-            width: parent.width*0.4
-            visible: false
-            height: 50
-
-            Text {
-                id: titreTour
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.leftMargin: 15
-                anchors.topMargin: 10
-
-            }
-
-            Text {
-                id: resumeTour
-                anchors.top: titreTour.bottom
-                anchors.left: parent.left
-                anchors.leftMargin: 15
-                anchors.topMargin: 10
-            }
-        }
     }
 
     Rectangle {
@@ -166,7 +138,7 @@ Item {
         anchors.topMargin: parent.height*0.20
         anchors.leftMargin: parent.width*0.25
         width: parent.width*0.50
-        height: parent.height*0.50
+        height: nomPoste.height + nomPoste.anchors.topMargin + date.height + date.anchors.topMargin + affectationsOk.height + affectationsOk.anchors.topMargin + affectationsProposees.height + affectationsProposees.anchors.topMargin + 10
 
         Text{
             visible: fenetre.visible
@@ -197,17 +169,19 @@ Item {
             Text {
                 id: date
                 anchors.top: nomPoste.bottom
-                anchors.topMargin: 10
+                anchors.topMargin: 20
                 anchors.left: parent.left
                 anchors.leftMargin: parent.width/2 - width/2
+
             }
 
             Text {
                 id: affectationsOk
                 anchors.top: date.bottom
-                anchors.topMargin:10
+                anchors.topMargin:20
                 anchors.left: parent.left
-                anchors.leftMargin: parent.width*0.4
+                anchors.leftMargin: parent.width/2 - (affectationsOk.width+affectationsMax.anchors.leftMargin+affectationsMax.width)/2
+                font.pixelSize: 14
             }
 
             Text {
@@ -215,6 +189,16 @@ Item {
                 anchors.top: affectationsOk.top
                 anchors.left: affectationsOk.right
                 anchors.leftMargin: 10
+                font.pixelSize: 14
+            }
+
+            Text {
+
+                id: affectationsProposees
+                anchors.top: affectationsOk.bottom
+                anchors.topMargin: 15
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width/2 - width/2
             }
 
 

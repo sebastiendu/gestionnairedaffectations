@@ -304,8 +304,9 @@ Item {
             text : "←"
              anchors.leftMargin: 10
              onClicked: {
-                // _boutonRecevoir.checkable = false
-                 app.desaffecterBenevole();
+                 console.log("index:" + listePersonnesInscritesBenevoles.currentIndex);
+                 console.log("model: " + listePersonnesInscritesBenevoles.model.getDataFromModel(listePersonnesInscritesBenevoles.currentIndex,"id_affectation"))
+                 app.desaffecterBenevole(listePersonnesInscritesBenevoles.model.getDataFromModel(listePersonnesInscritesBenevoles.currentIndex,"id_affectation"));
                  app.setIdDisponibilite(-1)
                  listePersonnesInscritesBenevoles.model = app.affectations;
                  listePoste.model = app.poste_et_tour;

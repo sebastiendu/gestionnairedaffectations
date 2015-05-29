@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
-
+import QtMultimedia 5.3
 
 import "fonctions.js" as Fonctions
 
@@ -12,6 +12,31 @@ Item {
         id: block
         anchors.fill: parent
         // color: "#2ecc71"
+
+        Connections {
+            target: app
+            onInscriptionOk:  {
+                ding.play();
+                _nomBenevole.vider();
+                _prenomBenevole.vider();
+                _adresseBenevole.vider();
+                _codePostalBenevole.vider();
+                _communeBenevole.vider();
+                _courrielBenevole.vider();
+                _numPortableBenevole.vider();
+                _numDomicileBenevole.vider();
+                _professionBenevole.vider();
+                _datenaissanceBenevole.vider();
+                _competencesBenevole.vider();
+                _languesBenevole.vider();
+                _listeAmis.vider();
+                _joursEtHeuresDispo.vider();
+                _typePoste.vider();
+                _commentaireBenevole.text =""
+                _commentaireDisponibilite.text = ""
+                _nomBenevole.focusField();
+            }
+        }
 
         RectangleTitre {
             id: blockInformations
@@ -206,15 +231,25 @@ Item {
 
             }
 
-            LabelTextField {
-                id: _commentaireDisponibilite
-                texte: "Commentaire"
+
+            Label {
+                id: l_commentaireDisponibilite
+                text: "Commentaire: "
                 anchors.top: _typePoste.bottom
                 anchors.topMargin:9
                 anchors.left: parent.left
                 anchors.leftMargin: parent.width *0.2
-                taille: 300
+            }
 
+            TextArea {
+                id: _commentaireDisponibilite
+
+                anchors.top: _typePoste.bottom
+                anchors.topMargin:5
+                anchors.left: l_commentaireDisponibilite.right
+                anchors.leftMargin: 10
+                width: 300
+                height: 100;
             }
 
         }
@@ -231,10 +266,16 @@ Item {
                                      _codePostalBenevole.valeur, _communeBenevole.valeur,_courrielBenevole.valeur,
                                      _numPortableBenevole.valeur, _numDomicileBenevole.valeur, _professionBenevole.valeur,
                                      _datenaissanceBenevole.valeur, _languesBenevole.valeur, _competencesBenevole.valeur,
-                                     _commentaireBenevole.text );
+                                     _commentaireBenevole.text, _joursEtHeuresDispo.valeur, _listeAmis.valeur, _typePoste.valeur, _commentaireDisponibilite.text);
 
                 // strdate et strfdate
             }
+        }
+
+        SoundEffect {
+            id: ding
+            source: "Ding_Sound_Effect.wav"
+            volume: 0.3
         }
 
     }

@@ -5,7 +5,7 @@
 #include <QtDebug>
 #include <QQuickView>
 #include <QXmlSimpleReader>
-#include "gestionnairedaffectations.h"+
+#include "gestionnairedaffectations.h"
 
 
 
@@ -456,7 +456,7 @@ void GestionnaireDAffectations::setIdPosteTour(int id) {
 
 void GestionnaireDAffectations::setIdTourPoste(int id) {
     QSqlQuery query;
-    query.prepare("select * from tour t JOIN poste p ON t.id_poste = p.id where t.id = :tour;");
+    query.prepare("select * from poste_et_tour WHERE id_tour = :tour;");
     query.bindValue(":tour", id);
     query.exec();
     m_fiche_poste_tour->setQuery(query);
@@ -494,8 +494,10 @@ void GestionnaireDAffectations::setIdAffectation(int id) {
 void GestionnaireDAffectations::setIdDisponibilite(int id) {
 
     m_id_disponibilite = id;
-    QSqlQuery query = m_fiche_benevole->query(); //On demande la fiche d'un bénévole ayant un id precis
-    query.bindValue(0, m_id_disponibilite); // Cet id correspond à l'id passé en parametre
+    QSqlQuery query;
+    query.prepare("SELECT * FROM fiche_benevole WHERE id_disponibilite = :id_disponibilite AND id_evenement = :id_evenement");; //On demande la fiche d'un bénévole ayant un id precis
+    query.bindValue(":id_disponibilite", m_id_disponibilite);
+    query.bindValue(":id_evenement", idEvenement());
     query.exec();
     m_fiche_benevole->setQuery(query);
     qDebug() << "setIdDisponibilite: " << id;
@@ -716,13 +718,13 @@ void GestionnaireDAffectations::rechargerPlan(){
     planCompletChanged();
 }
 
-void GestionnaireDAffectations::desaffecterBenevole(){
+void GestionnaireDAffectations::desaffecterBenevole(int id){
 
     QSqlQuery query;
-    qDebug() << "1";
-    query.prepare("DELETE FROM affectation WHERE id_disponibilite = :id_disponibilite;");
+    qDebug() << "1: " << id;
+    query.prepare("DELETE FROM affectation WHERE id = :id;");
     qDebug() << "2";
-    query.bindValue(":id_disponibilite",m_id_disponibilite);
+    query.bindValue(":id",id);
     query.exec();
     qDebug() << "3";
     qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
@@ -906,10 +908,20 @@ void GestionnaireDAffectations::insererTour(QDateTime dateFinPrecedente, int min
         qDebug() << query.lastError().text();
     }
     else {
+        // On recharge la fiche du poste
         query.prepare("select * from tours where id_poste= :poste ORDER BY debut ASC;");
         query.bindValue(":poste", m_id_poste);
         query.exec();
         m_fiche_poste_tour->setQuery(query);
+
+        // On recharge la liste des postes
+        query = m_poste_et_tour_sql->query();
+        query.bindValue(":id_evenement",idEvenement());
+        query.exec();
+        m_poste_et_tour_sql->setQuery(query);
+        m_poste_et_tour->setSourceModel(m_poste_et_tour_sql);
+        m_poste_et_tour->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        m_poste_et_tour->setFilterKeyColumn(-1);
 
         tableauTourChanged();
     }
@@ -937,7 +949,8 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
                                                  QString codePostalBenevole, QString communeBenevole, QString courrielBenevole,
                                                  QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
                                                  QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
-                                                 QString commentaireBenevole)
+                                                 QString commentaireBenevole, QString joursEtHeures, QString listeAmis, QString typePoste,
+                                                 QString commentaireDisponibilite)
 {
 
 
@@ -984,7 +997,27 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
         qCritical() << query.lastError().text();
     }
     else {
-        inscriptionOk();
+        query.prepare("INSERT INTO disponibilite (id_personne,id_evenement,date_inscription,jours_et_heures_dispo, liste_amis,type_poste,commentaire,statut) VALUES (:id_personne,:id_evenement,:date_inscription,:jours_et_heures_dispo, :liste_amis,:type_poste,:commentaire,:statut)");
+        query.bindValue(":id_personne",query.lastInsertId());
+        query.bindValue(":id_evenement",idEvenement());
+        query.bindValue(":date_inscription",QDateTime::currentDateTime());
+        query.bindValue(":jours_et_heures_dispo",joursEtHeures);
+        query.bindValue(":liste_amis",listeAmis);
+        query.bindValue(":type_poste",typePoste);
+        query.bindValue(":commentaire",commentaireDisponibilite);
+        query.bindValue(":statut","proposee");
+
+        if(!query.exec())
+        {
+            qCritical() << query.lastError().text();
+        }
+        else {
+            query = m_candidatures_en_attente->query();
+            query.bindValue(0,idEvenement());
+            query.exec();
+            m_candidatures_en_attente->setQuery(query);
+            inscriptionOk();
+        }
     }
 
     qDebug() << query.lastQuery();
@@ -992,7 +1025,34 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     qDebug() << datenaissanceBenevole;
     qDebug() << dateNaiss.toString();
 
-    // Erreur de syntaxe pres de « ( »
+}
+
+void GestionnaireDAffectations::validerCandidature(){
+
+    qDebug() << "1" << m_id_disponibilite;
+
+    QSqlQuery query;
+    query.prepare("UPDATE disponibilite SET statut = 'validee' WHERE id = :id");
+    query.bindValue(":id", m_id_disponibilite);
+    query.exec();
+
+    query.prepare("select * from benevoles_disponibles where id_evenement=?");
+    query.addBindValue(idEvenement());
+    query.exec();
+    m_benevoles_disponibles_sql->setQuery(query);
+    m_benevoles_disponibles->setSourceModel(m_benevoles_disponibles_sql);
+    m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_benevoles_disponibles->setFilterKeyColumn(-1);
+
+    qDebug() << "2" << query.lastError().text();
+    query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
+    query.bindValue(":id_evenement",idEvenement());
+    query.exec();
+    m_candidatures_en_attente->setQuery(query);
+
+    qDebug() << "3" << query.lastError().text();
+    candidatureValidee();
+
 }
 
 void GestionnaireDAffectations::setIdDoublons(int id_doublon) {

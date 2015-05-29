@@ -11,6 +11,14 @@ Item {
     property int taille : 0 // Taille du textField
     property int largeur: labelTexte.width + texteTextField.width + texteTextField.anchors.leftMargin // Largeur totale
 
+    function vider() {
+        texteTextField.text = "";
+    }
+
+    function focusField() {
+        texteTextField.focus = true;
+    }
+
     height: texteTextField.height
 
     Label {

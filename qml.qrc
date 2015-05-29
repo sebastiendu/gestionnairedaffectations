@@ -26,5 +26,7 @@
         <file>DatePicker.qml</file>
         <file>Q_SolliciterAnciensBenevoles.qml</file>
         <file>LabelTextField.qml</file>
+        <file>Ding_Sound_Effect.wav</file>
+        <file>Sound.wav</file>
     </qresource>
 </RCC>

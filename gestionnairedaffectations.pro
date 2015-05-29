@@ -23,7 +23,8 @@ OTHER_FILES += \
     corbeille.png \
     marqueur.qml \
     rouge.png \
-    marqueurs/rouge_brillant.png
+    marqueurs/rouge_brillant.png \
+    Ding_Sound_Effect.wav
 
 HEADERS += \
     sqlquerymodel.h \

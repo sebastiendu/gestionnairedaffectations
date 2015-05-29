@@ -107,7 +107,7 @@ Item  {
                         onClicked: {
                             listeDesDisponibles.currentIndex = index
                             app.setIdDisponibilite(id_disponibilite)
-                            listeDesDisponibles.model = app.benevoles_disponibles
+                            //listeDesDisponibles.model = app.benevoles_disponibles
                         }
                     }
                 }

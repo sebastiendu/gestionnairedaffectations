@@ -454,6 +454,8 @@ Item {
                             anchors.fill: parent
                             text: styleData.value
                             color: styleData.selected ? "white" : "black"
+                            font.bold: activeFocus
+                            font.pixelSize: activeFocus ? 16 : 13
                             // activeFocusOnPress: false
                             //   selectByMouse: true
                             horizontalAlignment: TextInput.AlignHCenter
@@ -461,8 +463,8 @@ Item {
                             onEditingFinished:  {
                                 if(styleData.value != nouveauNombre.text)
                                 {
-                                    app.modifierTourMinMax(styleData.role, nouveauNombre.text, tableauTours.model.getDataFromModel(styleData.row,"id_tour"))
-                                    font.underline = "true"
+                                    app.modifierTourMinMax(styleData.role, nouveauNombre.text, tableauTours.model.getDataFromModel(styleData.row,"id"))
+                                    font.pixelSize = 13
 
                                     console.log("On enregistre");
                                 }
@@ -481,7 +483,7 @@ Item {
                                 tableauTours.selection.select(styleData.row );
                                 console.log(styleData.role);
                                 nouveauNombre.forceActiveFocus();
-                                console.log(tableauTours.model.getDataFromModel(styleData.row,"id_tour"))
+                                console.log(tableauTours.model.getDataFromModel(styleData.row,"id"))
 
                             }
                         }
@@ -553,7 +555,9 @@ Item {
                 anchors.topMargin: 5
                 anchors.rightMargin: 15
                 onClicked: {
-                    app.supprimerTour(tableauTours.model.getDataFromModel(tableauTours.currentRow,"id_tour"));
+                    console.log("Row: "+ tableauTours.currentRow);
+                    console.log("A supprimer: " + tableauTours.model.getDataFromModel(tableauTours.currentRow,"id"));
+                    app.supprimerTour(tableauTours.model.getDataFromModel(tableauTours.currentRow,"id"));
                 }
             }
 
