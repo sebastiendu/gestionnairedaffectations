@@ -510,8 +510,9 @@ Item  {
             maximumValue: app.heureMax.getTime()
             value: app.heure.getTime()
             z:2
-            updateValueWhileDragging : false
+            updateValueWhileDragging : true
             onValueChanged: {
+
                 app.heure = new Date(value);
                 listeDesTours.model = app.planCourant;
                 leRepeater.model = app.planCourant;
@@ -519,6 +520,7 @@ Item  {
                 app.setIdTour(-1)
                 _listeDesAffectes.text = ""
                 Fonctions.bulleClique = false;
+
             }
             //  console.log(app.heure);}// La variable "heure" prends pour valeur la date du slider
             // stepSize: 24*3600 // Fait planter l'application
@@ -536,16 +538,7 @@ Item  {
                 groove: Rectangle {
                     implicitWidth: 200
                     implicitHeight: 8
-                    LinearGradient {
-                        anchors.fill: parent
-                        start: Qt.point(0, 0)
-                        end: Qt.point(navigateurDeTemps.width, 0)
-                        gradient: Gradient {
-                            GradientStop { position: 0.0; color: "red" }
-                            GradientStop { position: 1.0; color: "blue" }
-                        }
-                    }
-                    radius: 8
+                    color: "green"
                 }
                 handle: Rectangle {
                     anchors.centerIn: parent

@@ -1175,7 +1175,10 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
                 for(int i=0; i<listeEvenements.count();i++)
                 {
                     nomEvenements << (m_liste_des_evenements->getDataFromModel((listeEvenements[i]).toInt(),"nom")).toString();
+                    qDebug() << "Tour numero " << i << ", nom: " << (m_liste_des_evenements->getDataFromModel((listeEvenements[i]).toInt(),"nom")).toString() << " max: " << listeEvenements.count();
                 }
+
+                qDebug() << nomEvenements.join(" ou ");
 
                 QSqlQuery query;
                 if (query.prepare("insert into lot(titre) values(?) returning cle")) {
@@ -1183,7 +1186,7 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
                     if (query.exec()) {
                         QVariant id = query.lastInsertId();
                         query.next();
-                        QVariant cle = query.value(0);
+                        QVariant cle = query.value(0); //
                         adresseEmail = prefixe.toString() + '+' + id.toString() + '_' + cle.toString() + '@' + domaine.toString();
 
                         QStringList conditions;
@@ -1198,7 +1201,7 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
                                     "insert into lot_personne(id_lot, id_personne)"
                                     " select ?, id_personne"
                                     " from disponibilite"
-                                    " where " + conditions.join(" or ")
+                                    " where " + conditions.join(" or ") + " LIMIT 1"
                                     )) {
                             query.addBindValue(id.toInt());
                             if (query.exec()) {
@@ -1209,26 +1212,26 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
                                 m_lotsDejaCrees->setQuery(query);
 
                             } else {
-                                qCritical() << "Impossible d'executer la requête de population du lot d'affectations : " << query.lastError();
+                                qCritical() << "Impossible d'executer la requête de population du lot de bénévoles : " << query.lastError();
                                 database.rollback();
                             }
                         } else {
-                            qCritical() << "Impossible de préparer la requête de population du lot d'affectations : " << query.lastError();
+                            qCritical() << "Impossible de préparer la requête de population du lot de bénévoles : " << query.lastError();
                             database.rollback();
                         }
                     } else {
-                        qCritical() << "Impossible d'executer la requête de création du lot d'affectations : " << query.lastError();
+                        qCritical() << "Impossible d'executer la requête de création du lot de bénévoles : " << query.lastError();
                         database.rollback();
                     }
                 } else {
-                    qCritical() << "Impossible de préparer la requête de création du lot d'affectations : " << query.lastError();
+                    qCritical() << "Impossible de préparer la requête de création du lot de bénévoles : " << query.lastError();
                     database.rollback();
                 }
             } else {
-                qCritical() << "Impossible de démarrer la transaction de création du lot d'affectations : " << database.lastError();
+                qCritical() << "Impossible de démarrer la transaction de création du lot de bénévoles : " << database.lastError();
             }
         } else {
-            qWarning() << "Vous devez selectionner au moins un ensemble d'affectations";
+            qWarning() << "Vous devez selectionner au moins un ensemble de bénévoles";
         }
     } else {
         qWarning() << "Les paramètres de courriel (préfixe et domaine) ne sont pas renseignés";

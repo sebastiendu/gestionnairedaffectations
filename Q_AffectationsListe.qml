@@ -203,6 +203,7 @@ Item {
                 anchors.fill: parent
                 model: app.poste_et_tour
                 spacing : 2
+                cacheBuffer: 800
                 delegate:
                     Rectangle {
 
@@ -368,10 +369,9 @@ Item {
                         }
                     }
                 }
-
-                // Petit bug ,lorsque aucun n'est cliqué le surlignage reste sur le 1er champs
-               // highlight: Rectangle { id: rectangleSurligneBenevole; z:5; color: "blue"; radius: 5; opacity: 0.5; width: listePersonnesInscritesBenevoles.width ; height:13 ;y: listePersonnesInscritesBenevoles.currentItem.y}
+                highlight: Rectangle { visible: (listePersonnesInscritesBenevoles.currentIndex == -1)? false: true; z: 5; color: "blue"; radius: 5; opacity: 0.5; width: listePersonnesInscritesBenevoles.width ; height:13 ;y: (listePersonnesInscritesBenevoles.currentIndex == -1)? 0:listePersonnesInscritesBenevoles.currentItem.y}
                 highlightFollowsCurrentItem: false
+
                 focus: true
 
             }
