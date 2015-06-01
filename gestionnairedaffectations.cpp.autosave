@@ -1183,7 +1183,7 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
                     if (query.exec()) {
                         QVariant id = query.lastInsertId();
                         query.next();
-                        QVariant cle = query.value(0);
+                        QVariant cle = query.value(0); // 
                         adresseEmail = prefixe.toString() + '+' + id.toString() + '_' + cle.toString() + '@' + domaine.toString();
 
                         QStringList conditions;

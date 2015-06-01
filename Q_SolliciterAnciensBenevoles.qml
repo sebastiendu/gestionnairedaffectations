@@ -60,6 +60,9 @@ Item {
                      text: styleData.value
                      onClicked: {
                          Fonctions.tableauEvenement[styleData.row] = checked;
+                         _adresseEmail.visible = false;
+                         _boutonGenerer.visible = true;
+                         curseurDifferentPourLienEmail.visible=false;
                      }
                  }
              }
@@ -93,18 +96,16 @@ Item {
                 for(i=0;i<tableauDesEvenements.rowCount;i++)
                 {
                     if(Fonctions.tableauEvenement[i] == true){
-                        contenu += "" + tableauDesEvenements.model.getDataFromModel(i,"id")+"|";
+                        // contenu += "" + tableauDesEvenements.model.getDataFromModel(i,"id")+"|"; // pour avoir l'id de la base
+                        contenu += ""+i+"|"; // pour avoir le n° dans le model
+
                     }
                 }
+                if(contenu != "") contenu = contenu.slice(0,-1);
                 console.log(contenu);
 
-
                 var debut ="<a href='mailto:";
-              /*  var mail = app.creerLotDAffectations(
-                            _checkboxAffecationsJamaisSoumises.checked,
-                            _checkboxAffecationsNonTraitees.checked,
-                            _checkboxAffecationsRelance.checked
-                            ); */
+                var mail = app.creerLotDeSolicitation(contenu);
                 var fin = "'>";
                 var fin2 = "</a>";
                 _adresseEmail.text=debut+mail+fin+mail+fin2;
@@ -112,6 +113,7 @@ Item {
                 _boutonGenerer.visible = false
                 _adresseEmail.visible = true
                 curseurDifferentPourLienEmail.visible = true
+
             }
         }
 

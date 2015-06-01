@@ -101,6 +101,7 @@ public:
                                       QString commentaireDisponibilite);
 
     Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees); 
+    Q_INVOKABLE QString creerLotDeSolicitation(QString);
 
     Q_INVOKABLE float getRatioX();
     Q_INVOKABLE float getRatioY();
