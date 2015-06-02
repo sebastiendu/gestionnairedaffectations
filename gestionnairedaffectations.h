@@ -21,8 +21,10 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QDateTime heureMin MEMBER m_heureMin NOTIFY heureMinChanged)
     Q_PROPERTY(QDateTime heureMax MEMBER m_heureMax NOTIFY heureMaxChanged)
     Q_PROPERTY(Settings* settings MEMBER m_settings NOTIFY settingsChanged)
+    Q_PROPERTY(int id_poste MEMBER m_id_poste NOTIFY idPosteChanged)
     Q_PROPERTY(SqlQueryModel* liste_des_evenements MEMBER m_liste_des_evenements NOTIFY liste_des_evenementsChanged)
     Q_PROPERTY(QSortFilterProxyModel* benevoles_disponibles MEMBER m_benevoles_disponibles NOTIFY benevoles_disponiblesChanged)
+    Q_PROPERTY(SqlQueryModel* benevoles_disponibles_sql MEMBER m_benevoles_disponibles_sql NOTIFY benevoles_disponibles_sqlChanged)
     Q_PROPERTY(SqlQueryModel* postes MEMBER m_postes NOTIFY postesChanged)
     Q_PROPERTY(SqlQueryModel* fiche_benevole MEMBER m_fiche_benevole NOTIFY fiche_benevoleChanged)
     Q_PROPERTY(SqlQueryModel* fiche_personne MEMBER m_fiche_personne)
@@ -99,8 +101,10 @@ public:
                                       QString datenaissanceBenevole, QString languesBenevole,QString competencesBenevole,
                                       QString commentaireBenevole, QString joursEtHeures, QString listeAmis, QString typePoste,
                                       QString commentaireDisponibilite);
+    Q_INVOKABLE void ajouterResponsable(int id);
+    Q_INVOKABLE void rejeterResponsable(int id);
 
-    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees); 
+    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees);
     Q_INVOKABLE QString creerLotDeSolicitation(QString);
 
     Q_INVOKABLE float getRatioX();
@@ -168,6 +172,9 @@ signals:
     void inscriptionOk();
     void candidatureValidee();
     void candidatureRejetee();
+    void tableauResponsablesChanged();
+    void benevoles_disponibles_sqlChanged();
+    void idPosteChanged();
 
 public slots:
     void mettreAJourModelPlan();

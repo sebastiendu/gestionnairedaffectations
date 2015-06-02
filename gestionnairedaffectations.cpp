@@ -625,10 +625,32 @@ void GestionnaireDAffectations::mettreAJourModelPlan(){
     qDebug() << "Nombre de postes à ce moment: " << m_postes->rowCount();
 }
 
-/*
-void GestionnaireDAffectations::ajouterResponsable(int id){
 
-} */
+void GestionnaireDAffectations::ajouterResponsable(int id){
+    QSqlQuery query;
+    query.prepare("INSERT INTO responsable (id_personne, id_poste) VALUES (:id_personne, :id_poste)");
+    query.bindValue(":id_personne",id);
+    query.bindValue(":id_poste", m_id_poste);
+    query.exec();
+    qDebug() << query.lastError().text();
+
+    setResponsables();
+
+    tableauResponsablesChanged();
+}
+
+void GestionnaireDAffectations::rejeterResponsable(int id){
+    QSqlQuery query;
+    query.prepare("DELETE FROM responsable WHERE id_personne = :id_personne AND id_poste = :id_poste");
+    query.bindValue(":id_personne",id);
+    query.bindValue(":id_poste", m_id_poste);
+    query.exec();
+    setResponsables();
+
+    qDebug() << "Rejeté: " << id;
+
+    tableauResponsablesChanged();
+}
 
 void GestionnaireDAffectations::insererPoste(QString poste, QString description, bool autonome, float posx, float posy) {
     QSqlQuery query;

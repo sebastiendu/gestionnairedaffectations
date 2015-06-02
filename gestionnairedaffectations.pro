@@ -8,7 +8,8 @@ SOURCES += main.cpp \
     settings.cpp \
     plansvgimageprovider.cpp \
     abstracttablemodel.cpp \
-    toursparpostemodel.cpp
+    toursparpostemodel.cpp \
+    sortfilterproxymodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -32,4 +33,5 @@ HEADERS += \
     settings.h \
     plansvgimageprovider.h \
     abstracttablemodel.h \
-    toursparpostemodel.h
+    toursparpostemodel.h \
+    sortfilterproxymodel.h

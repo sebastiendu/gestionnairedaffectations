@@ -4,8 +4,8 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
 import fr.ldd.qml 1.0
 import QtWebKit 3.0
-import QtQuick.Controls.Styles 1.2
 import QtGraphicalEffects 1.0
+import QtQuick.Controls.Styles 1.2
 
 import "fonctions.js" as Fonctions
 
@@ -118,8 +118,18 @@ Item {
 
                             radius: 100
                             border.width: 4
-                            border.color: "red"
+                            border.color: (index == id) ? "red" : "yellow"
 
+                             Connections {
+                                target: app
+
+                                onIdPosteChanged: {
+                                    imageMarqueurPostesEtTours.color = (app.id_poste == id) ? "red" : "yellow"
+                                    index = 0
+                                    console.log("maj couleur")
+                                }
+
+                            }
 
                             z:1
 
@@ -160,6 +170,8 @@ Item {
 
                                     if(mouse.button == Qt.LeftButton)
                                     {
+                                        console.log(index)
+                                        descriptionPoste.visible = true;
                                         _nomPoste.text = nom;
                                         _descriptionPoste.text = description;
                                         app.setIdPosteTour(id);
@@ -219,6 +231,7 @@ Item {
             anchors.bottomMargin: 10
             anchors.right: parent.right
             anchors.rightMargin:10
+            visible: false
             // border.color: "black"
             // border.width: 1
 
@@ -292,6 +305,8 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 TableView {
+
+
                     id: tableauResponsable
                     height: contenu.height/6
                     anchors.top: parent.top
@@ -300,10 +315,21 @@ Item {
                     anchors.right: parent.right
                     sortIndicatorVisible: true
 
-                    TableViewColumn{ role: "nom"  ; title: "Nom" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/5)-1;}
-                    TableViewColumn{ role: "prenom" ; title: "Prenom" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/5)-1;}
+                    TableViewColumn{ role: "id_personne"  ; title: "id" ;  visible: true}
+                    TableViewColumn{ role: "nom"  ; title: "Nom" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/4)-1;}
+                    TableViewColumn{ role: "prenom" ; title: "Prenom" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/4)-1;}
                     TableViewColumn{ role: "portable"  ; title: "Téléphone" ;  horizontalAlignment: Text.AlignHCenter; width:(tableauTours.width/4)-1;}
-                    TableViewColumn{ role: "email" ; title: "Email" ; elideMode: Text.ElideMiddle}
+                    TableViewColumn{ role: "email" ; title: "Email" ; elideMode: Text.ElideMiddle; width:(tableauTours.width/4)-1}
+
+                    Connections {
+                        target: app
+
+                        onTableauResponsablesChanged: {
+                            tableauResponsable.model = app.responsables;
+                            console.log("maj")
+                        }
+
+                    }
 
                 }
 
@@ -311,7 +337,7 @@ Item {
                 ComboBox {
                     id: choixResponsable
                     editable: true
-                    model: app.benevoles_disponibles
+                    model: app.benevoles_disponibles_sql
 
                     anchors.right: ajouterResponsable.left
                     anchors.rightMargin: 10
@@ -321,17 +347,18 @@ Item {
 
                     onCurrentIndexChanged: {
                         console.log(currentIndex) // On appelle la fonction permettant entre autre de charger toutes les informations du nouvel évenement
-                        console.log(nom_personne);
                     }
 
                 }
+
+
 
                 Button {
                     id: ajouterResponsable
                     anchors.top: choixResponsable.top
                     anchors.right: rejeterResponsable.left
                     text: " + "
-                    onClicked: { console.log(choixResponsable.currentIndex)}
+                    onClicked: { app.ajouterResponsable(app.benevoles_disponibles_sql.getDataFromModel(choixResponsable.currentIndex,"id_personne"))}
                 }
 
                 Button {
@@ -339,6 +366,13 @@ Item {
                     anchors.top: choixResponsable.top
                     anchors.right: parent.right
                     text: " - "
+
+                    onClicked: {
+                        console.log("QML rejete : "+ app.responsables.getDataFromModel(tableauResponsable.currentRow,"id_personne"))
+                        app.rejeterResponsable(app.responsables.getDataFromModel(tableauResponsable.currentRow,"id_personne"));
+
+                    }
+
                 }
 
             }
