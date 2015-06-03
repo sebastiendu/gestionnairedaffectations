@@ -24,7 +24,7 @@ QImage PlanSVGImageProvider::requestImage(const QString & id, QSize * size, cons
     QPainter painter(&image);
     QSqlQuery query;
     if (query.prepare("select plan from evenement where id=?")) {
-        query.addBindValue(id.toInt());
+        query.addBindValue(id.split('/').at(0).toInt());
         if (query.exec()) {
             if (query.next()) {
                 const QByteArray content = query.value(0).toByteArray();

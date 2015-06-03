@@ -443,6 +443,9 @@ void GestionnaireDAffectations::setIdPoste(int id) {
     query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
     query.exec();
     m_fiche_poste->setQuery(query);
+
+    qDebug() << "id du poste changé en: " << id;
+    idPosteChanged();
 }
 
 void GestionnaireDAffectations::setIdPosteTour(int id) {
@@ -568,6 +571,7 @@ void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
             query.bindValue(":plan", QString(file.readAll()));
             query.bindValue(":id", idEvenement());
             if (query.exec()) {
+                // setIdEvenement(idEvenement());
                 emit planMisAJour();
             } else {
                 qCritical() << "Echec d'execution de la requête d'enregistrement du plan :" << query.lastError();
@@ -712,6 +716,7 @@ void GestionnaireDAffectations::modifierNomPoste(QString nom) {
     query.bindValue(":id",m_id_poste);
     query.exec();
 
+    qDebug() << "nom du poste " << m_id_poste << "modifié en " << nom;
     rechargerPlan();
 
 
@@ -1027,7 +1032,7 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
         query.bindValue(":liste_amis",listeAmis);
         query.bindValue(":type_poste",typePoste);
         query.bindValue(":commentaire",commentaireDisponibilite);
-        query.bindValue(":statut","proposee");
+        query.bindValue(":statut","validee");
 
         if(!query.exec())
         {

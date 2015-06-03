@@ -36,7 +36,8 @@ Item {
             Connections {
                 target: app
                 onPlanMisAJour: {
-                   // planPosteEtTours.source = "image://plan/" + app.idEvenement
+                    planPosteEtTours.source ="image://plan/" + app.idEvenement + "/" + new Date().getMilliseconds()
+                    console.log("Plan mis à jour")
                 }
             }
 
@@ -50,6 +51,7 @@ Item {
                     target: app
                     onPlanCompletChanged: {
                         repeaterPostesEtTours.model = app.planComplet;
+                        //imageMarqueurPostesEtTours.border.color = (app.id_poste == id) ? "#3498db" : "red";
                         console.log("PlanCompletChanged");
                     }
                 }
@@ -79,7 +81,6 @@ Item {
                     id: repeaterPostesEtTours
                     objectName: "repeaterPostesEtTours"
                     model: app.planComplet
-
 
                     delegate: Rectangle {
                         z:1
@@ -118,14 +119,15 @@ Item {
 
                             radius: 100
                             border.width: 4
-                            border.color: (index == id) ? "red" : "yellow"
+                            border.color: "red"
+
 
                              Connections {
                                 target: app
 
                                 onIdPosteChanged: {
-                                    imageMarqueurPostesEtTours.color = (app.id_poste == id) ? "red" : "yellow"
-                                    index = 0
+
+                                    imageMarqueurPostesEtTours.border.color = (app.id_poste == id) ? "#3498db" : "red"
                                     console.log("maj couleur")
                                 }
 
@@ -151,15 +153,16 @@ Item {
                                     app.setRatioX((imageMarqueurPostesEtTours.x/rectangleBordurePlan.width)+(imageMarqueurPostesEtTours.width/rectangleBordurePlan.width)/2)
                                     app.setRatioY((imageMarqueurPostesEtTours.y/rectangleBordurePlan.height)+(imageMarqueurPostesEtTours.height/rectangleBordurePlan.height)/2)
                                     app.modifierPositionPoste(posx,posy);
-                                    imageMarqueurPostesEtTours.border.color = "red";
+                                    //imageMarqueurPostesEtTours.border.color = "red";
                                     imageMarqueurPostesEtTours.border.width= 4
 
                                 }
 
                                 onPressed: {
                                     app.setIdPoste(id);
-                                    imageMarqueurPostesEtTours.border.color = "#3498db";
+                                    //imageMarqueurPostesEtTours.border.color = "#3498db";
                                     imageMarqueurPostesEtTours.border.width= 5
+
                                     imageMarqueurPostesEtTours.z = 149;
 
                                     if(mouse.button == Qt.RightButton)
@@ -171,11 +174,12 @@ Item {
                                     if(mouse.button == Qt.LeftButton)
                                     {
                                         console.log(index)
-                                        descriptionPoste.visible = true;
-                                        _nomPoste.text = nom;
-                                        _descriptionPoste.text = description;
                                         app.setIdPosteTour(id);
                                         app.setResponsables();
+
+                                        descriptionPoste.visible = true;
+                                        _nomPoste.text = app.planComplet.getDataFromModel(index,"nom")
+                                        _descriptionPoste.text = app.planComplet.getDataFromModel(index,"description");
                                         tableauResponsable.model = app.responsables;
                                         tableauResponsable.resizeColumnsToContents();
                                         tableauTours.model = app.fiche_poste_tour;
@@ -252,7 +256,10 @@ Item {
                 anchors.rightMargin: 10
                 anchors.topMargin:5
                 anchors.left: _descriptionPoste.left
-                onEditingFinished: app.modifierNomPoste(_nomPoste.text)
+                onEditingFinished: {
+                    console.log("Edition finie, je suis appellé!!");
+                    app.modifierNomPoste(_nomPoste.text)
+                }
 
             }
 

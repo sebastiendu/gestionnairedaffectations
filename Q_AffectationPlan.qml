@@ -387,6 +387,7 @@ Item  {
                         onClicked: {
                             app.setIdPoste(id_poste)
                             app.setIdTour(id_tour)
+                            app.setIdPosteTour(id_poste);
                             console.log(id_tour);
                             _listeDesAffectes.text = "<hr><u>Liste des affectés</u>";
 
@@ -510,7 +511,7 @@ Item  {
             maximumValue: app.heureMax.getTime()
             value: app.heure.getTime()
             z:2
-            updateValueWhileDragging : true
+            updateValueWhileDragging : false
             onValueChanged: {
 
                 app.heure = new Date(value);
