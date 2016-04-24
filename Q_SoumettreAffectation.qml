@@ -29,7 +29,7 @@ Item {
 
         Label {
             id : _soumettreAffectations
-            text : "Envoyer à chaque bénévole un email pour valider les affectations qui ont été :"
+            text : "Générer une adresse de courriel pour poster un message aux participants qui ont des affectations :"
             anchors.top: _rectangleHaut.top
             anchors.left: _rectangleHaut.left
             anchors.topMargin: 20
@@ -64,7 +64,7 @@ Item {
             anchors.left : _checkboxAffecationsJamaisSoumises.left
             anchors.top : _checkboxAffecationsJamaisSoumises.top
             anchors.leftMargin: 20
-            text: "Proposées mais qui n'ont jamais été soumises à l'approbation du bénévole (1er envoi)"
+            text: "possibles mais pas encore proposées au participant"
             wrapMode: "WordWrap"
             width: parent.width * 0.8
             z:1
@@ -88,53 +88,23 @@ Item {
             anchors.top : _checkboxAffecationsNonTraitees.top
             wrapMode: "WordWrap"
             width: parent.width * 0.8
-            text: "Déjà soumises à l'approbation mais que le bénévole n'a pas encore traité (Relance)"
-        }
-
-        CheckBox {
-            id: _checkboxAffecationsRelance
-            anchors.top: _checkboxAffecationsNonTraitees.bottom
-            anchors.topMargin: 20
-            anchors.left: _soumettreAffectations.left
-            anchors.leftMargin: 50
-            onClicked: {
-                _adresseEmail.visible=false
-                _boutonGenerer.visible=true
-                curseurDifferentPourLienEmail.visible=false
-            }
-        }
-        Text {
-            anchors.left : _checkboxAffecationsRelance.right
-            anchors.top : _checkboxAffecationsRelance.top
-            wrapMode: "WordWrap"
-            width: parent.width * 0.8
-            text: "Ayant fait l'objet d'une relance mais n'ont pas obtenu de réaction (2ème relance)"
-        }
-
-
-        Label {
-            id: _envoyerMessage
-            anchors.top: _checkboxAffecationsRelance.bottom
-            anchors.topMargin: 50
-            anchors.left: _soumettreAffectations.left
-            anchors.leftMargin: 50
-            text: "Envoyer un courriel à "
+            text: "déjà proposées mais que le participant n'a pas encore traitées (ni acceptées, ni refusées)"
         }
 
         Button {
             id: _boutonGenerer
             visible: true
-            anchors.top: _envoyerMessage.top
+            enabled: _checkboxAffecationsJamaisSoumises.checked || _checkboxAffecationsNonTraitees.checked
+            anchors.top: _checkboxAffecationsNonTraitees.bottom
             anchors.topMargin: -5 // Simplement pour que le bouton soit centré avec le texte
-            anchors.left: _envoyerMessage.right
+            anchors.left: _soumettreAffectations.left
             anchors.leftMargin: 10
             text: "Générer l'adresse mail"
             onClicked: {
-                var debut ="<a href='mailto:";
+                var debut ="Envoyer un courriel à <a href='mailto:";
                 var mail = app.creerLotDAffectations(
                             _checkboxAffecationsJamaisSoumises.checked,
-                            _checkboxAffecationsNonTraitees.checked,
-                            _checkboxAffecationsRelance.checked
+                            _checkboxAffecationsNonTraitees.checked
                             );
                 var fin = "'>";
                 var fin2 = "</a>";
@@ -149,10 +119,8 @@ Item {
         Text {
             id: _adresseEmail
             visible: false
-            anchors.top: _envoyerMessage.top
-            anchors.topMargin: _envoyerMessage.topMargin
-            anchors.left: _boutonGenerer.left
-            anchors.leftMargin: _boutonGenerer.leftMargin
+            anchors.top: _checkboxAffecationsNonTraitees.bottom
+            anchors.left: _soumettreAffectations.left
             text: ""
             textFormat: Text.RichText
             onLinkActivated: Qt.openUrlExternally(link)
@@ -176,7 +144,7 @@ Item {
         id: rectangleTableauListeDesLotsDejaCrees
         /*border.color:"blue"
         color: "yellow" // DEBUG */
-        color: white
+        color: "white"
         anchors.top: _rectangleHaut.bottom
         anchors.topMargin: 10
         anchors.left: parent.left

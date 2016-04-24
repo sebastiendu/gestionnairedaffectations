@@ -104,7 +104,7 @@ public:
     Q_INVOKABLE void ajouterResponsable(int id);
     Q_INVOKABLE void rejeterResponsable(int id);
 
-    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees, bool relancees);
+    Q_INVOKABLE QString creerLotDAffectations(bool possibles, bool proposees);
     Q_INVOKABLE QString creerLotDeSolicitation(QString);
 
     Q_INVOKABLE float getRatioX();
@@ -140,6 +140,7 @@ signals:
     void warning(const QString &msg, const QString &info, const QString &detail);
     void critical(const QString &msg, const QString &info, const QString &detail);
     void fatal(const QString &msg, const QString &info, const QString &detail);
+    void info(const QString &msg, const QString &info, const QString &detail);
     void heureChanged();
     void heureMinChanged();
     void heureMaxChanged();

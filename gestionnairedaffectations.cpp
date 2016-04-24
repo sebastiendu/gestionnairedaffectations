@@ -105,6 +105,9 @@ void GestionnaireDAffectations::gestionDesMessages(QtMsgType type, const QMessag
         fprintf(stderr, "ERREUR FATALE : ");
         emit inst->fatal(msg, info, detail);
         break;
+    default: // QtInfoMsg
+        fprintf(stderr, "INFORMATION : ");
+        emit inst->info(msg, info, detail);
     }
     fprintf(stderr, "%s\n\t%s\t%s\n\n", qPrintable(msg), qPrintable(info), qPrintable(detail));
     fflush(stderr);
@@ -1109,7 +1112,7 @@ void GestionnaireDAffectations::setIdDoublons(int id_doublon) {
     m_personnes_doublons->setQuery(query);
 }
 
-QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool proposees, bool relancees)
+QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool proposees)
 {
     QString adresseEmail; // L'adresse email qui sera retournée après génération
 
@@ -1118,37 +1121,39 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
     QVariant domaine = m_settings->value("email/domaine");
 
     if (prefixe.isValid() && domaine.isValid()) {
-        if (possibles or proposees or relancees) {
+        if (possibles or proposees) {
             QSqlDatabase database = QSqlDatabase::database();
             if (database.transaction()) {
                 QStringList titre;
                 if (possibles) titre << "possibles";
                 if (proposees) titre << "déjà proposées";
-                if (relancees) titre << "déjà proposées plusieurs fois";
                 QSqlQuery query;
-                if (query.prepare("insert into lot(titre) values(?) returning cle")) {
-                    query.addBindValue("Affectations " + titre.join(" ou "));
+                if (query.prepare("insert into lot(id_evenement, titre) values(:id_evenement, :titre) returning cle")) {
+                    query.bindValue(":id_evenement", idEvenement());
+                    query.bindValue(":titre", "Affectations " + titre.join(" ou "));
                     if (query.exec()) {
                         QVariant id = query.lastInsertId();
                         query.next();
                         QVariant cle = query.value(0);
                         adresseEmail = prefixe.toString() + '+' + id.toString() + '_' + cle.toString() + '@' + domaine.toString();
-
                         QStringList conditions;
-                        if (possibles) conditions << "statut='possible'";
-                        if (proposees) conditions << "statut='proposee' and id not in (select id from lot_affectation where traite and reussi)";
-                        if (relancees) conditions << "statut='proposee' and id in (select id from lot_affectation where traite and reussi)";
+                        if (possibles) conditions << "affectation.statut='possible'";
+                        if (proposees) conditions << "affectation.statut='proposee'";
                         if (query.prepare(
-                                    "insert into lot_affectation(id_lot, id_affectation)"
-                                    " select ?, id"
+                                    "insert into lot_personne(id_lot, id_personne)"
+                                    " select distinct :id_lot, id_personne"
                                     " from affectation"
-                                    " where " + conditions.join(" or ")
+                                    " join disponibilite on id_disponibilite = disponibilite.id"
+                                    " where " + conditions.join(" or ") +
+                                    " and id_evenement = :id_evenement" +
+                                    " and (" + conditions.join(" or ") + ")"
                                     )) {
-                            query.addBindValue(id.toInt());
+                            query.bindValue(":id_lot", id.toInt());
+                            query.bindValue(":id_evenement", idEvenement());
                             if (query.exec()) {
                                 database.commit();
 
-                                query.prepare("select date_de_creation, titre, traite, id, cle from lot;");
+                                query.prepare("select id_evenement, date_de_creation, titre, traite, id, cle from lot;");
                                 query.exec();
                                 m_lotsDejaCrees->setQuery(query);
 
@@ -1172,7 +1177,7 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
                 qCritical() << "Impossible de démarrer la transaction de création du lot d'affectations : " << database.lastError();
             }
         } else {
-            qWarning() << "Vous devez selectionner au moins un ensemble d'affectations";
+            qWarning() << "Vous devez selectionner au moins un ensemble de destinataires";
         }
     } else {
         qWarning() << "Les paramètres de courriel (préfixe et domaine) ne sont pas renseignés";
@@ -1208,8 +1213,9 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
                 qDebug() << nomEvenements.join(" ou ");
 
                 QSqlQuery query;
-                if (query.prepare("insert into lot(titre) values(?) returning cle")) {
-                    query.addBindValue("Bénévoles ayant participés à " + nomEvenements.join(" ou "));
+                if (query.prepare("insert into lot(id_evenement, titre) values(:id_evenement, :titre) returning cle")) {
+                    query.bindValue(":id_evenement", idEvenement());
+                    query.bindValue(":titre", "Bénévoles ayant participé à " + nomEvenements.join(" ou "));
                     if (query.exec()) {
                         QVariant id = query.lastInsertId();
                         query.next();
@@ -1509,7 +1515,7 @@ void GestionnaireDAffectations::genererCarteBenevoles()
     lowriter->start("lowriter", QStringList() << f->fileName());
     lowriter->waitForFinished();
 
-    qDebug(f->fileName().toUtf8());
+    qDebug() << f->fileName();
 
     qDebug() << lowriter->readAll();
 }
