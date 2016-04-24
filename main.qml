@@ -174,6 +174,7 @@ ApplicationWindow { // Fenetre principale
         id: fenetreOuvrirEvenement
 
         width: 700
+        height: 300
 
         TableView { // Le menu déroulant permettant de sélectionner l'événement
             id: tableauEvenement
@@ -234,6 +235,7 @@ ApplicationWindow { // Fenetre principale
         id: proprietesEvenement
 
         width: 400
+        height: 300
         standardButtons: StandardButton.NoButton
         // modality: Qt.ApplicationModal
 
