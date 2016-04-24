@@ -148,7 +148,7 @@ Item {
         id: rectangleTableauListeDesLotsDejaCrees
         /*border.color:"blue"
         color: "yellow" // DEBUG */
-        color: white
+        color: "white"
         anchors.top: _rectangleHaut.bottom
         anchors.topMargin: 30
         anchors.left: parent.left
@@ -207,8 +207,6 @@ Item {
                     text: styleData.value
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHLeft // Pour que le titre de la colonne soit à gauche
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
                     wrapMode: Text.WrapAnywhere;
                     elide: Text.ElideRight
                 }

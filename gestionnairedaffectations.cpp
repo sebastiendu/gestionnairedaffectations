@@ -1141,7 +1141,7 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
                         if (proposees) conditions << "affectation.statut='proposee'";
                         if (query.prepare(
                                     "insert into lot_personne(id_lot, id_personne)"
-                                    " select distinct :id_lot, id_personne"
+                                    " select distinct :id_lot::integer, id_personne"
                                     " from affectation"
                                     " join disponibilite on id_disponibilite = disponibilite.id"
                                     " where " + conditions.join(" or ") +
