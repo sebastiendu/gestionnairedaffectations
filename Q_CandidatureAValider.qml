@@ -144,7 +144,7 @@ Item {
 
                                 listView.currentIndex = index;
                                 app.setIdDisponibilite(id_disponibilite);
-                                ficheBenevole.model = app.fiche_benevole;
+                                ficheBenevole.model = app.disponibilite;
                                 app.setIdDoublons(id_personne);
                                 listeDoublons.model = app.personnes_doublons;
 

@@ -34,7 +34,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_tour_benevole = new SqlQueryModel;
     m_benevoles_disponibles_sql = new SqlQueryModel;
     m_benevoles_disponibles = new QSortFilterProxyModel(this);
-    m_fiche_benevole = new SqlQueryModel;
+    m_disponibilite = new SqlQueryModel;
     m_fiche_personne = new SqlQueryModel;
     m_affectations_acceptees_validees_ou_proposees_du_tour = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
@@ -157,10 +157,10 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_benevoles_disponibles->setFilterKeyColumn(-1);
 
-        query.prepare("select * from fiche_benevole where id_personne=? LIMIT 1");
-        query.addBindValue(m_id_disponibilite);
+        query.prepare("select * from fiche_benevole where id_disponibilite=:id_disponibilite");
+        query.bindValue(":id_disponibilite", m_id_disponibilite);
         query.exec();
-        m_fiche_benevole->setQuery(query);
+        m_disponibilite->setQuery(query);
 
 
         query.prepare("select * from poste_et_tour where id_poste= :poste AND id_evenement = :id_evenement AND debut <= :debut AND fin >= :fin ORDER BY debut ASC"); //AND debut <= :debut AND fin >= :fin"
@@ -381,10 +381,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_liste_des_evenements->setQuery(query);
 
-    query = m_fiche_benevole->query();
+    query = m_disponibilite->query();
     query.bindValue(0,0);
     query.exec();
-    m_fiche_benevole->setQuery(query);
+    m_disponibilite->setQuery(query);
 
     query = m_fiche_poste->query();
     query.bindValue(0,0);
@@ -527,15 +527,13 @@ void GestionnaireDAffectations::setIdTour(int id) {
 }
 
 void GestionnaireDAffectations::setIdDisponibilite(int id) {
-
+    qDebug() << "m_id_disponibilite va changer vers" << id;
     m_id_disponibilite = id;
-    QSqlQuery query;
-    query.prepare("SELECT * FROM fiche_benevole WHERE id_disponibilite = :id_disponibilite AND id_evenement = :id_evenement");; //On demande la fiche d'un bénévole ayant un id precis
+    QSqlQuery query = m_disponibilite->query();
     query.bindValue(":id_disponibilite", m_id_disponibilite);
-    query.bindValue(":id_evenement", idEvenement());
     query.exec();
-    m_fiche_benevole->setQuery(query);
-    qDebug() << "setIdDisponibilite: " << id;
+    m_disponibilite->setQuery(query);
+    qDebug() << "m_id_disponibilite vaut maintenant" << id;
 }
 
 void GestionnaireDAffectations::setIdPersonne(int id) {

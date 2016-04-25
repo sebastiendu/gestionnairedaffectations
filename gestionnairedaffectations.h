@@ -26,7 +26,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QSortFilterProxyModel* benevoles_disponibles MEMBER m_benevoles_disponibles NOTIFY benevoles_disponiblesChanged)
     Q_PROPERTY(SqlQueryModel* benevoles_disponibles_sql MEMBER m_benevoles_disponibles_sql NOTIFY benevoles_disponibles_sqlChanged)
     Q_PROPERTY(SqlQueryModel* postes MEMBER m_postes NOTIFY postesChanged)
-    Q_PROPERTY(SqlQueryModel* fiche_benevole MEMBER m_fiche_benevole NOTIFY fiche_benevoleChanged)
+    Q_PROPERTY(SqlQueryModel* disponibilite MEMBER m_disponibilite NOTIFY disponibiliteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_personne MEMBER m_fiche_personne)
     Q_PROPERTY(SqlQueryModel* fiche_poste MEMBER m_fiche_poste NOTIFY fiche_posteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_poste_tour MEMBER m_fiche_poste_tour NOTIFY fiche_posteTourChanged)
@@ -149,7 +149,7 @@ signals:
     void liste_des_evenementsChanged();
     void benevoles_disponiblesChanged();
     void postesChanged();
-    void fiche_benevoleChanged();
+    void disponibiliteChanged();
     void fiche_posteChanged();
     void planChanged();
     void planCompletChanged();
@@ -189,7 +189,7 @@ private:
     SqlQueryModel *m_postes;
     QSortFilterProxyModel *m_benevoles_disponibles;
     SqlQueryModel *m_benevoles_disponibles_sql;
-    SqlQueryModel *m_fiche_benevole; // Est associé à une disponibilité
+    SqlQueryModel *m_disponibilite;
     SqlQueryModel *m_fiche_personne; // Est associé à une personne
     SqlQueryModel *m_fiche_poste;
     SqlQueryModel *m_fiche_poste_tour;
