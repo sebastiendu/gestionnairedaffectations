@@ -1,0 +1,20 @@
+Source: gestionnairedaffectations
+Section: database
+Priority: optional
+Maintainer: Sébastien Ducoulombier <seb@ldd.fr>
+Build-Depends: debhelper (>=9),
+ libgcc-5-dev,
+ libqt5svg5-dev,
+ qtbase5-dev,
+ qtdeclarative5-dev,
+ libstdc++-5-dev,
+Standards-Version: 3.9.7
+Homepage: https://github.com/sebastiendu/gestionnairedaffectations
+
+Package: gestionnairedaffectations
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: relaidecourriel
+Description: Système de gestion des affectations de participants aux tours de travail
+ Application de bureau de gestion des rôles de chacun dans la préparation et
+ l'organisation d'un grand évènement.
