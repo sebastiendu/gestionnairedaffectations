@@ -14,10 +14,10 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     QCoreApplication::setOrganizationDomain("ldd.fr");
     QCoreApplication::setApplicationName("Laguntzaile");
 
-//    qmlRegisterType<Settings>("fr.ldd.qml", 1, 0, "Settings");
-//    qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
-//    qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
-//    qmlRegisterType<ToursParPosteModel>("fr.ldd.qml", 1, 0, "ToursParPosteModel");
+    //    qmlRegisterType<Settings>("fr.ldd.qml", 1, 0, "Settings");
+    //    qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
+    //    qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
+    //    qmlRegisterType<ToursParPosteModel>("fr.ldd.qml", 1, 0, "ToursParPosteModel");
 
     //qInstallMessageHandler(gestionDesMessages);
 
@@ -235,7 +235,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_lotsDejaCrees->setQuery(query);
 
-     /*   m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
+        /*   m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
         m_etat_tour_heure->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_etat_tour_heure->setFilterKeyColumn(-1); */
 
@@ -775,68 +775,52 @@ void GestionnaireDAffectations::rechargerPlan(){
     planCompletChanged();
 }
 
-void GestionnaireDAffectations::desaffecterBenevole(int id){
+void GestionnaireDAffectations::annulerAffectation(QString commentaire){
 
     QSqlQuery query;
-    qDebug() << "1: " << id;
-    query.prepare("DELETE FROM affectation WHERE id = :id;");
-    qDebug() << "2";
-    query.bindValue(":id",id);
-    query.exec();
-    qDebug() << "3";
-    qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
 
-    query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
-    qDebug() << "4";
-    query.bindValue(":tour",m_id_affectation); // FIXME faux, voir si c'est inutile ici, probablement redondant
-    query.exec();
-    qDebug() << "5";
-    m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
-    qDebug() << "6";
-
-    query = m_poste_et_tour_sql->query();
-    query.bindValue(":id_evenement",idEvenement());
-    query.exec();
-
-    m_poste_et_tour_sql->setQuery(query);
-    m_poste_et_tour->setSourceModel(m_poste_et_tour_sql);
-    m_poste_et_tour->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_poste_et_tour->setFilterKeyColumn(-1);
-
-    qDebug() << "m_id_disponibilite: " + m_id_disponibilite;
-    qDebug() << "m_id_tour: " + m_id_affectation;
-
+    if (query.prepare("update affectation set statut='annulee', commentaire=:commentaire where id=:id_affectation;")) {
+        query.bindValue(":id_affectation", m_id_affectation);
+        query.bindValue(":commentaire", commentaire);
+        if (query.exec()) {
+            m_benevoles_disponibles_sql->reload();
+            m_disponibilite->reload();
+            m_poste_et_tour_sql->reload();
+            m_tour->reload();
+            m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
+        } else {
+            qCritical() << "Impossible d'executer la requête d'annulation de l'affectation : " << query.lastError();
+        }
+    } else {
+        qCritical() << "Impossible de préparer la requête d'annulation de l'affectation : " << query.lastError();
+    }
 }
 
-
-void GestionnaireDAffectations::affecterBenevole(){
+void GestionnaireDAffectations::creerAffectation(QString commentaire){
 
     QSqlQuery query;
 
-    query.prepare("INSERT INTO affectation (id_disponibilite, id_tour,date_et_heure_proposee ,statut,commentaire) VALUES (:id_disponibilite, :id_tour, :date, :statut, :commentaire)");
-    query.bindValue(":id_disponibilite",m_id_disponibilite);
-    query.bindValue(":id_tour",m_id_affectation); // FIXME, faux, devrait être m_id_tour
-    query.bindValue(":date","2014-10-01 00:00:00");
-    query.bindValue(":statut","proposee");
-    query.bindValue(":commentaire","test");
-    query.exec();
-
-    qDebug() << "INSERT INTO affectation (id_disponibilite, id_tour,date_et_heure_proposee ,statut,commentaire) VALUES ("<< m_id_disponibilite << "," << m_id_affectation << ",'2014-10-01 00:00:00','proposee','test')";
-    qDebug() << query.lastError().text();
-    query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
-
-    query.bindValue(":tour",m_id_affectation);  // FIXME faux, m_id_tour
-    query.exec();
-    m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
-
-    query = m_poste_et_tour_sql->query();
-    query.bindValue(":id_evenement",idEvenement());
-    query.exec();
-
-    m_poste_et_tour_sql->setQuery(query);
-    m_poste_et_tour->setSourceModel(m_poste_et_tour_sql);
-    m_poste_et_tour->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_poste_et_tour->setFilterKeyColumn(-1);
+    if (query.prepare("INSERT INTO affectation"
+                      "(id_disponibilite, id_tour, commentaire)"
+                      "VALUES"
+                      "(:id_disponibilite, :id_tour, :commentaire)"
+                      )) {
+        query.bindValue(":id_disponibilite", m_id_disponibilite);
+        query.bindValue(":id_tour", m_id_tour);
+        query.bindValue(":commentaire", commentaire);
+        if (query.exec()) {
+            m_id_affectation = query.lastInsertId().toInt();
+            m_benevoles_disponibles_sql->reload();
+            m_disponibilite->reload();
+            m_poste_et_tour_sql->reload();
+            m_tour->reload();
+            m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
+        } else {
+            qCritical() << "Impossible d'executer la requête de création de l'affectation : " << query.lastError();
+        }
+    } else {
+        qCritical() << "Impossible de préparer la requête de création de l'affectation : " << query.lastError();
+    }
 }
 
 void GestionnaireDAffectations::modifierTourDebut(QDateTime date, int heure, int minutes, int id) {

@@ -2,7 +2,7 @@
 #include <QSqlRecord>
 #include <QtDebug>
 #include <QSqlError>
-
+#include <QSqlQuery>
 
 SqlQueryModel::SqlQueryModel(QObject *parent) :
     QSqlQueryModel(parent)
@@ -49,4 +49,10 @@ int SqlQueryModel::getIndexFromId(int id) {
 QVariant SqlQueryModel::getDataFromModel(int ligne, QString colonne)
 {
     return record(ligne).value(colonne).toString();
+}
+
+void SqlQueryModel::reload()
+{
+    // FIXME : il doit y avoir un moyen plus habile
+    setQuery(query());
 }

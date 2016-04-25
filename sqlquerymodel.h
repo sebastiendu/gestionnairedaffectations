@@ -18,6 +18,8 @@ public:
 
     Q_INVOKABLE QVariant getDataFromModel(int ligne, QString colonne);
 
+    void reload();
+
 signals:
 
 public slots:

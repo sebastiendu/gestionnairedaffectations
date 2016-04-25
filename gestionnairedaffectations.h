@@ -94,8 +94,8 @@ public:
     Q_INVOKABLE void modifierTourMinMax(QString type, int nombre, int id);
     Q_INVOKABLE void insererTour(QDateTime dateFinPrecedente, int min,int max);
     Q_INVOKABLE void supprimerTour(int id);
-    Q_INVOKABLE void desaffecterBenevole(int id);
-    Q_INVOKABLE void affecterBenevole();
+    Q_INVOKABLE void annulerAffectation(QString commentaire);
+    Q_INVOKABLE void creerAffectation(QString commentaire);
     Q_INVOKABLE void inscrireBenevole(QString nomBenevole, QString prenomBenevole, QString adresseBenevole,
                                       QString codePostalBenevole, QString communeBenevole, QString courrielBenevole,
                                       QString numPortableBenevole,QString numDomicileBenevole,QString professionBenevole,
