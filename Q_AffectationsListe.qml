@@ -2,8 +2,6 @@ import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.2
 
-import "fonctions.js" as Fonctions
-
 Item {
     RowLayout {
         anchors.fill: parent
@@ -14,47 +12,13 @@ Item {
             Layout.fillHeight: true
 
             ListeDesDisponibilites {
-                Layout.preferredHeight: parent.height / 2
                 Layout.fillWidth: true
                 Layout.fillHeight: true
             }
 
-            ListView { // fiche du participant (disponibilite)
-                Layout.preferredHeight: parent.height / 2
+            FicheDeLaDisponibilite {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                model: app.disponibilite
-                clip: true
-
-                delegate: Column {
-                    Text { text: "<img src='personne.png'/>     <b>" + prenom + " " + nom + "</b><br>";}
-                    Text { text: 'Inscription :\t' + date_inscription.toLocaleDateString();}
-                    Text { text: 'Amis :\t' + liste_amis }
-                    Text { text: 'Type de poste :\t' + type_poste }
-                    Text { text: 'Commentaire :\t' + commentaire_disponibilite }
-                    Text { text: 'Statut :\t' + statut_disponibilite }
-                    Text { text: 'Adresse :\t' + adresse }
-                    Text { text: '\t' + code_postal + ' ' + ville}
-                    Text { text: 'Contact :\t' + portable + " " + domicile }
-                    Text { text: '\t' + email }
-                    Text { text: 'Âge :\t' + age + " ans" }
-                    Text { text: 'Profession :\t' + profession }
-                    Text { text: 'Id DISPO :\t' + id_disponibilite } // A ENKLEVER
-                    Text {
-                        text: 'Compétences : ' + competences
-                        wrapMode: Text.WordWrap
-                        width: parent.width}
-                    Text { text: 'Langues :\t' + langues }
-                    Text {
-                        text: 'Commentaire : ' + commentaire_personne
-                        wrapMode: Text.WordWrap
-                        width: parent.width}
-                    Text {
-                        text: 'Disponibilite : ' + commentaire_disponibilite
-                        wrapMode: Text.WordWrap
-                        width: parent.width}
-
-                }
             }
         }
 
