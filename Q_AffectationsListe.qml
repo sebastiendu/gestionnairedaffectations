@@ -1,5 +1,4 @@
 import QtQuick 2.0
-import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.2
 
@@ -176,108 +175,18 @@ Item {
         anchors.bottom: parent.bottom
         color: "white"
 
-        TextField {
-            id: posteEtToursRecherche
+        ListeDesToursParPoste {
+            id: listeDesToursParPoste
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.margins: 10
-            onEditingFinished: app.poste_et_tour.setFilterFixedString(text);
-            placeholderText: "Recherche de postes et tours"
-
-        }
-
-        ScrollView { // contient la liste des postes et des tours
-            id: blockListePosteTour
-            anchors.top: posteEtToursRecherche.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: 10
             anchors.bottom: parent.verticalCenter
-            flickableItem.interactive: true
-
-            ListView {
-                id: listeDesToursParPoste
-                anchors.fill: parent
-                model: app.poste_et_tour
-                cacheBuffer: 800
-                delegate: Rectangle { // une ligne pour chaque tour du poste
-                    property int v_id_tour: id_tour
-                    height: 13
-                    z: 1
-                    width: parent.width
-
-                    RowLayout { // 3 cellules sur la même ligne
-                        spacing: 2
-                        width: parent.width
-
-                        Text { // date et heure début et fin
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter
-                            text: Fonctions.dateTour(debut,fin)
-                            horizontalAlignment: Text.AlignRight
-                            clip: true
-                            Layout.preferredWidth: parent.width / 3
-
-                        }
-
-                        Text { // nombre d'affectations, min et max
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter
-                            text: (nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees) +
-                                  "/" + max +
-                                  " (min: " + min + ", max: " + max +")" // TODO fusionner avec la progressbar ci-dessous
-                            horizontalAlignment: Text.AlignHCenter
-                            clip: true
-                            Layout.preferredWidth: parent.width / 3
-                        }
-
-                        ProgressBarAffectation {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            valeurmin: min
-                            valeurmax: max
-                            valeur: nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees
-                            certain: nombre_affectations_proposees == 0
-                            Layout.preferredWidth: parent.width / 3
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: listeDesToursParPoste.currentIndex = index
-                    }
-                }
-                section.property: "nom"
-                section.criteria: ViewSection.FullString
-                section.delegate: Rectangle { // une ligne d'entête pour chaque poste
-                    width: parent.width
-                    height: 15
-                    color: "lightsteelblue"
-
-                    Text {
-                        text: section
-                        font.bold: true
-                    }
-                }
-                clip: true
-                highlight: Rectangle {
-                    z: 5
-                    color: "blue"
-                    opacity: 0.5
-                    width: parent.width
-                    height: 13
-                }
-                focus: true // FIXME : on n'a jamais le focus ! (sauf en faisant Tab mais alors toute la listview disparait)
-                Keys.onUpPressed: { decrementCurrentIndex(); console.log("up"); } // FIXME
-                Keys.onDownPressed: { incrementCurrentIndex(); console.log("down"); } // FIXME
-                onCurrentItemChanged: app.setIdTour(currentItem.v_id_tour);
-            }
         }
 
         Button {
             id: _boutonEnvoyer // TODO : Renommer
-            anchors.top: blockListePosteTour.bottom
+            anchors.top: listeDesToursParPoste.bottom
             anchors.topMargin: blockFichePoste.height/3
             anchors.left: parent.left
             anchors.leftMargin: 10
@@ -315,7 +224,7 @@ Item {
 
         RectangleTitre {
             id: blockFichePoste
-            anchors.top: blockListePosteTour.bottom
+            anchors.top: listeDesToursParPoste.bottom
             anchors.left: _boutonEnvoyer.right
             anchors.right: parent.right
             anchors.bottom: parent.bottom
@@ -323,7 +232,7 @@ Item {
             anchors.topMargin: 15
             anchors.leftMargin: 10
             anchors.rightMargin: 10
-            titre: " <h2> Poste numéro " + listeDesToursParPoste.currentItem.v_id_poste + " </h2> "
+            titre: " <h2> Poste </h2> "
 
 
             /*Text {
