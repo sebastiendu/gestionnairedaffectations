@@ -7,8 +7,6 @@
 #include <QXmlSimpleReader>
 #include "gestionnairedaffectations.h"
 
-
-
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     QGuiApplication(argc,argv)
 {
@@ -16,10 +14,10 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     QCoreApplication::setOrganizationDomain("ldd.fr");
     QCoreApplication::setApplicationName("Laguntzaile");
 
-    qmlRegisterType<Settings>("fr.ldd.qml", 1, 0, "Settings");
-    qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
-    qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
-    qmlRegisterType<ToursParPosteModel>("fr.ldd.qml", 1, 0, "ToursParPosteModel");
+//    qmlRegisterType<Settings>("fr.ldd.qml", 1, 0, "Settings");
+//    qmlRegisterType<SqlQueryModel>("fr.ldd.qml", 1, 0, "SqlQueryModel");
+//    qmlRegisterType<QSortFilterProxyModel>("fr.ldd.qml", 1, 0, "QSortFilterProxyModel");
+//    qmlRegisterType<ToursParPosteModel>("fr.ldd.qml", 1, 0, "ToursParPosteModel");
 
     //qInstallMessageHandler(gestionDesMessages);
 
@@ -36,7 +34,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_benevoles_disponibles = new QSortFilterProxyModel(this);
     m_fiche_benevole = new SqlQueryModel;
     m_fiche_personne = new SqlQueryModel;
-    m_affectations = new SqlQueryModel;
+    m_affectations_acceptees_validees_ou_proposees_du_tour = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
     m_fiche_poste_tour = new SqlQueryModel;
     m_poste_et_tour_sql = new SqlQueryModel;
@@ -188,11 +186,10 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_tour_benevole->setQuery(query);
 
-        query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement AND (statut_affectation = 'acceptee' OR statut_affectation = 'validee' OR statut_affectation = 'proposee') ORDER BY  statut_affectation = 'proposee' , statut_affectation = 'validee', statut_affectation = 'acceptee' DESC; ");
+        query.prepare("select * from affectations where id_tour= :tour AND (statut_affectation = 'acceptee' OR statut_affectation = 'validee' OR statut_affectation = 'proposee') ORDER BY  statut_affectation = 'proposee' , statut_affectation = 'validee', statut_affectation = 'acceptee' DESC; ");
         query.bindValue(":tour",m_id_tour);
-        query.bindValue(":id_evenement",idEvenement());
         query.exec();
-        m_affectations->setQuery(query);
+        m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
 
         query.prepare("select * from poste where id_evenement= :evt;");
         query.bindValue(":evt",idEvenement());
@@ -387,10 +384,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_tour_benevole->setQuery(query);
 
-    query = m_affectations->query();
+    query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
     query.bindValue(0,0);
     query.exec();
-    m_affectations->setQuery(query);
+    m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
 
     query = m_planComplet->query();
     query.bindValue(0,idEvenement());
@@ -480,22 +477,17 @@ void GestionnaireDAffectations::setResponsables() {
 
 void GestionnaireDAffectations::setIdTour(int id) {
     m_id_tour = id;
+    qDebug() << "modification de m_id_tour en" << id;
     QSqlQuery query = m_tour_benevole->query();
     query.bindValue(":tour", m_id_tour);
     query.exec();
     m_tour_benevole->setQuery(query);
-    qDebug() << "Id du tour changé en " << id;
-}
-
-void GestionnaireDAffectations::setIdAffectation(int id) {
-    m_id_affectation = id;
-    QSqlQuery query = m_affectations->query();
-    query.bindValue(":tour", id);
+    query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
+    query.bindValue(":tour", m_id_tour);
     query.exec();
-    m_affectations->setQuery(query);
-    qDebug() << "setIdAffectation: " << id;
+    m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
+    qDebug() << "m_id_tour changé en" << id;
 }
-
 
 void GestionnaireDAffectations::setIdDisponibilite(int id) {
 
@@ -759,13 +751,12 @@ void GestionnaireDAffectations::desaffecterBenevole(int id){
     qDebug() << "3";
     qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
 
-    query = m_affectations->query();
+    query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
     qDebug() << "4";
     query.bindValue(":tour",m_id_affectation);
-    query.bindValue(":id_evenement",idEvenement());
     query.exec();
     qDebug() << "5";
-    m_affectations->setQuery(query);
+    m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
     qDebug() << "6";
 
     query = m_poste_et_tour_sql->query();
@@ -797,12 +788,11 @@ void GestionnaireDAffectations::affecterBenevole(){
 
     qDebug() << "INSERT INTO affectation (id_disponibilite, id_tour,date_et_heure_proposee ,statut,commentaire) VALUES ("<< m_id_disponibilite << "," << m_id_affectation << ",'2014-10-01 00:00:00','proposee','test')";
     qDebug() << query.lastError().text();
-    query = m_affectations->query();
+    query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
 
     query.bindValue(":tour",m_id_affectation);
-    query.bindValue(":id_evenement",idEvenement());
     query.exec();
-    m_affectations->setQuery(query);
+    m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
 
     query = m_poste_et_tour_sql->query();
     query.bindValue(":id_evenement",idEvenement());

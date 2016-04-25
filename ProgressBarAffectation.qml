@@ -1,28 +1,33 @@
 import QtQuick 2.0
 
-Item {
+Item { // une barre de progression qui indique un niveau de remplissage certain ou incertain
+       // grise tant que la valeur est sous le minimum requis,
+       // vert (certain) ou orange (incertain) quand elle est bien entre min et max
+       // rouge si elle dépasse le maximum
+    property int valeurmin: 0
+    property int valeurmax: 2
+    property int valeur: 1
+    property bool certain: true
+    property color couleurPasAssez: "grey"
+    property color couleurBien: "green"
+    property color couleurTrop: "red"
+    property color couleurBienMaisIncertain: "orange"
 
- property int valeurmin: 0
- property int valeurmax: 0
- property int valeur: 0
- property string couleurDefinie : "" // Vaut orange si au moins un personne n'a PAS encore accepté
+    Rectangle { // le cadre
+        anchors.fill: parent
+        anchors.margins: 1
+        border.color: (valeur > max) ? couleurTrop : (valeur < min) ? couleurPasAssez : certain ? couleurBien : couleurBienMaisIncertain
+        border.width: 2
 
-    Rectangle {
-        anchors.fill:parent
-        border.color: "black"
-
-        Rectangle {
+        Rectangle { // le remplissage
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            //color: "green"
-           // color: (couleurDefinie != "") ? couleurDefinie : (valeur < min) ? "grey" : (valeur > max ) ? "red" : "green"
-            color: (valeur > max ) ? "red" : (valeur < min) ? "grey" : (couleurDefinie != "") ? couleurDefinie : "green"
-            width: (valeur/max > 1) ? parent.width : parent.width * (valeur/max)
-            height: parent.height
+            anchors.margins: parent.border.width
+            border.width: 0
+            color: "black"
+            width: valeurmax > 0 ? (parent.width - 2*anchors.margins) * Math.min(valeur/valeurmax, 1) : 0;
         }
     }
-
-
 }
 

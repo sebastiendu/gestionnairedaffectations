@@ -1,7 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
-import fr.ldd.qml 1.0
+//import fr.ldd.qml 1.0
 import QtWebKit 3.0
 import QtQuick.Controls.Styles 1.2
 import QtGraphicalEffects 1.0
@@ -242,9 +242,8 @@ Item  {
                                     elargirRectangle.start();
                                     remonterRectangle.start();
                                     app.setIdTour(id_tour);
-                                    app.setIdAffectation(id_tour);
                                     app.setIdPoste(id_poste);
-                                    interieurCercle.model = app.affectations;
+                                    interieurCercle.model = app.affectations_acceptees_validees_ou_proposees_du_tour;
                                     fichePoste.model = app.fiche_poste;
                                     imageMarqueur.radius =5 ;
                                 }
@@ -255,7 +254,6 @@ Item  {
                                     retrecirRectangle.start();
                                     affinerRectangle.start();
                                     redescendreRectangle.start();
-                                    interieurCercle.model = app.setIdAffectation(-1);
                                     app.setIdDisponibilite(-1);
                                     app.setIdTour(-1) ;
                                     app.setIdPoste(-1);

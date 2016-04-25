@@ -31,7 +31,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* fiche_poste MEMBER m_fiche_poste NOTIFY fiche_posteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_poste_tour MEMBER m_fiche_poste_tour NOTIFY fiche_posteTourChanged)
     Q_PROPERTY(SqlQueryModel* tour_benevoles MEMBER m_tour_benevole NOTIFY tourChanged)
-    Q_PROPERTY(SqlQueryModel* affectations MEMBER m_affectations NOTIFY affectationsChanged)
+    Q_PROPERTY(SqlQueryModel* affectations_acceptees_validees_ou_proposees_du_tour MEMBER m_affectations_acceptees_validees_ou_proposees_du_tour NOTIFY affectationsAccepteesValideesOuProposeesDuTourChanged)
     Q_PROPERTY(SqlQueryModel* lotsDejaCrees MEMBER m_lotsDejaCrees NOTIFY lotDejaCreesChanged)
     Q_PROPERTY(QSortFilterProxyModel* planCourant MEMBER m_plan NOTIFY planChanged)
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
@@ -41,8 +41,6 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QDateTime heureCourante MEMBER m_heure_courante NOTIFY heureCouranteChanged)
 
     Q_PROPERTY(SqlQueryModel* responsables MEMBER m_responsables NOTIFY responsablesChanged)
-
-
 
     Q_PROPERTY(SqlQueryModel* candidatures_en_attente MEMBER m_candidatures_en_attente NOTIFY candidatureEnAttenteChanged)
     Q_PROPERTY(SqlQueryModel* personnes_doublons MEMBER m_personnes_doublons)
@@ -68,7 +66,6 @@ public:
 
     Q_INVOKABLE void setIdTour(int);
     Q_INVOKABLE void setIdDisponibilite(int);
-    Q_INVOKABLE void setIdAffectation(int);
     Q_INVOKABLE void setResponsables();
 
     Q_INVOKABLE void enregistrerNouvelEvenement(QString, QDateTime, QDateTime, int heureDebut, int heureFin, QString, int id_evenement_precedent);
@@ -154,7 +151,7 @@ signals:
     void planCompletChanged();
     void tourChanged();
     void fiche_posteTourChanged();
-    void affectationsChanged();
+    void affectationsAccepteesValideesOuProposeesDuTourChanged();
     void posteEtTourChanged();
     void horaireChanged();
     void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours es t
@@ -192,7 +189,7 @@ private:
     SqlQueryModel *m_fiche_poste;
     SqlQueryModel *m_fiche_poste_tour;
     SqlQueryModel *m_tour_benevole;
-    SqlQueryModel *m_affectations;
+    SqlQueryModel *m_affectations_acceptees_validees_ou_proposees_du_tour;
     SqlQueryModel *m_postes_tours_affectations;
     SqlQueryModel *m_lotsDejaCrees;
     int m_id_disponibilite;

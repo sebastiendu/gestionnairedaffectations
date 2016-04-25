@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
-
+import QtQuick.Layouts 1.2
 
 import "fonctions.js" as Fonctions
 
@@ -35,18 +35,18 @@ Item {
             width: parent.width
 
 
-                Text {
-                    anchors.top: parent.top
-                    x: parent.width *0.25 - width/2
-                    text: "Prenom Nom"
+            Text {
+                anchors.top: parent.top
+                x: parent.width *0.25 - width/2
+                text: "Prenom Nom"
 
-                }
-                Text {
-                    anchors.top: parent.top
-                    x: parent.width *0.75 - width/2
-                    text: "Nombre d'affectations"
+            }
+            Text {
+                anchors.top: parent.top
+                x: parent.width *0.75 - width/2
+                text: "Nombre d'affectations"
 
-                }
+            }
 
         }
 
@@ -168,7 +168,7 @@ Item {
         }
     }
 
-    Rectangle {
+    Rectangle { // TODO remplacer par un layout avec un spacing et virer les margins des blocks regroupés ici
         id: blockPosteTour
         anchors.left: affectationsListeDisponibilites.right
         anchors.top: parent.top
@@ -183,109 +183,100 @@ Item {
             anchors.left: parent.left
             anchors.margins: 10
             onEditingFinished: app.poste_et_tour.setFilterFixedString(text);
-            placeholderText: "Poste et tours Recherche"
+            placeholderText: "Recherche de postes et tours"
 
         }
 
-        Rectangle {
+        ScrollView { // contient la liste des postes et des tours
             id: blockListePosteTour
             anchors.top: posteEtToursRecherche.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.margins: 10
             anchors.bottom: parent.verticalCenter
-          //  border.color: "black"
-
+            flickableItem.interactive: true
 
             ListView {
-
-                id: listePoste
+                id: listeDesToursParPoste
                 anchors.fill: parent
                 model: app.poste_et_tour
-                spacing : 2
                 cacheBuffer: 800
-                delegate:
-                    Rectangle {
-
-                    height : 13
-                    z:1
+                delegate: Rectangle { // une ligne pour chaque tour du poste
+                    property int v_id_tour: id_tour
+                    height: 13
+                    z: 1
                     width: parent.width
-                    Text {
-                        id: informationsTour
-                    anchors.left: parent.left
-                    anchors.leftMargin: 20;
-                    text: Fonctions.dateTour(debut,fin) +
-                          (nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees) + "/" +max  + "\t" + "(min: " + min + ", max: " + max +") \t"
 
+                    RowLayout { // 3 cellules sur la même ligne
+                        spacing: 2
+                        width: parent.width
 
-                }
+                        Text { // date et heure début et fin
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignHCenter
+                            text: Fonctions.dateTour(debut,fin)
+                            horizontalAlignment: Text.AlignRight
+                            clip: true
+                            Layout.preferredWidth: parent.width / 3
 
-                    ProgressBarAffectation {
-                        anchors.left: informationsTour.right
-                        anchors.top: informationsTour.top
-                        anchors.topMargin: 2 // Pour etre centré au milieu verticalement
-                        anchors.leftMargin: 10
-                        width: 100
-                        height: 8
-                        valeurmin: min
-                        valeurmax: max
-                        valeur: (nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees)
-                        couleurDefinie: ( nombre_affectations_proposees != 0 ) ? "orange" : ""
+                        }
+
+                        Text { // nombre d'affectations, min et max
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignHCenter
+                            text: (nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees) +
+                                  "/" + max +
+                                  " (min: " + min + ", max: " + max +")" // TODO fusionner avec la progressbar ci-dessous
+                            horizontalAlignment: Text.AlignHCenter
+                            clip: true
+                            Layout.preferredWidth: parent.width / 3
+                        }
+
+                        ProgressBarAffectation {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            valeurmin: min
+                            valeurmax: max
+                            valeur: nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees
+                            certain: nombre_affectations_proposees == 0
+                            Layout.preferredWidth: parent.width / 3
+                        }
                     }
 
                     MouseArea {
-                       anchors.fill: parent
-                       onClicked: {
-                           console.log("id tour: " + id_tour);
-
-                           app.setIdAffectation(id_tour); 
-                           listePersonnesInscritesBenevoles.model = app.affectations;
-                           listePoste.currentIndex = index
-                           blockFichePoste.titre = " <h2> " + nom + " </h2> "
-
-                       }
-                   }
+                        anchors.fill: parent
+                        onClicked: listeDesToursParPoste.currentIndex = index
+                    }
                 }
-
-
                 section.property: "nom"
                 section.criteria: ViewSection.FullString
-                section.delegate: sectionHeading
-
-                clip: true
-                highlight: Rectangle { visible: (listePoste.currentIndex == -1)? false: true; z: 5; color: "blue"; radius: 5; opacity: 0.5; width: listePoste.width ; height:13 ;y: (listePoste.currentIndex == -1)? 0:listePoste.currentItem.y}
-                highlightFollowsCurrentItem: false
-                focus: true
-
-
-
-            }
-
-            Component.onCompleted: {
-                listePoste.currentIndex = -1;
-            }
-
-            ScrollBar {
-                flickable: listePoste
-            }
-
-            Component {
-                id: sectionHeading
-                Rectangle {
+                section.delegate: Rectangle { // une ligne d'entête pour chaque poste
                     width: parent.width
                     height: 15
                     color: "lightsteelblue"
 
                     Text {
-                        text: " " + section
+                        text: section
                         font.bold: true
                     }
                 }
+                clip: true
+                highlight: Rectangle {
+                    z: 5
+                    color: "blue"
+                    opacity: 0.5
+                    width: parent.width
+                    height: 13
+                }
+                focus: true // FIXME : on n'a jamais le focus ! (sauf en faisant Tab mais alors toute la listview disparait)
+                Keys.onUpPressed: { decrementCurrentIndex(); console.log("up"); } // FIXME
+                Keys.onDownPressed: { incrementCurrentIndex(); console.log("down"); } // FIXME
+                onCurrentItemChanged: app.setIdTour(currentItem.v_id_tour);
             }
         }
 
         Button {
-            id: _boutonEnvoyer
+            id: _boutonEnvoyer // TODO : Renommer
             anchors.top: blockListePosteTour.bottom
             anchors.topMargin: blockFichePoste.height/3
             anchors.left: parent.left
@@ -295,29 +286,29 @@ Item {
                 console.log("Cliqué");
                 app.affecterBenevole();
                 app.setIdDisponibilite(-1)
-                listePersonnesInscritesBenevoles.model = app.affectations;
-                listePoste.model = app.poste_et_tour;
+                listePersonnesInscritesBenevoles.model = app.affectations_acceptees_validees_ou_proposees_du_tour;
+                listeDesToursParPoste.model = app.poste_et_tour;
 
             }
         }
 
         Button {
-            id: _boutonRecevoir
+            id: _boutonRecevoir // TODO : Renommer
             anchors.top: _boutonEnvoyer.bottom
             anchors.topMargin: 10
             anchors.left: parent.left
             text : "←"
-             anchors.leftMargin: 10
-             onClicked: {
-                 console.log("index:" + listePersonnesInscritesBenevoles.currentIndex);
-                 console.log("model: " + listePersonnesInscritesBenevoles.model.getDataFromModel(listePersonnesInscritesBenevoles.currentIndex,"id_affectation"))
-                 app.desaffecterBenevole(listePersonnesInscritesBenevoles.model.getDataFromModel(listePersonnesInscritesBenevoles.currentIndex,"id_affectation"));
-                 app.setIdDisponibilite(-1)
-                 listePersonnesInscritesBenevoles.model = app.affectations;
-                 listePoste.model = app.poste_et_tour;
+            anchors.leftMargin: 10
+            onClicked: {
+                console.log("index:" + listePersonnesInscritesBenevoles.currentIndex);
+                console.log("model: " + listePersonnesInscritesBenevoles.model.getDataFromModel(listePersonnesInscritesBenevoles.currentIndex,"id_affectation"))
+                app.desaffecterBenevole(listePersonnesInscritesBenevoles.model.getDataFromModel(listePersonnesInscritesBenevoles.currentIndex,"id_affectation"));
+                app.setIdDisponibilite(-1)
+                listePersonnesInscritesBenevoles.model = app.affectations_acceptees_validees_ou_proposees_du_tour;
+                listeDesToursParPoste.model = app.poste_et_tour;
                 // _boutonRecevoir.checkable = true
 
-             }
+            }
         }
 
 
@@ -332,7 +323,7 @@ Item {
             anchors.topMargin: 15
             anchors.leftMargin: 10
             anchors.rightMargin: 10
-            titre: ""
+            titre: " <h2> Poste numéro " + listeDesToursParPoste.currentItem.v_id_poste + " </h2> "
 
 
             /*Text {
@@ -351,6 +342,7 @@ Item {
                 anchors.leftMargin: 30
                 anchors.top: parent.top
                 anchors.topMargin: 20
+                model: app.affectations_acceptees_validees_ou_proposees_du_tour
 
                 clip: true
                 spacing: 5

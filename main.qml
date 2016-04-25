@@ -1,7 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.2
-import fr.ldd.qml 1.0
+//import fr.ldd.qml 1.0
 import QtWebKit 3.0
 import QtQuick.Controls.Styles 1.2
 import QtGraphicalEffects 1.0
@@ -262,6 +262,7 @@ ApplicationWindow { // Fenetre principale
         TextField { id: _inputLieu; anchors.left: _lieu.right; width: 200;  anchors.top: _nom.bottom; text: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "lieu");anchors.topMargin:20;anchors.leftMargin: 20}
         Text { text: "Debut: \t"; id: _debut; anchors.top: _lieu.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
         TextField {id: _inputDebut; anchors.left: _debut.right;  readOnly: true; width: 200;  anchors.top: _lieu.bottom; text: Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")));anchors.topMargin:20;anchors.leftMargin: 20}
+// FIXME: le bouton debut mène à une pop-up de choix de date et heure mais sans bouton de validation, et qui s'appelle "Ajouter un tour" !
         Button {
             id: boutonCalendrierDebut
             anchors.top: _inputDebut.top
