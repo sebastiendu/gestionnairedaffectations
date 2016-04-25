@@ -28,5 +28,6 @@
         <file>LabelTextField.qml</file>
         <file>doge.gif</file>
         <file>ListeDesToursParPoste.qml</file>
+        <file>FicheDuTour.qml</file>
     </qresource>
 </RCC>

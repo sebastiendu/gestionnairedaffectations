@@ -29,6 +29,8 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     ratioY = -1;
     m_liste_des_evenements = new SqlQueryModel;
     m_postes = new SqlQueryModel;
+    m_affectation = new SqlQueryModel;
+    m_tour = new SqlQueryModel;
     m_tour_benevole = new SqlQueryModel;
     m_benevoles_disponibles_sql = new SqlQueryModel;
     m_benevoles_disponibles = new QSortFilterProxyModel(this);
@@ -179,6 +181,16 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.bindValue(":poste",m_id_poste);
         query.exec();
         m_fiche_poste_tour->setQuery(query);
+
+        query.prepare("select * from affectation where id=:id_affectation"); // TODO : utiliser une vue plus complète (affectations ?)
+        query.bindValue(":id_affectation",m_id_affectation);
+        query.exec();
+        m_affectation->setQuery(query);
+
+        query.prepare("select * from tour where id=:id_tour; "); // TODO: generifier pour pouvoir initialiser les requetes à partir du QML et afficher des erreurs si les prepare ou les exec ne fonctionnent pas
+        query.bindValue(":id_tour",m_id_tour);
+        query.exec();
+        m_tour->setQuery(query);
 
         query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement; ");
         query.bindValue(":tour",m_id_tour);
@@ -379,6 +391,16 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_fiche_poste->setQuery(query);
 
+    query = m_affectation->query();
+    query.bindValue(0,0);
+    query.exec();
+    m_affectation->setQuery(query);
+
+    query = m_tour->query(); // FIXME: est-ce vraiment nécessaire ?
+    query.bindValue(0,0);
+    query.exec();
+    m_tour->setQuery(query);
+
     query = m_tour_benevole->query();
     query.bindValue(0,0);
     query.exec();
@@ -465,6 +487,17 @@ void GestionnaireDAffectations::setIdTourPoste(int id) {
     m_fiche_poste_tour->setQuery(query);
 }
 
+void GestionnaireDAffectations::setIdAffectation(int id)
+{
+    qDebug() << "modification de m_id_affectation en" << id;
+    m_id_affectation = id;
+    QSqlQuery query = m_affectation->query();
+    query.bindValue(":id_affectation", m_id_affectation);
+    query.exec();
+    m_affectation->setQuery(query);
+    qDebug() << "m_id_affectation changé en" << id;
+}
+
 
 void GestionnaireDAffectations::setResponsables() {
     QSqlQuery query;
@@ -478,7 +511,11 @@ void GestionnaireDAffectations::setResponsables() {
 void GestionnaireDAffectations::setIdTour(int id) {
     m_id_tour = id;
     qDebug() << "modification de m_id_tour en" << id;
-    QSqlQuery query = m_tour_benevole->query();
+    QSqlQuery query = m_tour->query();
+    query.bindValue(":id_tour", m_id_tour);
+    query.exec();
+    m_tour->setQuery(query);
+    query = m_tour_benevole->query();
     query.bindValue(":tour", m_id_tour);
     query.exec();
     m_tour_benevole->setQuery(query);
@@ -753,7 +790,7 @@ void GestionnaireDAffectations::desaffecterBenevole(int id){
 
     query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
     qDebug() << "4";
-    query.bindValue(":tour",m_id_affectation);
+    query.bindValue(":tour",m_id_affectation); // FIXME faux, voir si c'est inutile ici, probablement redondant
     query.exec();
     qDebug() << "5";
     m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
@@ -780,7 +817,7 @@ void GestionnaireDAffectations::affecterBenevole(){
 
     query.prepare("INSERT INTO affectation (id_disponibilite, id_tour,date_et_heure_proposee ,statut,commentaire) VALUES (:id_disponibilite, :id_tour, :date, :statut, :commentaire)");
     query.bindValue(":id_disponibilite",m_id_disponibilite);
-    query.bindValue(":id_tour",m_id_affectation);
+    query.bindValue(":id_tour",m_id_affectation); // FIXME, faux, devrait être m_id_tour
     query.bindValue(":date","2014-10-01 00:00:00");
     query.bindValue(":statut","proposee");
     query.bindValue(":commentaire","test");
@@ -790,7 +827,7 @@ void GestionnaireDAffectations::affecterBenevole(){
     qDebug() << query.lastError().text();
     query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
 
-    query.bindValue(":tour",m_id_affectation);
+    query.bindValue(":tour",m_id_affectation);  // FIXME faux, m_id_tour
     query.exec();
     m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
 

@@ -7,7 +7,7 @@ import "fonctions.js" as Fonctions
 Item {
     anchors.fill: parent
 
-    Rectangle {
+    Rectangle { // liste des dispo et fiche du participant
         id: affectationsListeDisponibilites
         anchors.left: parent.left
         anchors.top: parent.top
@@ -107,11 +107,11 @@ Item {
 
 
 
-        ScrollBar {
+        ScrollBar { // de la ListView
             flickable: listeDesDisponibles;
         }
 
-        Rectangle {
+        Rectangle { // un trait et la fiche du participant
             anchors.fill: parent
             border.color: "black"
             color: "transparent"
@@ -187,7 +187,6 @@ Item {
         Button {
             id: _boutonEnvoyer // TODO : Renommer
             anchors.top: listeDesToursParPoste.bottom
-            anchors.topMargin: blockFichePoste.height/3
             anchors.left: parent.left
             anchors.leftMargin: 10
             text : "→"
@@ -220,9 +219,7 @@ Item {
             }
         }
 
-
-
-        RectangleTitre {
+        FicheDuTour {
             id: blockFichePoste
             anchors.top: listeDesToursParPoste.bottom
             anchors.left: _boutonEnvoyer.right
@@ -232,57 +229,8 @@ Item {
             anchors.topMargin: 15
             anchors.leftMargin: 10
             anchors.rightMargin: 10
-            titre: " <h2> Poste </h2> "
-
-
-            /*Text {
-                id: _nomDuPoste
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.top: parent.top
-                anchors.topMargin: 1
-            } */
-
-            ListView {
-
-                id: listePersonnesInscritesBenevoles
-                anchors.fill: parent
-                anchors.left: parent.left
-                anchors.leftMargin: 30
-                anchors.top: parent.top
-                anchors.topMargin: 20
-                model: app.affectations_acceptees_validees_ou_proposees_du_tour
-
-                clip: true
-                spacing: 5
-                delegate: Text {
-                    text: prenom_personne + " " + nom_personne
-                    font.bold: true
-                    color: (statut_affectation == "acceptee" ||statut_affectation ==  "validee") ? "green" : (statut_affectation == "rejetee" || statut_affectation=="annulee") ? "red" : "orange"
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked : {
-                            listePersonnesInscritesBenevoles.currentIndex = index;
-                            console.log("id_disponibilte: " + id_disponibilite)
-                            app.setIdDisponibilite(id_disponibilite);
-
-
-                        }
-                    }
-                }
-                highlight: Rectangle { visible: (listePersonnesInscritesBenevoles.currentIndex == -1)? false: true; z: 5; color: "blue"; radius: 5; opacity: 0.5; width: listePersonnesInscritesBenevoles.width ; height:13 ;y: (listePersonnesInscritesBenevoles.currentIndex == -1)? 0:listePersonnesInscritesBenevoles.currentItem.y}
-                highlightFollowsCurrentItem: false
-
-                focus: true
-
-            }
-            ScrollBar {
-                flickable : listePersonnesInscritesBenevoles
-            }
-
-
-
         }
+
 
     }
 

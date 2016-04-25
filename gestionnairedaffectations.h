@@ -30,6 +30,8 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* fiche_personne MEMBER m_fiche_personne)
     Q_PROPERTY(SqlQueryModel* fiche_poste MEMBER m_fiche_poste NOTIFY fiche_posteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_poste_tour MEMBER m_fiche_poste_tour NOTIFY fiche_posteTourChanged)
+    Q_PROPERTY(SqlQueryModel* affectation MEMBER m_affectation NOTIFY affectationChanged)
+    Q_PROPERTY(SqlQueryModel* tour MEMBER m_tour NOTIFY tourChanged)
     Q_PROPERTY(SqlQueryModel* tour_benevoles MEMBER m_tour_benevole NOTIFY tourChanged)
     Q_PROPERTY(SqlQueryModel* affectations_acceptees_validees_ou_proposees_du_tour MEMBER m_affectations_acceptees_validees_ou_proposees_du_tour NOTIFY affectationsAccepteesValideesOuProposeesDuTourChanged)
     Q_PROPERTY(SqlQueryModel* lotsDejaCrees MEMBER m_lotsDejaCrees NOTIFY lotDejaCreesChanged)
@@ -63,6 +65,8 @@ public:
     Q_INVOKABLE void setIdPoste(int);
     Q_INVOKABLE void setIdPosteTour(int); // Permet de selectionner le poste les tours en ayant l'id du poste
     Q_INVOKABLE void setIdTourPoste(int); // Permet de selectionner le tour et le poste en connaissant l'id du tour
+    Q_INVOKABLE void setIdAffectation(int);
+
 
     Q_INVOKABLE void setIdTour(int);
     Q_INVOKABLE void setIdDisponibilite(int);
@@ -149,6 +153,7 @@ signals:
     void fiche_posteChanged();
     void planChanged();
     void planCompletChanged();
+    void affectationChanged();
     void tourChanged();
     void fiche_posteTourChanged();
     void affectationsAccepteesValideesOuProposeesDuTourChanged();
@@ -188,6 +193,8 @@ private:
     SqlQueryModel *m_fiche_personne; // Est associé à une personne
     SqlQueryModel *m_fiche_poste;
     SqlQueryModel *m_fiche_poste_tour;
+    SqlQueryModel *m_affectation;
+    SqlQueryModel *m_tour;
     SqlQueryModel *m_tour_benevole;
     SqlQueryModel *m_affectations_acceptees_validees_ou_proposees_du_tour;
     SqlQueryModel *m_postes_tours_affectations;
