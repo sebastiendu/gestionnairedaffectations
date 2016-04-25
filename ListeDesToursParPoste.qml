@@ -11,7 +11,7 @@ Item {
 
         TextField {
             Layout.fillWidth: true
-            onEditingFinished: app.poste_et_tour.setFilterFixedString(text);
+            onEditingFinished: liste.model.setFilterFixedString(text);
             placeholderText: "Recherche de postes et tours"
             Layout.preferredHeight: 14
         }
@@ -74,7 +74,6 @@ Item {
                     }
                 }
                 section.property: "nom"
-                section.criteria: ViewSection.FullString
                 section.delegate: Rectangle { // une ligne d'entête pour chaque poste
                     width: parent.width
                     height: 15
@@ -90,12 +89,11 @@ Item {
                     z: 5
                     color: "blue"
                     opacity: 0.5
-                    width: parent.width
                     height: 13
                 }
                 focus: true
-                Keys.onUpPressed: { decrementCurrentIndex(); console.log("up"); }
-                Keys.onDownPressed: { incrementCurrentIndex(); console.log("down"); }
+                Keys.onUpPressed: decrementCurrentIndex()
+                Keys.onDownPressed: incrementCurrentIndex()
                 onCurrentItemChanged: app.setIdTour(currentItem._id_tour);
             }
         }

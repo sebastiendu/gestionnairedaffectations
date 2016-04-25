@@ -9,7 +9,7 @@ Item {
 
         TextField {
             Layout.fillWidth: true
-            onEditingFinished: app.benevoles_disponibles.setFilterFixedString(text);
+            onEditingFinished: liste.model.setFilterFixedString(text);
             placeholderText: "Recherche de participants disponibles"
             Layout.preferredHeight: 14
         }
@@ -27,7 +27,6 @@ Item {
                 delegate: Rectangle {
                     property int _id_disponibilite: id_disponibilite
                     height: 13
-                    z: 1
                     width: parent.width
 
                     RowLayout { // nom et ville TODO
@@ -77,7 +76,6 @@ Item {
                     z: 5
                     color: "blue"
                     opacity: 0.5
-                    width: parent.width
                     height: 13
                 }
                 focus: true
