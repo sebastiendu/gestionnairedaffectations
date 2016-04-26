@@ -30,5 +30,7 @@
         <file>FicheDuTour.qml</file>
         <file>ListeDesDisponibilites.qml</file>
         <file>FicheDeLaDisponibilite.qml</file>
+        <file>ListeDesAffectationsDuTour.qml</file>
+        <file>ListeDesAffectationsDeLaDisponibilite.qml</file>
     </qresource>
 </RCC>

@@ -22,6 +22,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(Settings* settings MEMBER m_settings NOTIFY settingsChanged)
     Q_PROPERTY(int id_poste MEMBER m_id_poste NOTIFY idPosteChanged)
     Q_PROPERTY(SqlQueryModel* liste_des_evenements MEMBER m_liste_des_evenements NOTIFY liste_des_evenementsChanged)
+    Q_PROPERTY(SqlQueryModel* liste_des_affectations_de_la_disponibilite MEMBER m_liste_des_affectations_de_la_disponibilite NOTIFY liste_des_affectations_de_la_disponibiliteChanged)
     Q_PROPERTY(QSortFilterProxyModel* proxy_de_la_liste_des_disponibilites_de_l_evenement MEMBER m_proxy_de_la_liste_des_disponibilites_de_l_evenement NOTIFY proxy_de_la_liste_des_disponibilites_de_l_evenementChanged)
     Q_PROPERTY(SqlQueryModel* liste_des_disponibilites_de_l_evenement MEMBER m_liste_des_disponibilites_de_l_evenement NOTIFY liste_des_disponibilites_de_l_evenementChanged)
     Q_PROPERTY(SqlQueryModel* postes MEMBER m_postes NOTIFY postesChanged)
@@ -177,6 +178,7 @@ signals:
     void candidatureRejetee();
     void tableauResponsablesChanged();
     void liste_des_disponibilites_de_l_evenementChanged();
+    void liste_des_affectations_de_la_disponibiliteChanged();
     void idPosteChanged();
 
 public slots:
@@ -189,6 +191,7 @@ private:
     SqlQueryModel *m_postes;
     QSortFilterProxyModel *m_proxy_de_la_liste_des_disponibilites_de_l_evenement;
     SqlQueryModel *m_liste_des_disponibilites_de_l_evenement;
+    SqlQueryModel *m_liste_des_affectations_de_la_disponibilite;
     SqlQueryModel *m_fiche_de_la_disponibilite;
     SqlQueryModel *m_fiche_personne; // Est associé à une personne
     SqlQueryModel *m_fiche_poste;

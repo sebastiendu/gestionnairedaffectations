@@ -3,42 +3,46 @@ import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.2
 
 Item {
-    ColumnLayout {
+    RowLayout {
         anchors.fill: parent
 
-        RowLayout {
+        ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            ColumnLayout { // liste des dispo et fiche du participant
+            ListeDesDisponibilites {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-
-                ListeDesDisponibilites {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                }
-
-                FicheDeLaDisponibilite {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                }
             }
 
-            ColumnLayout { // liste des tours et fiche du tour
+            FicheDeLaDisponibilite {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+            }
 
-                ListeDesTours {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                }
+            ListeDesAffectationsDeLaDisponibilite {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
+        }
 
-                FicheDuTour {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                }
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
+            ListeDesTours {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
+
+            FicheDuTour {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
+
+            ListeDesAffectationsDuTour {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
             }
 
         }
@@ -46,3 +50,4 @@ Item {
     }
 
 }
+

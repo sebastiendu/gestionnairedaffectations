@@ -31,6 +31,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_postes = new SqlQueryModel;
     m_affectation = new SqlQueryModel;
     m_fiche_du_tour = new SqlQueryModel;
+    m_liste_des_affectations_de_la_disponibilite = new SqlQueryModel;
     m_affectations_du_tour = new SqlQueryModel;
     m_liste_des_disponibilites_de_l_evenement = new SqlQueryModel;
     m_proxy_de_la_liste_des_disponibilites_de_l_evenement = new QSortFilterProxyModel(this);
@@ -187,10 +188,27 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_affectation->setQuery(query);
 
-        query.prepare("select * from tour where id=:id_tour; "); // TODO: generifier pour pouvoir initialiser les requetes à partir du QML et afficher des erreurs si les prepare ou les exec ne fonctionnent pas
-        query.bindValue(":id_tour",m_id_tour);
-        query.exec();
-        m_fiche_du_tour->setQuery(query);
+        if (query.prepare("select * from tours_benevole where id_disponibilite = :id_disponibilite order by debut, fin")) {
+            query.bindValue(":id_disponibilite", m_id_disponibilite);
+            if (query.exec()) {
+                m_liste_des_affectations_de_la_disponibilite->setQuery(query);
+            } else {
+                qCritical() << "Echec d'execution de la requête de la liste des affectations de la disponibilite :" << query.lastError();
+            }
+        } else {
+            qCritical() << "Echec de préparation de la requête de la liste des affectations de la disponibilite :" << query.lastError();
+        }
+
+        if (query.prepare("select * from poste_et_tour where id_tour = :id_tour")) {
+            query.bindValue(":id_tour", m_id_tour);
+            if (query.exec()) {
+                m_fiche_du_tour->setQuery(query);
+            } else {
+                qCritical() << "Echec d'execution de la requête de lecture de la fiche du tour :" << query.lastError();
+            }
+        } else {
+            qCritical() << "Echec de préparation de la requête de lecture de la fiche du tour :" << query.lastError();
+        }
 
         query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement; ");
         query.bindValue(":tour",m_id_tour);
@@ -401,6 +419,11 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_fiche_du_tour->setQuery(query);
 
+    query = m_liste_des_affectations_de_la_disponibilite->query(); // FIXME: est-ce vraiment nécessaire ?
+    query.bindValue(0,0);
+    query.exec();
+    m_liste_des_affectations_de_la_disponibilite->setQuery(query);
+
     query = m_affectations_du_tour->query();
     query.bindValue(0,0);
     query.exec();
@@ -529,10 +552,17 @@ void GestionnaireDAffectations::setIdTour(int id) {
 void GestionnaireDAffectations::setIdDisponibilite(int id) {
     qDebug() << "m_id_disponibilite va changer vers" << id;
     m_id_disponibilite = id;
+
     QSqlQuery query = m_fiche_de_la_disponibilite->query();
     query.bindValue(":id_disponibilite", m_id_disponibilite);
     query.exec();
     m_fiche_de_la_disponibilite->setQuery(query);
+
+    query = m_liste_des_affectations_de_la_disponibilite->query();
+    query.bindValue(":id_disponibilite", m_id_disponibilite);
+    query.exec();
+    m_liste_des_affectations_de_la_disponibilite->setQuery(query);
+
     qDebug() << "m_id_disponibilite vaut maintenant" << id;
 }
 
@@ -788,6 +818,7 @@ void GestionnaireDAffectations::annulerAffectation(QString commentaire){
             m_liste_des_tours_de_l_evenement->reload();
             m_fiche_du_tour->reload();
             m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
+            m_liste_des_affectations_de_la_disponibilite->reload();
         } else {
             qCritical() << "Impossible d'executer la requête d'annulation de l'affectation : " << query.lastError();
         }
