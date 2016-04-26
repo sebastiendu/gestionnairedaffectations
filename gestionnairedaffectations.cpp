@@ -37,7 +37,6 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_proxy_de_la_liste_des_disponibilites_de_l_evenement = new QSortFilterProxyModel(this);
     m_fiche_de_la_disponibilite = new SqlQueryModel;
     m_fiche_personne = new SqlQueryModel;
-    m_affectations_acceptees_validees_ou_proposees_du_tour = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
     m_fiche_poste_tour = new SqlQueryModel;
     m_liste_des_tours_de_l_evenement = new SqlQueryModel;
@@ -210,16 +209,25 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
             qCritical() << "Echec de préparation de la requête de lecture de la fiche du tour :" << query.lastError();
         }
 
-        query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement; ");
-        query.bindValue(":tour",m_id_tour);
-        query.bindValue(":id_evenement",idEvenement());
-        query.exec();
-        m_affectations_du_tour->setQuery(query);
-
-        query.prepare("select * from affectations where id_tour= :tour AND (statut_affectation = 'acceptee' OR statut_affectation = 'validee' OR statut_affectation = 'proposee') ORDER BY  statut_affectation = 'proposee' , statut_affectation = 'validee', statut_affectation = 'acceptee' DESC; ");
-        query.bindValue(":tour",m_id_tour);
-        query.exec();
-        m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
+        if (query.prepare("select * from affectations"
+                          " where id_tour = :tour"
+                          " order by"
+                          " statut_affectation = 'possible' desc,"
+                          " statut_affectation = 'proposee' desc,"
+                          " statut_affectation = 'validee' desc,"
+                          " statut_affectation = 'acceptee' desc,"
+                          " statut_affectation = 'rejetee' desc,"
+                          " statut_affectation = 'annulee' desc"
+                          )) {
+            query.bindValue(":tour",m_id_tour);
+            if (query.exec()) {
+                m_affectations_du_tour->setQuery(query);
+            } else {
+                qCritical() << "Echec d'execution de la requête des affectations du tour :" << query.lastError();
+            }
+        } else {
+            qCritical() << "Echec de préparation de la requête des affectations du tour :" << query.lastError();
+        }
 
         query.prepare("select * from poste where id_evenement= :evt;");
         query.bindValue(":evt",idEvenement());
@@ -429,11 +437,6 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_affectations_du_tour->setQuery(query);
 
-    query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
-    query.bindValue(0,0);
-    query.exec();
-    m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
-
     query = m_planComplet->query();
     query.bindValue(0,idEvenement());
     query.exec();
@@ -532,20 +535,19 @@ void GestionnaireDAffectations::setResponsables() {
 }
 
 void GestionnaireDAffectations::setIdTour(int id) {
-    m_id_tour = id;
     qDebug() << "modification de m_id_tour en" << id;
+    m_id_tour = id;
+
     QSqlQuery query = m_fiche_du_tour->query();
     query.bindValue(":id_tour", m_id_tour);
     query.exec();
     m_fiche_du_tour->setQuery(query);
+
     query = m_affectations_du_tour->query();
     query.bindValue(":tour", m_id_tour);
     query.exec();
     m_affectations_du_tour->setQuery(query);
-    query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
-    query.bindValue(":tour", m_id_tour);
-    query.exec();
-    m_affectations_acceptees_validees_ou_proposees_du_tour->setQuery(query);
+
     qDebug() << "m_id_tour changé en" << id;
 }
 
@@ -817,7 +819,7 @@ void GestionnaireDAffectations::annulerAffectation(QString commentaire){
             m_fiche_de_la_disponibilite->reload();
             m_liste_des_tours_de_l_evenement->reload();
             m_fiche_du_tour->reload();
-            m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
+            m_affectations_du_tour->reload();
             m_liste_des_affectations_de_la_disponibilite->reload();
         } else {
             qCritical() << "Impossible d'executer la requête d'annulation de l'affectation : " << query.lastError();
@@ -845,7 +847,7 @@ void GestionnaireDAffectations::creerAffectation(QString commentaire){
             m_fiche_de_la_disponibilite->reload();
             m_liste_des_tours_de_l_evenement->reload();
             m_fiche_du_tour->reload();
-            m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
+            m_affectations_du_tour->reload();
         } else {
             qCritical() << "Impossible d'executer la requête de création de l'affectation : " << query.lastError();
         }

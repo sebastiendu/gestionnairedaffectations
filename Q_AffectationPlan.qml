@@ -243,7 +243,7 @@ Item  {
                                     remonterRectangle.start();
                                     app.setIdTour(id_tour);
                                     app.setIdPoste(id_poste);
-                                    interieurCercle.model = app.affectations_acceptees_validees_ou_proposees_du_tour;
+                                    interieurCercle.model = app.affectations_du_tour;
                                     fichePoste.model = app.fiche_poste;
                                     imageMarqueur.radius =5 ;
                                 }

@@ -13,7 +13,7 @@ Item {
 
             ListView {
                 id: liste
-                model: app.affectations_acceptees_validees_ou_proposees_du_tour // FIXME : pourquoi cacher les "possibles" ?
+                model: app.affectations_du_tour
                 delegate: Rectangle {
                     property int _id_affectation: id_affectation
                     height: children[0].height
@@ -32,15 +32,21 @@ Item {
                                 Layout.alignment: Qt.AlignHCenter
                                 text: prenom_personne + " " + nom_personne + (ville ? ", " + ville : "")
                                 elide: Text.ElideRight
+                                font.strikeout: statut_affectation == "rejetee" || statut_affectation == "annulee"
                             }
 
                             Text {
                                 visible: commentaire_affectation != ""
                                 Layout.fillWidth: true;
-                                Layout.alignment: Qt.AlignHCenter
                                 text: commentaire_affectation
+                                horizontalAlignment: Text.AlignRight
                                 elide: Text.ElideRight
                                 wrapMode: Text.Wrap
+                            }
+
+                            Text {
+                                visible: statut_affectation == "proposee"
+                                text: "Proposée " + date_et_heure_proposee // TODO : formater la date et l'heure
                             }
 
                             MouseArea {
@@ -72,7 +78,7 @@ Item {
                     color: "lightsteelblue"
 
                     Text {
-                        text: "Affectation " + section
+                        text: "Affectations " + section + "s"
                         font.bold: true
                         color: (section == "acceptee" || section ==  "validee")
                                ? "green"

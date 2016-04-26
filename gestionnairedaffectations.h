@@ -33,7 +33,6 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* affectation MEMBER m_affectation NOTIFY affectationChanged)
     Q_PROPERTY(SqlQueryModel* fiche_du_tour MEMBER m_fiche_du_tour NOTIFY ficheDuTourChanged)
     Q_PROPERTY(SqlQueryModel* affectations_du_tour MEMBER m_affectations_du_tour NOTIFY affectationsDuTourChanged)
-    Q_PROPERTY(SqlQueryModel* affectations_acceptees_validees_ou_proposees_du_tour MEMBER m_affectations_acceptees_validees_ou_proposees_du_tour NOTIFY affectationsAccepteesValideesOuProposeesDuTourChanged)
     Q_PROPERTY(SqlQueryModel* lotsDejaCrees MEMBER m_lotsDejaCrees NOTIFY lotDejaCreesChanged)
     Q_PROPERTY(QSortFilterProxyModel* planCourant MEMBER m_plan NOTIFY planChanged)
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
@@ -199,7 +198,6 @@ private:
     SqlQueryModel *m_affectation;
     SqlQueryModel *m_fiche_du_tour;
     SqlQueryModel *m_affectations_du_tour;
-    SqlQueryModel *m_affectations_acceptees_validees_ou_proposees_du_tour;
     SqlQueryModel *m_postes_tours_affectations;
     SqlQueryModel *m_lotsDejaCrees;
     int m_id_disponibilite;
