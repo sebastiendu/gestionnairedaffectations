@@ -30,22 +30,21 @@ Item {
                                     Layout.fillWidth: true
                                     text: nom_poste + " de " + heure_debut + " à " + heure_fin + " (" + duree + ")"
                                     font.bold: true
-                                    // TODO affichage de description_poste avec un petit [+] ? ou la fiche complete du poste
                                     elide: Text.ElideRight
+                                    font.strikeout: statut_affectation == "rejetee" || statut_affectation == "annulee"
                                 }
 
                                 Text {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: "Affectation " + statut_affectation +
                                           (statut_affectation == "proposee"
-                                           ? " " + date_et_heure_proposee
+                                           ? " " + date_et_heure_proposee // TODO : formater la date et l'heure
                                            : "")
                                     color: (statut_affectation == "acceptee" || statut_affectation ==  "validee")
                                            ? "green"
                                            : (statut_affectation == "rejetee" || statut_affectation=="annulee")
                                              ? "red"
                                              : "orange"
-                                    font.strikeout: statut_affectation == "rejetee" || statut_affectation == "annulee"
                                 }
                             }
 
@@ -57,7 +56,6 @@ Item {
                                 elide: Text.ElideRight
                                 wrapMode: Text.Wrap
                             }
-
 
                             MouseArea {
                                 anchors.fill: parent

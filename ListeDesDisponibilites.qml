@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.2
 
-Item {
+Item { // TODO : plusieurs états : "selon le nombre d'affectations (les sans-tour en premier)", "alphabétique" (ViewSection.FirstCharacter)
     ColumnLayout {
         anchors.fill: parent;
 
