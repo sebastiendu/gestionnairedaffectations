@@ -6,7 +6,7 @@ Item {
     ListView {
         interactive: false
         anchors.fill: parent
-        model: app.tour
+        model: app.fiche_du_tour
         clip: true
 
         delegate: GridLayout {

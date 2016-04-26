@@ -30,7 +30,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_liste_des_evenements = new SqlQueryModel;
     m_postes = new SqlQueryModel;
     m_affectation = new SqlQueryModel;
-    m_tour = new SqlQueryModel;
+    m_fiche_du_tour = new SqlQueryModel;
     m_affectations_du_tour = new SqlQueryModel;
     m_benevoles_disponibles_sql = new SqlQueryModel;
     m_benevoles_disponibles = new QSortFilterProxyModel(this);
@@ -190,7 +190,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.prepare("select * from tour where id=:id_tour; "); // TODO: generifier pour pouvoir initialiser les requetes à partir du QML et afficher des erreurs si les prepare ou les exec ne fonctionnent pas
         query.bindValue(":id_tour",m_id_tour);
         query.exec();
-        m_tour->setQuery(query);
+        m_fiche_du_tour->setQuery(query);
 
         query.prepare("select * from affectations where id_tour= :tour AND id_evenement = :id_evenement; ");
         query.bindValue(":tour",m_id_tour);
@@ -396,10 +396,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_affectation->setQuery(query);
 
-    query = m_tour->query(); // FIXME: est-ce vraiment nécessaire ?
+    query = m_fiche_du_tour->query(); // FIXME: est-ce vraiment nécessaire ?
     query.bindValue(0,0);
     query.exec();
-    m_tour->setQuery(query);
+    m_fiche_du_tour->setQuery(query);
 
     query = m_affectations_du_tour->query();
     query.bindValue(0,0);
@@ -511,10 +511,10 @@ void GestionnaireDAffectations::setResponsables() {
 void GestionnaireDAffectations::setIdTour(int id) {
     m_id_tour = id;
     qDebug() << "modification de m_id_tour en" << id;
-    QSqlQuery query = m_tour->query();
+    QSqlQuery query = m_fiche_du_tour->query();
     query.bindValue(":id_tour", m_id_tour);
     query.exec();
-    m_tour->setQuery(query);
+    m_fiche_du_tour->setQuery(query);
     query = m_affectations_du_tour->query();
     query.bindValue(":tour", m_id_tour);
     query.exec();
@@ -786,7 +786,7 @@ void GestionnaireDAffectations::annulerAffectation(QString commentaire){
             m_benevoles_disponibles_sql->reload();
             m_fiche_de_la_disponibilite->reload();
             m_poste_et_tour_sql->reload();
-            m_tour->reload();
+            m_fiche_du_tour->reload();
             m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
         } else {
             qCritical() << "Impossible d'executer la requête d'annulation de l'affectation : " << query.lastError();
@@ -813,7 +813,7 @@ void GestionnaireDAffectations::creerAffectation(QString commentaire){
             m_benevoles_disponibles_sql->reload();
             m_fiche_de_la_disponibilite->reload();
             m_poste_et_tour_sql->reload();
-            m_tour->reload();
+            m_fiche_du_tour->reload();
             m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
         } else {
             qCritical() << "Impossible d'executer la requête de création de l'affectation : " << query.lastError();
