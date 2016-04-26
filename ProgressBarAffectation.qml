@@ -1,9 +1,9 @@
 import QtQuick 2.0
 
 Item { // une barre de progression qui indique un niveau de remplissage certain ou incertain
-       // grise tant que la valeur est sous le minimum requis,
-       // vert (certain) ou orange (incertain) quand elle est bien entre min et max
-       // rouge si elle dépasse le maximum
+    // grise tant que la valeur est sous le minimum requis,
+    // vert (certain) ou orange (incertain) quand elle est bien entre min et max
+    // rouge si elle dépasse le maximum
     property int valeurmin: 0
     property int valeurmax: 2
     property int valeur: 1
@@ -25,9 +25,20 @@ Item { // une barre de progression qui indique un niveau de remplissage certain 
             anchors.bottom: parent.bottom
             anchors.margins: parent.border.width
             border.width: 0
-            color: "black"
+            color: parent.border.color
             width: valeurmax > 0 ? (parent.width - 2*anchors.margins) * Math.min(valeur/valeurmax, 1) : 0;
         }
     }
+    Text {
+        anchors.fill: parent
+        text: valeur + " / " + (
+                  valeurmax == valeurmin
+                  ? valeurmax
+                  : "(" + valeurmin + "-" + valeurmax + ")"
+                  )
+        horizontalAlignment: Text.Center
+        clip: true
+    }
+
 }
 

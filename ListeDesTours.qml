@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.2
 
 import "fonctions.js" as Fonctions
 
-Item {
+Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "par date de debut", "par taux de remplissage"
     ColumnLayout {
         anchors.fill: parent;
 
@@ -37,29 +37,15 @@ Item {
                             text: Fonctions.dateTour(debut,fin)
                             horizontalAlignment: Text.AlignRight
                             elide: Text.ElideLeft
-                            Layout.preferredWidth: parent.width / 3
-
-                        }
-
-                        Text { // nombre d'affectations, min et max
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter
-                            text: (nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees) +
-                                  "/" + max +
-                                  " (min: " + min + ", max: " + max +")" // TODO fusionner avec la progressbar ci-dessous
-                            horizontalAlignment: Text.AlignHCenter
-                            clip: true
-                            Layout.preferredWidth: parent.width / 3
                         }
 
                         ProgressBarAffectation {
-                            Layout.fillWidth: true
                             Layout.fillHeight: true
                             valeurmin: min
                             valeurmax: max
                             valeur: nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees
                             certain: nombre_affectations_proposees == 0
-                            Layout.preferredWidth: parent.width / 3
+                            Layout.preferredWidth: parent.width / 6
                         }
                     }
 
