@@ -31,7 +31,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_postes = new SqlQueryModel;
     m_affectation = new SqlQueryModel;
     m_tour = new SqlQueryModel;
-    m_tour_benevole = new SqlQueryModel;
+    m_affectations_du_tour = new SqlQueryModel;
     m_benevoles_disponibles_sql = new SqlQueryModel;
     m_benevoles_disponibles = new QSortFilterProxyModel(this);
     m_disponibilite = new SqlQueryModel;
@@ -196,7 +196,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.bindValue(":tour",m_id_tour);
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
-        m_tour_benevole->setQuery(query);
+        m_affectations_du_tour->setQuery(query);
 
         query.prepare("select * from affectations where id_tour= :tour AND (statut_affectation = 'acceptee' OR statut_affectation = 'validee' OR statut_affectation = 'proposee') ORDER BY  statut_affectation = 'proposee' , statut_affectation = 'validee', statut_affectation = 'acceptee' DESC; ");
         query.bindValue(":tour",m_id_tour);
@@ -401,10 +401,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_tour->setQuery(query);
 
-    query = m_tour_benevole->query();
+    query = m_affectations_du_tour->query();
     query.bindValue(0,0);
     query.exec();
-    m_tour_benevole->setQuery(query);
+    m_affectations_du_tour->setQuery(query);
 
     query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
     query.bindValue(0,0);
@@ -515,10 +515,10 @@ void GestionnaireDAffectations::setIdTour(int id) {
     query.bindValue(":id_tour", m_id_tour);
     query.exec();
     m_tour->setQuery(query);
-    query = m_tour_benevole->query();
+    query = m_affectations_du_tour->query();
     query.bindValue(":tour", m_id_tour);
     query.exec();
-    m_tour_benevole->setQuery(query);
+    m_affectations_du_tour->setQuery(query);
     query = m_affectations_acceptees_validees_ou_proposees_du_tour->query();
     query.bindValue(":tour", m_id_tour);
     query.exec();

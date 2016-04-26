@@ -464,7 +464,7 @@ Item  {
                     anchors.right: parent.right
                     clip: true
                     spacing: 6
-                    model: app.tour_benevoles
+                    model: app.affectations_du_tour
 
                     delegate:
                         Row {
