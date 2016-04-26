@@ -139,7 +139,7 @@ Item  {
 
                 ListView {
                     id: ficheBenevole
-                    model: app.disponibilite
+                    model: app.fiche_de_la_disponibilite
                     anchors.top: traitMilieu.bottom
                     anchors.bottom: parent.bottom
                     anchors.margins: 5

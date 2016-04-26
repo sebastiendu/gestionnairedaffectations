@@ -6,7 +6,7 @@ Item {
     ListView {
         interactive: false
         anchors.fill: parent
-        model: app.disponibilite
+        model: app.fiche_de_la_disponibilite
         clip: true
 
         delegate: GridLayout {

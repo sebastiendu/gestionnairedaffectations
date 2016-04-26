@@ -34,7 +34,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_affectations_du_tour = new SqlQueryModel;
     m_benevoles_disponibles_sql = new SqlQueryModel;
     m_benevoles_disponibles = new QSortFilterProxyModel(this);
-    m_disponibilite = new SqlQueryModel;
+    m_fiche_de_la_disponibilite = new SqlQueryModel;
     m_fiche_personne = new SqlQueryModel;
     m_affectations_acceptees_validees_ou_proposees_du_tour = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
@@ -160,7 +160,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.prepare("select * from fiche_benevole where id_disponibilite=:id_disponibilite");
         query.bindValue(":id_disponibilite", m_id_disponibilite);
         query.exec();
-        m_disponibilite->setQuery(query);
+        m_fiche_de_la_disponibilite->setQuery(query);
 
 
         query.prepare("select * from poste_et_tour where id_poste= :poste AND id_evenement = :id_evenement AND debut <= :debut AND fin >= :fin ORDER BY debut ASC"); //AND debut <= :debut AND fin >= :fin"
@@ -381,10 +381,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_liste_des_evenements->setQuery(query);
 
-    query = m_disponibilite->query();
+    query = m_fiche_de_la_disponibilite->query();
     query.bindValue(0,0);
     query.exec();
-    m_disponibilite->setQuery(query);
+    m_fiche_de_la_disponibilite->setQuery(query);
 
     query = m_fiche_poste->query();
     query.bindValue(0,0);
@@ -529,10 +529,10 @@ void GestionnaireDAffectations::setIdTour(int id) {
 void GestionnaireDAffectations::setIdDisponibilite(int id) {
     qDebug() << "m_id_disponibilite va changer vers" << id;
     m_id_disponibilite = id;
-    QSqlQuery query = m_disponibilite->query();
+    QSqlQuery query = m_fiche_de_la_disponibilite->query();
     query.bindValue(":id_disponibilite", m_id_disponibilite);
     query.exec();
-    m_disponibilite->setQuery(query);
+    m_fiche_de_la_disponibilite->setQuery(query);
     qDebug() << "m_id_disponibilite vaut maintenant" << id;
 }
 
@@ -784,7 +784,7 @@ void GestionnaireDAffectations::annulerAffectation(QString commentaire){
         query.bindValue(":commentaire", commentaire);
         if (query.exec()) {
             m_benevoles_disponibles_sql->reload();
-            m_disponibilite->reload();
+            m_fiche_de_la_disponibilite->reload();
             m_poste_et_tour_sql->reload();
             m_tour->reload();
             m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
@@ -811,7 +811,7 @@ void GestionnaireDAffectations::creerAffectation(QString commentaire){
         if (query.exec()) {
             m_id_affectation = query.lastInsertId().toInt();
             m_benevoles_disponibles_sql->reload();
-            m_disponibilite->reload();
+            m_fiche_de_la_disponibilite->reload();
             m_poste_et_tour_sql->reload();
             m_tour->reload();
             m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
