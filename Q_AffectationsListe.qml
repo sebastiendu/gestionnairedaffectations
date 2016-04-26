@@ -29,7 +29,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                ListeDesToursParPoste {
+                ListeDesTours {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                 }

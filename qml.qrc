@@ -26,7 +26,7 @@
         <file>DatePicker.qml</file>
         <file>Q_SolliciterAnciensBenevoles.qml</file>
         <file>LabelTextField.qml</file>
-        <file>ListeDesToursParPoste.qml</file>
+        <file>ListeDesTours.qml</file>
         <file>FicheDuTour.qml</file>
         <file>ListeDesDisponibilites.qml</file>
         <file>FicheDeLaDisponibilite.qml</file>
