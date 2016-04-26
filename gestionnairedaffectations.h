@@ -36,7 +36,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* lotsDejaCrees MEMBER m_lotsDejaCrees NOTIFY lotDejaCreesChanged)
     Q_PROPERTY(QSortFilterProxyModel* planCourant MEMBER m_plan NOTIFY planChanged)
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
-    Q_PROPERTY(QSortFilterProxyModel* poste_et_tour MEMBER m_poste_et_tour NOTIFY posteEtTourChanged)
+    Q_PROPERTY(QSortFilterProxyModel* proxy_de_la_liste_des_tours_de_l_evenement MEMBER m_proxy_de_la_liste_des_tours_de_l_evenement NOTIFY proxy_de_la_liste_des_tours_de_l_evenementChanged)
     Q_PROPERTY(SqlQueryModel* horaires MEMBER m_horaires NOTIFY horaireChanged)
     Q_PROPERTY(QSortFilterProxyModel* etat_tour_heure MEMBER m_etat_tour_heure  NOTIFY etatTourHeureChanged)
     Q_PROPERTY(QDateTime heureCourante MEMBER m_heure_courante NOTIFY heureCouranteChanged)
@@ -157,7 +157,7 @@ signals:
     void ficheDuTourChanged();
     void fiche_posteTourChanged();
     void affectationsAccepteesValideesOuProposeesDuTourChanged();
-    void posteEtTourChanged();
+    void proxy_de_la_liste_des_tours_de_l_evenementChanged();
     void horaireChanged();
     void tableauTourChanged(); // Signal emis lorsque le tableau des tours de l'onglet Poste&Tours es t
     void erreurBD(QString erreur);
@@ -207,9 +207,9 @@ private:
     Settings *m_settings;
     QSortFilterProxyModel *m_plan;
     SqlQueryModel *m_planComplet;
-    SqlQueryModel *m_poste_et_tour_sql;
+    SqlQueryModel *m_liste_des_tours_de_l_evenement;
     SqlQueryModel *m_horaires;
-    QSortFilterProxyModel *m_poste_et_tour;
+    QSortFilterProxyModel *m_proxy_de_la_liste_des_tours_de_l_evenement;
     QSortFilterProxyModel *m_etat_tour_heure;
     SqlQueryModel *m_etat_tour_heure_sql;
     SqlQueryModel *m_candidatures_en_attente;

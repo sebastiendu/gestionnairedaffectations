@@ -24,7 +24,7 @@ Item {
             ListView {
                 id: liste
                 anchors.fill: parent
-                model: app.poste_et_tour
+                model: app.proxy_de_la_liste_des_tours_de_l_evenement
                 cacheBuffer: 800
                 delegate: Rectangle { // une ligne pour chaque tour du poste
                     property int _id_tour: id_tour

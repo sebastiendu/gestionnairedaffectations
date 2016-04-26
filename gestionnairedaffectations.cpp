@@ -39,8 +39,8 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_affectations_acceptees_validees_ou_proposees_du_tour = new SqlQueryModel;
     m_fiche_poste = new SqlQueryModel;
     m_fiche_poste_tour = new SqlQueryModel;
-    m_poste_et_tour_sql = new SqlQueryModel;
-    m_poste_et_tour = new QSortFilterProxyModel(this);
+    m_liste_des_tours_de_l_evenement = new SqlQueryModel;
+    m_proxy_de_la_liste_des_tours_de_l_evenement = new QSortFilterProxyModel(this);
     m_planComplet = new SqlQueryModel;
     m_plan = new QSortFilterProxyModel(this);
     m_horaires = new SqlQueryModel;
@@ -219,10 +219,10 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.prepare("select * from poste_et_tour where id_evenement= :id_evenement ORDER BY nom, debut ASC;");
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
-        m_poste_et_tour_sql->setQuery(query);
-        m_poste_et_tour->setSourceModel(m_poste_et_tour_sql);
-        m_poste_et_tour->setFilterCaseSensitivity(Qt::CaseInsensitive);
-        m_poste_et_tour->setFilterKeyColumn(-1);
+        m_liste_des_tours_de_l_evenement->setQuery(query);
+        m_proxy_de_la_liste_des_tours_de_l_evenement->setSourceModel(m_liste_des_tours_de_l_evenement);
+        m_proxy_de_la_liste_des_tours_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        m_proxy_de_la_liste_des_tours_de_l_evenement->setFilterKeyColumn(-1);
 
         query.prepare("SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < :debut  AND fin > :fin) or t.debut is null AND id_evenement = :evt ORDER BY nom ;");
         query.bindValue(":evt",idEvenement());
@@ -416,10 +416,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_planComplet->setQuery(query);
 
-    query = m_poste_et_tour_sql->query();
+    query = m_liste_des_tours_de_l_evenement->query();
     query.bindValue(0,idEvenement());
     query.exec();
-    m_poste_et_tour_sql->setQuery(query);
+    m_liste_des_tours_de_l_evenement->setQuery(query);
 
 
     query = m_etat_tour_heure_sql ->query();
@@ -785,7 +785,7 @@ void GestionnaireDAffectations::annulerAffectation(QString commentaire){
         if (query.exec()) {
             m_liste_des_disponibilites_de_l_evenement->reload();
             m_fiche_de_la_disponibilite->reload();
-            m_poste_et_tour_sql->reload();
+            m_liste_des_tours_de_l_evenement->reload();
             m_fiche_du_tour->reload();
             m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
         } else {
@@ -812,7 +812,7 @@ void GestionnaireDAffectations::creerAffectation(QString commentaire){
             m_id_affectation = query.lastInsertId().toInt();
             m_liste_des_disponibilites_de_l_evenement->reload();
             m_fiche_de_la_disponibilite->reload();
-            m_poste_et_tour_sql->reload();
+            m_liste_des_tours_de_l_evenement->reload();
             m_fiche_du_tour->reload();
             m_affectations_acceptees_validees_ou_proposees_du_tour->reload();
         } else {
@@ -916,10 +916,10 @@ void GestionnaireDAffectations::modifierTourMinMax(QString type, int nombre, int
             qCritical() << query.lastError().text();
         }
         else {
-            query = m_poste_et_tour_sql->query();
+            query = m_liste_des_tours_de_l_evenement->query();
             query.bindValue(0,idEvenement());
             query.exec();
-            m_poste_et_tour_sql->setQuery(query);
+            m_liste_des_tours_de_l_evenement->setQuery(query);
         }
 
     }
@@ -954,13 +954,13 @@ void GestionnaireDAffectations::insererTour(QDateTime dateFinPrecedente, int min
         m_fiche_poste_tour->setQuery(query);
 
         // On recharge la liste des postes
-        query = m_poste_et_tour_sql->query();
+        query = m_liste_des_tours_de_l_evenement->query();
         query.bindValue(":id_evenement",idEvenement());
         query.exec();
-        m_poste_et_tour_sql->setQuery(query);
-        m_poste_et_tour->setSourceModel(m_poste_et_tour_sql);
-        m_poste_et_tour->setFilterCaseSensitivity(Qt::CaseInsensitive);
-        m_poste_et_tour->setFilterKeyColumn(-1);
+        m_liste_des_tours_de_l_evenement->setQuery(query);
+        m_proxy_de_la_liste_des_tours_de_l_evenement->setSourceModel(m_liste_des_tours_de_l_evenement);
+        m_proxy_de_la_liste_des_tours_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        m_proxy_de_la_liste_des_tours_de_l_evenement->setFilterKeyColumn(-1);
 
         tableauTourChanged();
     }
