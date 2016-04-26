@@ -38,7 +38,7 @@ Item  {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.margins: 10
-                onEditingFinished: app.benevoles_disponibles.setFilterFixedString(text);
+                onEditingFinished: app.proxy_de_la_liste_des_disponibilites_de_l_evenement.setFilterFixedString(text);
                 placeholderText: "Disponibilités Recherche"
 
             }
@@ -107,12 +107,12 @@ Item  {
                         onClicked: {
                             listeDesDisponibles.currentIndex = index
                             app.setIdDisponibilite(id_disponibilite)
-                            //listeDesDisponibles.model = app.benevoles_disponibles
+                            //listeDesDisponibles.model = app.proxy_de_la_liste_des_disponibilites_de_l_evenement
                         }
                     }
                 }
 
-                model: app.benevoles_disponibles
+                model: app.proxy_de_la_liste_des_disponibilites_de_l_evenement
                 highlight: Rectangle { visible: (listeDesDisponibles.currentIndex == -1 )? false: true; z:5;color: "blue"; radius: 5; opacity: 0.5; width: listeDesDisponibles.width ; height:13 ;y: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.y + 10;x: (listeDesDisponibles.currentIndex == -1 )? 0: listeDesDisponibles.currentItem.x}
                 focus: true
                 highlightFollowsCurrentItem: false

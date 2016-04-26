@@ -22,8 +22,8 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(Settings* settings MEMBER m_settings NOTIFY settingsChanged)
     Q_PROPERTY(int id_poste MEMBER m_id_poste NOTIFY idPosteChanged)
     Q_PROPERTY(SqlQueryModel* liste_des_evenements MEMBER m_liste_des_evenements NOTIFY liste_des_evenementsChanged)
-    Q_PROPERTY(QSortFilterProxyModel* benevoles_disponibles MEMBER m_benevoles_disponibles NOTIFY benevoles_disponiblesChanged)
-    Q_PROPERTY(SqlQueryModel* benevoles_disponibles_sql MEMBER m_benevoles_disponibles_sql NOTIFY benevoles_disponibles_sqlChanged)
+    Q_PROPERTY(QSortFilterProxyModel* proxy_de_la_liste_des_disponibilites_de_l_evenement MEMBER m_proxy_de_la_liste_des_disponibilites_de_l_evenement NOTIFY proxy_de_la_liste_des_disponibilites_de_l_evenementChanged)
+    Q_PROPERTY(SqlQueryModel* liste_des_disponibilites_de_l_evenement MEMBER m_liste_des_disponibilites_de_l_evenement NOTIFY liste_des_disponibilites_de_l_evenementChanged)
     Q_PROPERTY(SqlQueryModel* postes MEMBER m_postes NOTIFY postesChanged)
     Q_PROPERTY(SqlQueryModel* fiche_de_la_disponibilite MEMBER m_fiche_de_la_disponibilite NOTIFY ficheDeLaDisponibiliteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_personne MEMBER m_fiche_personne)
@@ -146,7 +146,7 @@ signals:
     void heureMaxChanged();
     void settingsChanged();
     void liste_des_evenementsChanged();
-    void benevoles_disponiblesChanged();
+    void proxy_de_la_liste_des_disponibilites_de_l_evenementChanged();
     void postesChanged();
     void ficheDeLaDisponibiliteChanged();
     void fiche_posteChanged();
@@ -176,7 +176,7 @@ signals:
     void candidatureValidee();
     void candidatureRejetee();
     void tableauResponsablesChanged();
-    void benevoles_disponibles_sqlChanged();
+    void liste_des_disponibilites_de_l_evenementChanged();
     void idPosteChanged();
 
 public slots:
@@ -187,8 +187,8 @@ private:
     QSqlDatabase db;
     SqlQueryModel *m_liste_des_evenements;
     SqlQueryModel *m_postes;
-    QSortFilterProxyModel *m_benevoles_disponibles;
-    SqlQueryModel *m_benevoles_disponibles_sql;
+    QSortFilterProxyModel *m_proxy_de_la_liste_des_disponibilites_de_l_evenement;
+    SqlQueryModel *m_liste_des_disponibilites_de_l_evenement;
     SqlQueryModel *m_fiche_de_la_disponibilite;
     SqlQueryModel *m_fiche_personne; // Est associé à une personne
     SqlQueryModel *m_fiche_poste;

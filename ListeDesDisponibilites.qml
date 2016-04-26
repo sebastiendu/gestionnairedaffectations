@@ -22,7 +22,7 @@ Item {
             ListView {
                 id: liste
                 anchors.fill: parent
-                model: app.benevoles_disponibles
+                model: app.proxy_de_la_liste_des_disponibilites_de_l_evenement
                 cacheBuffer: 800
                 delegate: Rectangle {
                     property int _id_disponibilite: id_disponibilite

@@ -32,8 +32,8 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_affectation = new SqlQueryModel;
     m_fiche_du_tour = new SqlQueryModel;
     m_affectations_du_tour = new SqlQueryModel;
-    m_benevoles_disponibles_sql = new SqlQueryModel;
-    m_benevoles_disponibles = new QSortFilterProxyModel(this);
+    m_liste_des_disponibilites_de_l_evenement = new SqlQueryModel;
+    m_proxy_de_la_liste_des_disponibilites_de_l_evenement = new QSortFilterProxyModel(this);
     m_fiche_de_la_disponibilite = new SqlQueryModel;
     m_fiche_personne = new SqlQueryModel;
     m_affectations_acceptees_validees_ou_proposees_du_tour = new SqlQueryModel;
@@ -152,10 +152,10 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.prepare("select * from benevoles_disponibles where id_evenement=?");
         query.addBindValue(idEvenement());
         query.exec();
-        m_benevoles_disponibles_sql->setQuery(query);
-        m_benevoles_disponibles->setSourceModel(m_benevoles_disponibles_sql);
-        m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
-        m_benevoles_disponibles->setFilterKeyColumn(-1);
+        m_liste_des_disponibilites_de_l_evenement->setQuery(query);
+        m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setSourceModel(m_liste_des_disponibilites_de_l_evenement);
+        m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterKeyColumn(-1);
 
         query.prepare("select * from fiche_benevole where id_disponibilite=:id_disponibilite");
         query.bindValue(":id_disponibilite", m_id_disponibilite);
@@ -367,10 +367,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
 
     qDebug() << "L'id mis en index: " << m_liste_des_evenements->getIdFromIndex(index);
 
-    QSqlQuery query = m_benevoles_disponibles_sql->query(); // On fait un select des bénévoles participant à un événement avec un id précis
+    QSqlQuery query = m_liste_des_disponibilites_de_l_evenement->query(); // On fait un select des bénévoles participant à un événement avec un id précis
     query.bindValue(0,idEvenement()); // Cet id correspond à l'id evenement
     query.exec(); // On execute la requette
-    m_benevoles_disponibles_sql->setQuery(query); // On remplace la requete ayant un id indéfini par une requete avec un id précis (idEvenement)
+    m_liste_des_disponibilites_de_l_evenement->setQuery(query); // On remplace la requete ayant un id indéfini par une requete avec un id précis (idEvenement)
 
     query = m_postes->query();
     query.bindValue(0,idEvenement());
@@ -783,7 +783,7 @@ void GestionnaireDAffectations::annulerAffectation(QString commentaire){
         query.bindValue(":id_affectation", m_id_affectation);
         query.bindValue(":commentaire", commentaire);
         if (query.exec()) {
-            m_benevoles_disponibles_sql->reload();
+            m_liste_des_disponibilites_de_l_evenement->reload();
             m_fiche_de_la_disponibilite->reload();
             m_poste_et_tour_sql->reload();
             m_fiche_du_tour->reload();
@@ -810,7 +810,7 @@ void GestionnaireDAffectations::creerAffectation(QString commentaire){
         query.bindValue(":commentaire", commentaire);
         if (query.exec()) {
             m_id_affectation = query.lastInsertId().toInt();
-            m_benevoles_disponibles_sql->reload();
+            m_liste_des_disponibilites_de_l_evenement->reload();
             m_fiche_de_la_disponibilite->reload();
             m_poste_et_tour_sql->reload();
             m_fiche_du_tour->reload();
@@ -1076,10 +1076,10 @@ void GestionnaireDAffectations::validerCandidature(){
     query.prepare("select * from benevoles_disponibles where id_evenement=?");
     query.addBindValue(idEvenement());
     query.exec();
-    m_benevoles_disponibles_sql->setQuery(query);
-    m_benevoles_disponibles->setSourceModel(m_benevoles_disponibles_sql);
-    m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_benevoles_disponibles->setFilterKeyColumn(-1);
+    m_liste_des_disponibilites_de_l_evenement->setQuery(query);
+    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setSourceModel(m_liste_des_disponibilites_de_l_evenement);
+    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterKeyColumn(-1);
 
     query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
     query.bindValue(":id_evenement",idEvenement());
@@ -1099,10 +1099,10 @@ void GestionnaireDAffectations::rejeterCandidature(){
     query.prepare("select * from benevoles_disponibles where id_evenement=?");
     query.addBindValue(idEvenement());
     query.exec();
-    m_benevoles_disponibles_sql->setQuery(query);
-    m_benevoles_disponibles->setSourceModel(m_benevoles_disponibles_sql);
-    m_benevoles_disponibles->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_benevoles_disponibles->setFilterKeyColumn(-1);
+    m_liste_des_disponibilites_de_l_evenement->setQuery(query);
+    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setSourceModel(m_liste_des_disponibilites_de_l_evenement);
+    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterKeyColumn(-1);
 
     query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
     query.bindValue(":id_evenement",idEvenement());

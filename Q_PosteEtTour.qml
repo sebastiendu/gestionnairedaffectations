@@ -344,7 +344,7 @@ Item {
                 ComboBox {
                     id: choixResponsable
                     editable: true
-                    model: app.benevoles_disponibles_sql
+                    model: app.liste_des_disponibilites_de_l_evenement
 
                     anchors.right: ajouterResponsable.left
                     anchors.rightMargin: 10
@@ -365,7 +365,7 @@ Item {
                     anchors.top: choixResponsable.top
                     anchors.right: rejeterResponsable.left
                     text: " + "
-                    onClicked: { app.ajouterResponsable(app.benevoles_disponibles_sql.getDataFromModel(choixResponsable.currentIndex,"id_personne"))}
+                    onClicked: { app.ajouterResponsable(app.liste_des_disponibilites_de_l_evenement.getDataFromModel(choixResponsable.currentIndex,"id_personne"))}
                 }
 
                 Button {
