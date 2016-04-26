@@ -5,13 +5,11 @@ import QtQuick.Layouts 1.2
 Item {
     ColumnLayout {
         anchors.fill: parent;
-        spacing: 2;
 
         TextField {
             Layout.fillWidth: true
             onEditingFinished: liste.model.setFilterFixedString(text);
             placeholderText: "Recherche de participants disponibles"
-            Layout.preferredHeight: 14
         }
 
         ScrollView { // contient la liste des disponibles
@@ -21,34 +19,17 @@ Item {
 
             ListView {
                 id: liste
-                anchors.fill: parent
                 model: app.proxy_de_la_liste_des_disponibilites_de_l_evenement
                 cacheBuffer: 800
                 delegate: Rectangle {
                     property int _id_disponibilite: id_disponibilite
-                    height: 13
+                    height: children[0].height
                     width: parent.width
 
-                    RowLayout { // nom et ville TODO
-                        spacing: 2
+                    Text {
                         width: parent.width
-
-                        Text { // prenom et nom
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter
-                            text: prenom_personne + ' ' + nom_personne
-                            clip: true
-                            Layout.preferredWidth: parent.width * 2 / 3
-                        }
-
-                        Text { // ville
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter
-                            text: ville
-                            clip: true
-                            Layout.preferredWidth: parent.width / 3
-                        }
-
+                        text: prenom_personne + " " + nom_personne + (ville ? ", " + ville : "")
+                        elide: Text.ElideRight
                     }
 
                     MouseArea {
@@ -59,7 +40,7 @@ Item {
                 section.property: "nombre_affectations"
                 section.delegate: Rectangle {
                     width: parent.width
-                    height: 15
+                    height: children[0].height
                     color: "lightsteelblue"
 
                     Text {
@@ -71,12 +52,10 @@ Item {
                         font.bold: true
                     }
                 }
-                clip: true
                 highlight: Rectangle {
                     z: 5
                     color: "blue"
                     opacity: 0.5
-                    height: 13
                 }
                 focus: true
                 Keys.onUpPressed: decrementCurrentIndex()

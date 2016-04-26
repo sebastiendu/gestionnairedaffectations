@@ -7,13 +7,11 @@ import "fonctions.js" as Fonctions
 Item {
     ColumnLayout {
         anchors.fill: parent;
-        spacing: 2;
 
         TextField {
             Layout.fillWidth: true
             onEditingFinished: liste.model.setFilterFixedString(text);
             placeholderText: "Recherche de postes et tours"
-            Layout.preferredHeight: 14
         }
 
         ScrollView { // contient la liste des postes et des tours
@@ -23,17 +21,14 @@ Item {
 
             ListView {
                 id: liste
-                anchors.fill: parent
                 model: app.proxy_de_la_liste_des_tours_de_l_evenement
                 cacheBuffer: 800
                 delegate: Rectangle { // une ligne pour chaque tour du poste
                     property int _id_tour: id_tour
-                    height: 13
-                    z: 1
+                    height: children[0].height
                     width: parent.width
 
-                    RowLayout { // 3 cellules sur la même ligne
-                        spacing: 2
+                    RowLayout {
                         width: parent.width
 
                         Text { // date et heure début et fin
@@ -41,7 +36,7 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             text: Fonctions.dateTour(debut,fin)
                             horizontalAlignment: Text.AlignRight
-                            clip: true
+                            elide: Text.ElideLeft
                             Layout.preferredWidth: parent.width / 3
 
                         }
@@ -76,7 +71,7 @@ Item {
                 section.property: "nom"
                 section.delegate: Rectangle { // une ligne d'entête pour chaque poste
                     width: parent.width
-                    height: 15
+                    height: children[0].height
                     color: "lightsteelblue"
 
                     Text {
@@ -84,12 +79,10 @@ Item {
                         font.bold: true
                     }
                 }
-                clip: true
                 highlight: Rectangle {
                     z: 5
                     color: "blue"
                     opacity: 0.5
-                    height: 13
                 }
                 focus: true
                 Keys.onUpPressed: decrementCurrentIndex()
