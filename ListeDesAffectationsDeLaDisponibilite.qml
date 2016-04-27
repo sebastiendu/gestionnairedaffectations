@@ -18,6 +18,13 @@ Item {
                     property int _id_affectation: id_affectation
                     height: children[0].height
                     width: parent.width
+
+                    ColorAnimation on color {
+                        duration: 1000
+                        from: "red"
+                        to: color
+                        running: app.id_affectation == id_affectation
+                    }
                     RowLayout {
                         width: parent.width
                         ColumnLayout {
@@ -95,6 +102,7 @@ Item {
                 Keys.onUpPressed: decrementCurrentIndex()
                 Keys.onDownPressed: incrementCurrentIndex()
                 onCurrentItemChanged: app.setIdAffectation(currentItem._id_affectation)
+
             }
 
         }
