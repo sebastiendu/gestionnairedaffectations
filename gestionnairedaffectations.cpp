@@ -514,7 +514,8 @@ void GestionnaireDAffectations::setIdPoste(int id) {
     m_fiche_poste->setQuery(query);
 
     qDebug() << "id du poste changé en: " << id;
-    idPosteChanged();
+    emit idPosteChanged();
+
 }
 
 void GestionnaireDAffectations::setIdPosteTour(int id) {
@@ -542,6 +543,9 @@ void GestionnaireDAffectations::setIdAffectation(int id)
     query.bindValue(":id_affectation", m_id_affectation);
     query.exec();
     m_fiche_de_l_affectation->setQuery(query);
+
+    emit id_affectationChanged();
+
     qDebug() << "m_id_affectation changé en" << id;
 }
 
@@ -574,6 +578,8 @@ void GestionnaireDAffectations::setIdTour(int id) {
     query.exec();
     m_fiche_de_l_affectation_de_la_disponibilite_au_tour->setQuery(query);
 
+    emit id_tourChanged();
+
     qDebug() << "m_id_tour changé en" << id;
 }
 
@@ -596,6 +602,8 @@ void GestionnaireDAffectations::setIdDisponibilite(int id) {
     query.exec();
     m_fiche_de_l_affectation_de_la_disponibilite_au_tour->setQuery(query);
 
+    emit id_disponibiliteChanged();
+
     qDebug() << "m_id_disponibilite vaut maintenant" << id;
 }
 
@@ -606,6 +614,9 @@ void GestionnaireDAffectations::setIdPersonne(int id) {
     query.bindValue(":id_evenement", idEvenement());
     query.exec();
     m_fiche_personne->setQuery(query);
+
+    emit idPersonneChanged();
+
     qDebug() << "id_personne: " << id;
 }
 
