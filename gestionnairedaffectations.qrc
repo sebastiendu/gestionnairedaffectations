@@ -11,7 +11,6 @@
         <file>supprimerPoste.qml</file>
         <file>RectangleTitre.qml</file>
         <file>Calendrier.qml</file>
-        <file>test.qml</file>
         <file>Q_AffectationsListe.qml</file>
         <file>Trait.qml</file>
         <file>ProgressBarAffectation.qml</file>
@@ -21,7 +20,6 @@
         <file>Q_AffectationPlan.qml</file>
         <file>Q_SoumettreAffectation.qml</file>
         <file>Q_EmploiDuTemps.qml</file>
-        <file>variables.js</file>
         <file>DatePicker.qml</file>
         <file>Q_SolliciterAnciensBenevoles.qml</file>
         <file>LabelTextField.qml</file>
