@@ -100,16 +100,6 @@ Item {
 
         }
 
-        Button {
-            Layout.alignment: Qt.AlignTop
-            Layout.preferredHeight: 20
-            Layout.fillWidth: true
-            // TODO : visible: app.id_disponibilite defined and (id_disponibilite, id_tour) pas déjà dans affectation
-            text: "+"
-            tooltip: "Affecter ce participant à ce tour"
-            // TODO : ouvrir une dialog pour confirmer le nom du participant et le nom du poste ainsi que début et fin du tour
-            // et permettre de préciser un commentaire
-            onClicked: app.creerAffectation("pas de commentaire");
-        }
     }
+
 }

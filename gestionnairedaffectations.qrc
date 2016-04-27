@@ -30,5 +30,7 @@
         <file>ListeDesAffectationsDuTour.qml</file>
         <file>ListeDesAffectationsDeLaDisponibilite.qml</file>
         <file>traductions/gestionnairedaffectations_eu.qm</file>
+        <file>FicheDUneNouvelleAffectation.qml</file>
+        <file>FicheDeLAffectation.qml</file>
     </qresource>
 </RCC>
