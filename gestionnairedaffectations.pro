@@ -11,21 +11,14 @@ SOURCES += main.cpp \
     toursparpostemodel.cpp \
     sortfilterproxymodel.cpp
 
-RESOURCES += qml.qrc
+RESOURCES += \
+    gestionnairedaffectations.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
 
 # Default rules for deployment.
 include(deployment.pri)
-
-OTHER_FILES += \
-    nouvelevenement.qml \
-    corbeille.png \
-    marqueur.qml \
-    rouge.png \
-    marqueurs/rouge_brillant.png \
-    Ding_Sound_Effect.wav
 
 HEADERS += \
     sqlquerymodel.h \
