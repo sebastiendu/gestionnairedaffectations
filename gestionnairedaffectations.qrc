@@ -3,7 +3,6 @@
         <file>main.qml</file>
         <file>nouvelevenement.qml</file>
         <file>fonctions.js</file>
-        <file>corbeille.png</file>
         <file>personne.png</file>
         <file>marqueur.qml</file>
         <file>ScrollBar.qml</file>
