@@ -22,7 +22,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(Settings* settings MEMBER m_settings NOTIFY settingsChanged)
     Q_PROPERTY(int id_poste MEMBER m_id_poste NOTIFY idPosteChanged)
     Q_PROPERTY(int id_tour MEMBER m_id_tour NOTIFY id_tourChanged)
-    Q_PROPERTY(int id_disponiblite MEMBER m_id_disponibilite NOTIFY id_disponibiliteChanged)
+    Q_PROPERTY(int id_disponibilite MEMBER m_id_disponibilite NOTIFY id_disponibiliteChanged)
     Q_PROPERTY(int id_affectation MEMBER m_id_affectation NOTIFY id_affectationChanged)
     Q_PROPERTY(SqlQueryModel* liste_des_evenements MEMBER m_liste_des_evenements NOTIFY liste_des_evenementsChanged)
     Q_PROPERTY(SqlQueryModel* liste_des_affectations_de_la_disponibilite MEMBER m_liste_des_affectations_de_la_disponibilite NOTIFY liste_des_affectations_de_la_disponibiliteChanged)
