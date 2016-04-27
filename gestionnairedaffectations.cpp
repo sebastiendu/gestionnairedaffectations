@@ -29,7 +29,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     ratioY = -1;
     m_liste_des_evenements = new SqlQueryModel;
     m_postes = new SqlQueryModel;
-    m_affectation = new SqlQueryModel;
+    m_fiche_de_l_affectation = new SqlQueryModel;
     m_fiche_du_tour = new SqlQueryModel;
     m_liste_des_affectations_de_la_disponibilite = new SqlQueryModel;
     m_affectations_du_tour = new SqlQueryModel;
@@ -182,10 +182,10 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_fiche_poste_tour->setQuery(query);
 
-        query.prepare("select * from affectation where id=:id_affectation"); // TODO : utiliser une vue plus complète (affectations ?)
+        query.prepare("select * from affectations where id_affectation=:id_affectation");
         query.bindValue(":id_affectation",m_id_affectation);
         query.exec();
-        m_affectation->setQuery(query);
+        m_fiche_de_l_affectation->setQuery(query);
 
         if (query.prepare("select * from tours_benevole where id_disponibilite = :id_disponibilite order by debut, fin")) {
             query.bindValue(":id_disponibilite", m_id_disponibilite);
@@ -417,10 +417,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_fiche_poste->setQuery(query);
 
-    query = m_affectation->query();
+    query = m_fiche_de_l_affectation->query();
     query.bindValue(0,0);
     query.exec();
-    m_affectation->setQuery(query);
+    m_fiche_de_l_affectation->setQuery(query);
 
     query = m_fiche_du_tour->query(); // FIXME: est-ce vraiment nécessaire ?
     query.bindValue(0,0);
@@ -517,10 +517,10 @@ void GestionnaireDAffectations::setIdAffectation(int id)
 {
     qDebug() << "modification de m_id_affectation en" << id;
     m_id_affectation = id;
-    QSqlQuery query = m_affectation->query();
+    QSqlQuery query = m_fiche_de_l_affectation->query();
     query.bindValue(":id_affectation", m_id_affectation);
     query.exec();
-    m_affectation->setQuery(query);
+    m_fiche_de_l_affectation->setQuery(query);
     qDebug() << "m_id_affectation changé en" << id;
 }
 

@@ -30,7 +30,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* fiche_personne MEMBER m_fiche_personne)
     Q_PROPERTY(SqlQueryModel* fiche_poste MEMBER m_fiche_poste NOTIFY fiche_posteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_poste_tour MEMBER m_fiche_poste_tour NOTIFY fiche_posteTourChanged)
-    Q_PROPERTY(SqlQueryModel* affectation MEMBER m_affectation NOTIFY affectationChanged)
+    Q_PROPERTY(SqlQueryModel* fiche_de_l_affectation MEMBER m_fiche_de_l_affectation NOTIFY fiche_de_l_affectationChanged)
     Q_PROPERTY(SqlQueryModel* fiche_du_tour MEMBER m_fiche_du_tour NOTIFY ficheDuTourChanged)
     Q_PROPERTY(SqlQueryModel* affectations_du_tour MEMBER m_affectations_du_tour NOTIFY affectationsDuTourChanged)
     Q_PROPERTY(SqlQueryModel* lotsDejaCrees MEMBER m_lotsDejaCrees NOTIFY lotDejaCreesChanged)
@@ -152,7 +152,7 @@ signals:
     void fiche_posteChanged();
     void planChanged();
     void planCompletChanged();
-    void affectationChanged();
+    void fiche_de_l_affectationChanged();
     void affectationsDuTourChanged();
     void ficheDuTourChanged();
     void fiche_posteTourChanged();
@@ -195,7 +195,7 @@ private:
     SqlQueryModel *m_fiche_personne; // Est associé à une personne
     SqlQueryModel *m_fiche_poste;
     SqlQueryModel *m_fiche_poste_tour;
-    SqlQueryModel *m_affectation;
+    SqlQueryModel *m_fiche_de_l_affectation;
     SqlQueryModel *m_fiche_du_tour;
     SqlQueryModel *m_affectations_du_tour;
     SqlQueryModel *m_postes_tours_affectations;
