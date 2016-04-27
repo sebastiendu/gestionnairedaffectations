@@ -21,6 +21,9 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(QDateTime heureMax MEMBER m_heureMax NOTIFY heureMaxChanged)
     Q_PROPERTY(Settings* settings MEMBER m_settings NOTIFY settingsChanged)
     Q_PROPERTY(int id_poste MEMBER m_id_poste NOTIFY idPosteChanged)
+    Q_PROPERTY(int id_tour MEMBER m_id_tour NOTIFY id_tourChanged)
+    Q_PROPERTY(int id_disponiblite MEMBER m_id_disponibilite NOTIFY id_disponibiliteChanged)
+    Q_PROPERTY(int id_affectation MEMBER m_id_affectation NOTIFY id_affectationChanged)
     Q_PROPERTY(SqlQueryModel* liste_des_evenements MEMBER m_liste_des_evenements NOTIFY liste_des_evenementsChanged)
     Q_PROPERTY(SqlQueryModel* liste_des_affectations_de_la_disponibilite MEMBER m_liste_des_affectations_de_la_disponibilite NOTIFY liste_des_affectations_de_la_disponibiliteChanged)
     Q_PROPERTY(QSortFilterProxyModel* proxy_de_la_liste_des_disponibilites_de_l_evenement MEMBER m_proxy_de_la_liste_des_disponibilites_de_l_evenement NOTIFY proxy_de_la_liste_des_disponibilites_de_l_evenementChanged)
@@ -30,6 +33,7 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* fiche_personne MEMBER m_fiche_personne)
     Q_PROPERTY(SqlQueryModel* fiche_poste MEMBER m_fiche_poste NOTIFY fiche_posteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_poste_tour MEMBER m_fiche_poste_tour NOTIFY fiche_posteTourChanged)
+    Q_PROPERTY(SqlQueryModel* fiche_de_l_affectation_de_la_disponibilite_au_tour MEMBER m_fiche_de_l_affectation_de_la_disponibilite_au_tour NOTIFY fiche_de_l_affectation_de_la_disponibilite_au_tourChanged)
     Q_PROPERTY(SqlQueryModel* fiche_de_l_affectation MEMBER m_fiche_de_l_affectation NOTIFY fiche_de_l_affectationChanged)
     Q_PROPERTY(SqlQueryModel* fiche_du_tour MEMBER m_fiche_du_tour NOTIFY ficheDuTourChanged)
     Q_PROPERTY(SqlQueryModel* affectations_du_tour MEMBER m_affectations_du_tour NOTIFY affectationsDuTourChanged)
@@ -153,6 +157,7 @@ signals:
     void planChanged();
     void planCompletChanged();
     void fiche_de_l_affectationChanged();
+    void fiche_de_l_affectation_de_la_disponibilite_au_tourChanged();
     void affectationsDuTourChanged();
     void ficheDuTourChanged();
     void fiche_posteTourChanged();
@@ -179,6 +184,9 @@ signals:
     void liste_des_disponibilites_de_l_evenementChanged();
     void liste_des_affectations_de_la_disponibiliteChanged();
     void idPosteChanged();
+    void id_tourChanged();
+    void id_disponibiliteChanged();
+    void id_affectationChanged();
 
 public slots:
     void mettreAJourModelPlan();
@@ -196,6 +204,7 @@ private:
     SqlQueryModel *m_fiche_poste;
     SqlQueryModel *m_fiche_poste_tour;
     SqlQueryModel *m_fiche_de_l_affectation;
+    SqlQueryModel *m_fiche_de_l_affectation_de_la_disponibilite_au_tour;
     SqlQueryModel *m_fiche_du_tour;
     SqlQueryModel *m_affectations_du_tour;
     SqlQueryModel *m_postes_tours_affectations;

@@ -30,6 +30,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_liste_des_evenements = new SqlQueryModel;
     m_postes = new SqlQueryModel;
     m_fiche_de_l_affectation = new SqlQueryModel;
+    m_fiche_de_l_affectation_de_la_disponibilite_au_tour = new SqlQueryModel;
     m_fiche_du_tour = new SqlQueryModel;
     m_liste_des_affectations_de_la_disponibilite = new SqlQueryModel;
     m_affectations_du_tour = new SqlQueryModel;
@@ -186,6 +187,21 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.bindValue(":id_affectation",m_id_affectation);
         query.exec();
         m_fiche_de_l_affectation->setQuery(query);
+
+        if (query.prepare("select * from affectations"
+                      " where id_disponibilite=:id_disponibilite"
+                      " and id_tour=:id_tour")) {
+            query.bindValue(":id_disponibilite", m_id_disponibilite);
+            query.bindValue(":id_tour", m_id_tour);
+            if (query.exec()) {
+                m_fiche_de_l_affectation_de_la_disponibilite_au_tour->setQuery(query);
+            } else {
+                qCritical() << "Echec d'execution de la requête de la fiche de l'affectation de la disponibilite au tour :" << query.lastError();
+            }
+        } else {
+            qCritical() << "Echec de préparation de la requête de la liste de l'affectation de la disponibilite au tour :" << query.lastError();
+        }
+
 
         if (query.prepare("select * from tours_benevole where id_disponibilite = :id_disponibilite order by debut, fin")) {
             query.bindValue(":id_disponibilite", m_id_disponibilite);
@@ -422,6 +438,11 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec();
     m_fiche_de_l_affectation->setQuery(query);
 
+    query = m_fiche_de_l_affectation_de_la_disponibilite_au_tour->query();
+    query.bindValue(0,0);
+    query.exec();
+    m_fiche_de_l_affectation_de_la_disponibilite_au_tour->setQuery(query);
+
     query = m_fiche_du_tour->query(); // FIXME: est-ce vraiment nécessaire ?
     query.bindValue(0,0);
     query.exec();
@@ -548,6 +569,11 @@ void GestionnaireDAffectations::setIdTour(int id) {
     query.exec();
     m_affectations_du_tour->setQuery(query);
 
+    query = m_fiche_de_l_affectation_de_la_disponibilite_au_tour->query();
+    query.bindValue(":id_tour", m_id_tour);
+    query.exec();
+    m_fiche_de_l_affectation_de_la_disponibilite_au_tour->setQuery(query);
+
     qDebug() << "m_id_tour changé en" << id;
 }
 
@@ -564,6 +590,11 @@ void GestionnaireDAffectations::setIdDisponibilite(int id) {
     query.bindValue(":id_disponibilite", m_id_disponibilite);
     query.exec();
     m_liste_des_affectations_de_la_disponibilite->setQuery(query);
+
+    query = m_fiche_de_l_affectation_de_la_disponibilite_au_tour->query();
+    query.bindValue(":id_disponibilite", m_id_disponibilite);
+    query.exec();
+    m_fiche_de_l_affectation_de_la_disponibilite_au_tour->setQuery(query);
 
     qDebug() << "m_id_disponibilite vaut maintenant" << id;
 }
