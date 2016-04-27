@@ -24,6 +24,7 @@ Item {
                         from: "red"
                         to: color
                         running: app.id_affectation == id_affectation
+                        alwaysRunToEnd: true
                     }
 
                     RowLayout {
