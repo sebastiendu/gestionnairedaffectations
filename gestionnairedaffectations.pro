@@ -35,3 +35,12 @@ HEADERS += \
     abstracttablemodel.h \
     toursparpostemodel.h \
     sortfilterproxymodel.h
+
+TRANSLATIONS = \
+    traductions/gestionnairedaffectations_eu.ts
+
+lupdate_only {
+SOURCES += \
+    *.qml \
+    *.js
+}
