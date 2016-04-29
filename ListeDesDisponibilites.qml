@@ -9,7 +9,7 @@ Item { // TODO : plusieurs états : "selon le nombre d'affectations (les sans-to
         TextField {
             Layout.fillWidth: true
             onEditingFinished: liste.model.setFilterFixedString(text);
-            placeholderText: "Recherche de participants disponibles"
+            placeholderText: qsTr("Recherche de participants disponibles")
         }
 
         ScrollView { // contient la liste des disponibles
@@ -28,7 +28,10 @@ Item { // TODO : plusieurs états : "selon le nombre d'affectations (les sans-to
 
                     Text {
                         width: parent.width
-                        text: prenom_personne + " " + nom_personne + (ville ? ", " + ville : "")
+                        text: qsTr("%1 %2%3")
+                        .arg(prenom_personne)
+                        .arg(nom_personne)
+                        .arg(ville ? qsTr(", %1").arg(ville) : "")
                         elide: Text.ElideRight
                     }
 
@@ -44,16 +47,17 @@ Item { // TODO : plusieurs états : "selon le nombre d'affectations (les sans-to
                     color: "lightsteelblue"
 
                     Text {
-                        text: "Participants disponibles " + (
-                                  section == 0 ? "sans affectation" :
-                                                 section == 1 ? "déjà affectés à un tour de travail" :
-                                                                "déjà affectés à " + section + " tours de travail"
-                                  )
+                        text: section == 0
+                              ? qsTr("Participants disponibles sans affectation")
+                              : section == 1
+                                ? qsTr("Participants déjà affectés à un tour de travail")
+                                : qsTr("Participants déjà affectés à %1 tours de travail").arg(section)
                         font.bold: true
                     }
                 }
                 highlight: Rectangle {
-                    anchors.fill: liste.currentItem
+                    width: liste.currentItem.width
+                    height: liste.currentItem.height
                     z: 5
                     color: "blue"
                     opacity: 0.5

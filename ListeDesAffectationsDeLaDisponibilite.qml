@@ -31,29 +31,39 @@ Item {
                         ColumnLayout {
                             spacing: 0
                             Layout.fillWidth: true
-                            RowLayout {
-                                width: parent.width
 
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: nom_poste + " de " + heure_debut + " à " + heure_fin + " (" + duree + ")"
-                                    font.bold: true
-                                    elide: Text.ElideRight
-                                    font.strikeout: statut_affectation == "rejetee" || statut_affectation == "annulee"
-                                }
+                            Text {
+                                Layout.fillWidth: true
+                                text: qsTr("%1 de %2 à %3 (%4)")
+                                .arg(nom_poste)
+                                .arg(debut.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"}))
+                                .arg(fin.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"}))
+                                .arg((new Date(0,0,0,0,0,0,fin-debut)).toLocaleTimeString(null, {hour: "numeric", minute: "2-digit"}))
+                                font.bold: true
+                                elide: Text.ElideRight
+                                font.strikeout: statut_affectation == "rejetee" || statut_affectation == "annulee"
+                                color: (statut_affectation == "acceptee" || statut_affectation ==  "validee")
+                                       ? "green"
+                                       : (statut_affectation == "rejetee" || statut_affectation=="annulee")
+                                         ? "red"
+                                         : "orange"
+                            }
 
-                                Text {
-                                    Layout.alignment: Qt.AlignHCenter
-                                    text: "Affectation " + statut_affectation +
-                                          (statut_affectation == "proposee"
-                                           ? " " + date_et_heure_proposee // TODO : formater la date et l'heure
-                                           : "")
-                                    color: (statut_affectation == "acceptee" || statut_affectation ==  "validee")
-                                           ? "green"
-                                           : (statut_affectation == "rejetee" || statut_affectation=="annulee")
-                                             ? "red"
-                                             : "orange"
-                                }
+                            Text {
+                                Layout.fillWidth: true;
+                                Layout.alignment: Qt.AlignHCenter
+                                text: statut_affectation == "possible"
+                                      ? qsTr("Affectation possible")
+                                      : statut_affectation == "proposee"
+                                        ? qsTr("Affectation proposée le %1").arg(date_et_heure_proposee.toLocaleDateString())
+                                        : statut_affectation == "validee"
+                                          ? qsTr("Affectation validée")
+                                          : statut_affectation == "acceptee"
+                                            ? qsTr("Affectation acceptée")
+                                            : statut_affectation == "refusee"
+                                              ? qsTr("Affectation refusée")
+                                              : qsTr("Affectation annulée")
+                                font.pointSize: 7
                             }
 
                             Text {
@@ -63,23 +73,12 @@ Item {
                                 horizontalAlignment: Text.AlignRight
                                 elide: Text.ElideRight
                                 wrapMode: Text.Wrap
+                                font.pointSize: 7
                             }
 
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: liste.currentIndex = index
-                            }
-                        }
-                        Button {
-                            enabled: index == liste.currentIndex && statut_affectation != "rejetee" && statut_affectation != "annulee"
-                            Layout.alignment: Qt.AlignRight
-                            text: "-"
-                            tooltip: "Annuler cette affectation"
-                            onClicked: {
-                                app.setIdAffectation(id_affectation); // par sécurité
-                                // TODO : ouvrir une dialog pour confirmer le nom du participant et le nom du poste ainsi que début et fin du tour
-                                // et permettre de modifier le commentaire
-                                app.annulerAffectation("pas de commentaire");
                             }
                         }
                     }

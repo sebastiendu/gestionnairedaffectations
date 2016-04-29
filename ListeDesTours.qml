@@ -9,7 +9,7 @@ Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "
         TextField {
             Layout.fillWidth: true
             onEditingFinished: liste.model.setFilterFixedString(text);
-            placeholderText: "Recherche de postes et tours"
+            placeholderText: qsTr("Recherche de postes et tours")
         }
 
         ScrollView { // contient la liste des postes et des tours
@@ -32,10 +32,11 @@ Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "
                         Text { // date et heure début et fin
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignHCenter
-                            text: debut.toLocaleDateString()
-                                  + " de " + debut.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"})
-                                  + " à " + fin.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"})
-                                  + " (" + (new Date(0,0,0,0,0,0,fin-debut)).toLocaleTimeString(null, {hour: "numeric", minute: "2-digit"}) + ")"
+                            text: qsTr("%1 de %2 à %3 (%4)")
+                            .arg(debut.toLocaleDateString())
+                            .arg(debut.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"}))
+                            .arg(fin.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"}))
+                            .arg((new Date(0,0,0,0,0,0,fin-debut)).toLocaleTimeString(null, {hour: "numeric", minute: "2-digit"}))
                             horizontalAlignment: Text.AlignRight
                             elide: Text.ElideLeft
                         }
@@ -69,7 +70,8 @@ Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "
                     }
                 }
                 highlight: Rectangle {
-                    anchors.fill: liste.currentItem
+                    width: liste.currentItem.width
+                    height: liste.currentItem.height
                     z: 5
                     color: "blue"
                     opacity: 0.5

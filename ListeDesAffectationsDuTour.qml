@@ -38,10 +38,35 @@ Item {
 
                             Text {
                                 Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignHCenter
-                                text: prenom_personne + " " + nom_personne + (ville ? ", " + ville : "")
+                                text: qsTr("%1 %2%3")
+                                .arg(prenom_personne)
+                                .arg(nom_personne)
+                                .arg(ville ? qsTr(", %1").arg(ville) : "")
+                                font.bold: true
                                 elide: Text.ElideRight
                                 font.strikeout: statut_affectation == "rejetee" || statut_affectation == "annulee"
+                                color: (statut_affectation == "acceptee" || statut_affectation ==  "validee")
+                                       ? "green"
+                                       : (statut_affectation == "rejetee" || statut_affectation=="annulee")
+                                         ? "red"
+                                         : "orange"
+                            }
+
+                            Text {
+                                Layout.fillWidth: true;
+                                Layout.alignment: Qt.AlignHCenter
+                                text: statut_affectation == "possible"
+                                      ? qsTr("Affectation possible")
+                                      : statut_affectation == "proposee"
+                                        ? qsTr("Affectation proposée le %1").arg(date_et_heure_proposee.toLocaleDateString())
+                                        : statut_affectation == "validee"
+                                          ? qsTr("Affectation validée")
+                                          : statut_affectation == "acceptee"
+                                            ? qsTr("Affectation acceptée")
+                                            : statut_affectation == "refusee"
+                                              ? qsTr("Affectation refusée")
+                                              : qsTr("Affectation annulée")
+                                font.pointSize: 7
                             }
 
                             Text {
@@ -51,11 +76,7 @@ Item {
                                 horizontalAlignment: Text.AlignRight
                                 elide: Text.ElideRight
                                 wrapMode: Text.Wrap
-                            }
-
-                            Text {
-                                visible: statut_affectation == "proposee"
-                                text: qsTr("Proposée le %1").arg(date_et_heure_proposee.toLocaleDateString())
+                                font.pointSize: 7
                             }
 
                             MouseArea {
@@ -63,21 +84,7 @@ Item {
                                 onClicked: liste.currentIndex = index
                             }
                         }
-                        Button {
-                            enabled: index == liste.currentIndex && statut_affectation != "rejetee" && statut_affectation != "annulee"
-                            Layout.alignment: Qt.AlignRight
-                            text: "-"
-                            tooltip: "Annuler cette affectation"
-                            onClicked: {
-                                app.setIdAffectation(id_affectation); // par sécurité
-                                // TODO : ouvrir une dialog pour confirmer le nom du participant et le nom du poste ainsi que début et fin du tour
-                                // et permettre de modifier le commentaire
-                                app.annulerAffectation("pas de commentaire");
-                            }
-
-                        }
                     }
-
 
                 }
                 section.property: "statut_affectation"
@@ -87,13 +94,18 @@ Item {
                     color: "lightsteelblue"
 
                     Text {
-                        text: "Affectations " + section + "s"
+                        text: section == "possible"
+                              ? qsTr("Affectations possibles")
+                              : section == "proposee"
+                                ? qsTr("Affectations proposées")
+                                : section == "validee"
+                                  ? qsTr("Affectations validées")
+                                  : section == "acceptee"
+                                    ? qsTr("Affectations acceptées")
+                                    : section == "refusee"
+                                      ? qsTr("Affectations refusées")
+                                      : qsTr("Affectations annulées")
                         font.bold: true
-                        color: (section == "acceptee" || section ==  "validee")
-                               ? "green"
-                               : (section == "rejetee" || section=="annulee")
-                                 ? "red"
-                                 : "orange"
                     }
                 }
                 highlight: Rectangle {
