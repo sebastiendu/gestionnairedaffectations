@@ -53,10 +53,13 @@ Item { // TODO : plusieurs états : "selon le nombre d'affectations (les sans-to
                     }
                 }
                 highlight: Rectangle {
+                    anchors.fill: liste.currentItem
                     z: 5
                     color: "blue"
                     opacity: 0.5
+                    y: liste.currentItem.y
                 }
+                highlightFollowsCurrentItem: false
                 focus: true
                 Keys.onUpPressed: decrementCurrentIndex()
                 Keys.onDownPressed: incrementCurrentIndex()

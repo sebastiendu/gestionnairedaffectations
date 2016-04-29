@@ -69,10 +69,13 @@ Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "
                     }
                 }
                 highlight: Rectangle {
+                    anchors.fill: liste.currentItem
                     z: 5
                     color: "blue"
                     opacity: 0.5
+                    y: liste.currentItem.y
                 }
+                highlightFollowsCurrentItem: false
                 focus: true
                 Keys.onUpPressed: decrementCurrentIndex()
                 Keys.onDownPressed: incrementCurrentIndex()
