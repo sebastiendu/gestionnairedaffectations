@@ -189,8 +189,8 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_fiche_de_l_affectation->setQuery(query);
 
         if (query.prepare("select * from affectations"
-                      " where id_disponibilite=:id_disponibilite"
-                      " and id_tour=:id_tour")) {
+                          " where id_disponibilite=:id_disponibilite"
+                          " and id_tour=:id_tour")) {
             query.bindValue(":id_disponibilite", m_id_disponibilite);
             query.bindValue(":id_tour", m_id_tour);
             if (query.exec()) {
@@ -717,10 +717,13 @@ void GestionnaireDAffectations::mettreAJourModelPlan(){
     m_postes = new SqlQueryModel;
     m_postes->setQuery(query);
 
+
     m_plan = new QSortFilterProxyModel();
     m_plan->setSourceModel(m_postes);
     m_plan->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_plan->setFilterKeyColumn(-1);
+
+    emit planChanged();
 
     qDebug() << "Nombre de colonne dans plan:" << m_plan->rowCount();
     qDebug() << m_plan->index(1,1);
