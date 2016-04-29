@@ -614,10 +614,6 @@ void GestionnaireDAffectations::setIdPersonne(int id) {
     query.bindValue(":id_evenement", idEvenement());
     query.exec();
     m_fiche_personne->setQuery(query);
-
-    emit idPersonneChanged();
-
-    qDebug() << "id_personne: " << id;
 }
 
 
