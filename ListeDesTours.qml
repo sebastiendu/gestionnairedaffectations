@@ -2,8 +2,6 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.2
 
-import "fonctions.js" as Fonctions
-
 Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "par date de debut", "par taux de remplissage"
     ColumnLayout {
         anchors.fill: parent;
@@ -34,19 +32,24 @@ Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "
                         Text { // date et heure début et fin
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignHCenter
-                            text: Fonctions.dateTour(debut,fin)
+                            text: debut.toLocaleDateString()
+                                  + " de " + debut.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"})
+                                  + " à " + fin.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"})
+                                  + " (" + (new Date(0,0,0,0,0,0,fin-debut)).toLocaleTimeString(null, {hour: "numeric", minute: "2-digit"}) + ")"
                             horizontalAlignment: Text.AlignRight
                             elide: Text.ElideLeft
                         }
 
                         ProgressBarAffectation {
                             Layout.fillHeight: true
-                            valeurmin: min
-                            valeurmax: max
-                            valeur: nombre_affectations_validees_ou_acceptees + nombre_affectations_proposees
-                            certain: nombre_affectations_proposees == 0
-                            Layout.preferredWidth: parent.width / 6
+                            Layout.preferredWidth: parent.width / 5
+                            acceptees: nombre_affectations_validees_ou_acceptees
+                            proposees: nombre_affectations_proposees
+                            possibles: nombre_affectations_possibles
+                            minimum: min
+                            maximum: max
                         }
+
                     }
 
                     MouseArea {
