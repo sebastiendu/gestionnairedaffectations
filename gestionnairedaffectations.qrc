@@ -32,5 +32,8 @@
         <file>traductions/gestionnairedaffectations_eu.qm</file>
         <file>FicheDUneNouvelleAffectation.qml</file>
         <file>FicheDeLAffectation.qml</file>
+        <file>FicheDuPoste.qml</file>
+        <file>ListeDesToursDuMoment.qml</file>
+        <file>PlanDesPostesDansLeTemps.qml</file>
     </qresource>
 </RCC>
