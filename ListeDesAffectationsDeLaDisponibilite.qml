@@ -84,13 +84,13 @@ Item {
                         }
                     }
                 }
-                section.property: "date_debut"
+                section.property: "debut"
                 section.delegate: Rectangle {
                     width: parent.width
                     height: children[0].height
                     color: "lightsteelblue"
                     Text {
-                        text: section // FIXME : date au format long
+                        text: (new Date(section)).toLocaleDateString()
                         font.bold: true
                     }
                 }

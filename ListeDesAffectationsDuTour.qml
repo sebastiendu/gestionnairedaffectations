@@ -55,7 +55,7 @@ Item {
 
                             Text {
                                 visible: statut_affectation == "proposee"
-                                text: "Proposée " + date_et_heure_proposee // TODO : formater la date et l'heure
+                                text: qsTr("Proposée le %1").arg(date_et_heure_proposee.toLocaleDateString())
                             }
 
                             MouseArea {
