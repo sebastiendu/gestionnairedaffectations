@@ -19,6 +19,8 @@ public:
     Q_INVOKABLE QVariant getDataFromModel(int ligne, QString colonne);
 
     void reload();
+    Q_INVOKABLE int rowCount();
+
 
 signals:
 

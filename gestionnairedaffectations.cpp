@@ -52,6 +52,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_personnes_doublons = new SqlQueryModel;
     m_responsables = new SqlQueryModel;
     m_sequence_emploi_du_temps = new SqlQueryModel;
+    m_remplissage_par_heure = new SqlQueryModel;
 
     if(!m_settings->contains("database/databaseName")) {
         if(!m_settings->contains("database/hostName")) {
@@ -243,6 +244,19 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
             }
         } else {
             qCritical() << "Echec de préparation de la requête des affectations du tour :" << query.lastError();
+        }
+
+        if (query.prepare("select * from remplissage_par_heure"
+                          " where id_evenement = :id_evenement"
+                          " order by heure")) {
+            query.bindValue(":id_evenement", idEvenement());
+            if (query.exec()) {
+                m_remplissage_par_heure->setQuery(query);
+            } else {
+                qCritical() << "Echec d'execution de la requête du remplissage par heure :" << query.lastError();
+            }
+        } else {
+            qCritical() << "Echec de préparation de la requête du remplissage par heure :" << query.lastError();
         }
 
         query.prepare("select * from poste where id_evenement= :evt;");

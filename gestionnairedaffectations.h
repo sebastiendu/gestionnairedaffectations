@@ -54,6 +54,8 @@ class GestionnaireDAffectations : public QGuiApplication
 
     Q_PROPERTY(SqlQueryModel* sequence_emploi_du_temps MEMBER m_sequence_emploi_du_temps NOTIFY sequenceEmploiDuTempsChanged)
 
+    Q_PROPERTY(SqlQueryModel* remplissage_par_heure MEMBER m_remplissage_par_heure NOTIFY remplissage_par_heureChanged)
+
 public:
     GestionnaireDAffectations(int & argc, char ** argv);
     int idEvenement();
@@ -187,6 +189,7 @@ signals:
     void id_tourChanged();
     void id_disponibiliteChanged();
     void id_affectationChanged();
+    void remplissage_par_heureChanged();
 
 public slots:
     void mettreAJourModelPlan();
@@ -209,6 +212,7 @@ private:
     SqlQueryModel *m_affectations_du_tour;
     SqlQueryModel *m_postes_tours_affectations;
     SqlQueryModel *m_lotsDejaCrees;
+    SqlQueryModel *m_remplissage_par_heure;
     int m_id_disponibilite;
     int m_id_poste;
     int m_id_tour;

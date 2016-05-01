@@ -31,25 +31,38 @@ Item {
 
                     model: app.planCourant
                     delegate: Rectangle { // le marqueur de position du poste
-                        // TODO : revoir ces cercles de couleur pour représenter les mêmes informations que l'indicateur de remplissage de ListeDesTours
                         height: cadre.cote * 0.07
                         width: height
-                        radius: height / 2
-                        border.width: 5
-                        border.color: nombre_affectations_validees_ou_acceptees > max
-                                      ? "red"
-                                      : nombre_affectations_validees_ou_acceptees < min
-                                        ? "grey"
-                                        : nombre_affectations_proposees > 0
-                                          ? "orange"
-                                          : "green"
-
                         y: posy * cadre.cote - height / 2
                         x: posx * cadre.cote - width / 2
+                        Rectangle {
+                            width: parent.height
+                            height: parent.width
+                            transform: Rotation { angle: -90; origin { x: height/2; y: height/2 } }
+
+                            ProgressBarAffectation {
+                                anchors.fill: parent
+                                acceptees: nombre_affectations_validees_ou_acceptees
+                                proposees: nombre_affectations_proposees
+                                possibles: nombre_affectations_possibles
+                                minimum: min
+                                maximum: max
+                            }
+                        }
+                        Text {
+                            anchors.fill: parent
+
+                            text: nom
+                            font.pixelSize: width/4
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.Wrap
+                            maximumLineCount: 4
+                            elide: Text.ElideRight
+                        }
 
                         MouseArea {
                             anchors.fill: parent
-
                             onClicked: app.setIdTour(id_tour)
                         }
                     }
@@ -57,39 +70,54 @@ Item {
             }
         }
 
-        Slider { // La ligne du temps
+        Text { // Date et heure selectionnées
             Layout.fillWidth: true; Layout.preferredHeight: 20
+            text: qsTr("Le %1 à %2")
+            .arg(app.heure.toLocaleDateString())
+            .arg(app.heure.toLocaleTimeString(null, { hour: "numeric", minute: "2-digit" }))
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+        }
 
-            minimumValue: app.heureMin.getTime() // TODO : Arrondir à l'heure juste
-            maximumValue: app.heureMax.getTime()
-            stepSize: 3600000
-            updateValueWhileDragging: true // TODO : evaluer si l'on a un accès rapide à la base
+
+        Slider { // La ligne du temps
+            Layout.fillWidth: true;
+            Layout.preferredHeight: 50
+            Layout.minimumHeight: 10
+
+            maximumValue: app.remplissage_par_heure.rowCount() - 1
+            stepSize: 1
             onValueChanged: {
-                app.heure = new Date(value);
+                app.heure = app.remplissage_par_heure.getDataFromModel(value, "heure");
                 app.setIdPoste(-1); // aucun poste selectionné
                 app.setIdTour(-1); // aucun tour selectionné
             }
-
             style: SliderStyle {
-                groove: Rectangle { // TODO : remplacer ça par autant de rectangles que de périodes de temps et montrer le taux de remplissage avec la couleur
-                    implicitWidth: 200; implicitHeight: 8
-                    color: "green"
-                }
-                handle: Rectangle {
-                    anchors.centerIn: parent
-                    implicitWidth: 55; implicitHeight: 34
+                groove: RowLayout {
+                    spacing: 0
+                    height: parent.parent.height
 
-                    color: control.pressed ? "white" : "lightgray"
-                    border { color: "gray"; width: 2 }
-                    radius: 12
+                    Repeater {
+                        model: app.remplissage_par_heure
 
-                    Rectangle { // la date et l'heure selectionnées
-                        anchors.topMargin: 10
-                        anchors.fill:parent
-                        color: "transparent"
-                        Text {
-                            text: app.heure.toLocaleTimeString(null, { hours: "numeric", minutes: "2-digit" })
-                            anchors.horizontalCenter: parent.horizontalCenter
+                        Rectangle {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
+
+                            Rectangle {
+                                width: parent.height
+                                height: parent.width
+                                transform: Rotation { angle: -90; origin { x: height/2; y: height/2 } }
+
+                                ProgressBarAffectation {
+                                    anchors.fill: parent
+                                    acceptees: nombre_affectations_validees_ou_acceptees
+                                    proposees: nombre_affectations_proposees
+                                    possibles: nombre_affectations_possibles
+                                    minimum: min
+                                    maximum: max
+                                }
+                            }
                         }
                     }
                 }

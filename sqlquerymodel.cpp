@@ -56,3 +56,8 @@ void SqlQueryModel::reload()
     // FIXME : il doit y avoir un moyen plus habile
     setQuery(query());
 }
+
+int SqlQueryModel::rowCount()
+{
+    return QSqlQueryModel::rowCount();
+}
