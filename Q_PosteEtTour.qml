@@ -1,303 +1,76 @@
-import QtQuick 2.0
 import QtQuick 2.3
-import QtQuick.Window 2.2
-import QtQuick.Controls 1.2
-//import fr.ldd.qml 1.0
-import QtWebKit 3.0
-import QtGraphicalEffects 1.0
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.1
 
 import "fonctions.js" as Fonctions
 
 Item {
 
-    anchors.fill: parent
+    RowLayout {
+        anchors.fill: parent
 
-    Rectangle {
-        id: contenu
-        anchors.fill : parent
+        PlanDeLEvenement {
+            Layout.fillWidth: true; Layout.fillHeight: true
+            Layout.preferredWidth: cote
+            Layout.preferredHeight: cote
 
-        color: "white"
-        Image {
-            id: planPosteEtTours
-            width: 3* (parent.width / 5)
-
-            sourceSize.height: 1000
-            sourceSize.width: 1000
-            fillMode: Image.PreserveAspectFit
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 85
-            anchors.left: parent.left
-            anchors.leftMargin:10
-            source: "image://plan/" + app.idEvenement
-            onStatusChanged: console.log(planPosteEtTours.anchors.right)
-            Connections {
-                target: app
-                onPlanMisAJour: {
-                    planPosteEtTours.source ="image://plan/" + app.idEvenement + "/" + new Date().getMilliseconds()
-                    console.log("Plan mis à jour")
+            modeleListeDesPostes: app.liste_des_postes_de_l_evenement
+            fonctionAjouterPoste: function (x, y) { // FIXME
+                app.setRatioX(x);
+                app.setRatioY(y);
+                Fonctions.afficherFenetreNouveauPoste();
+            }
+            fonctionDeplacerPoste: function (id_poste, x, y) { // FIXME
+                app.setIdPoste(id_poste);
+                app.modifierPositionPoste(x, y);
+            }
+            fonctionSupprimerPoste: function (id_poste) { // FIXME
+                app.setIdPoste(id_poste);
+                if (app.getNombreDeTours() > 0 || app.getNombreDAffectations() > 0) {
+                    Fonctions.afficherFenetreSupprimerPoste(id_poste);
+                }
+                else {
+                    app.supprimerPoste(id_poste);
                 }
             }
-
-            Rectangle {
-
-                id: rectangleBordurePlan
-                color: "transparent"
-
-                // ICI ON MET LE PLAN SUR ECOUTE
-                Connections {
-                    target: app
-                    onPlanCompletChanged: {
-                        repeaterPostesEtTours.model = app.planComplet;
-                        //imageMarqueurPostesEtTours.border.color = (app.id_poste == id) ? "#3498db" : "red";
-                        console.log("PlanCompletChanged");
-                    }
-                }
-
-                x: (parent.width - width)/2
-                y: (parent.height - height)/2
-                height: Fonctions.min(parent.width, parent.height)
-                width: Fonctions.min(parent.width, parent.height)
-
-                MouseArea {
-                    id: mouseAreaPlan
-                    anchors.fill: parent
-                    onClicked: {
-
-                        app.setRatioX(mouse.x/parent.width)
-                        app.setRatioY(mouse.y/parent.height)
-
-                        Fonctions.afficherFenetreNouveauPoste();
-
-
-                    }
-
-                    cursorShape: Qt.CrossCursor
-                }
-
-                Repeater {
-                    id: repeaterPostesEtTours
-                    objectName: "repeaterPostesEtTours"
-                    model: app.planComplet
-
-                    delegate: Rectangle {
-                        z:1
-
-                        Rectangle {
-                            id: nomBulle
-                            color: "white"
-                            height: _nomDuPoste.height+3
-                            width: _nomDuPoste.width+5
-                            border.color: "black"
-                            border.width: 1
-                            y: imageMarqueurPostesEtTours.y + _nomDuPoste.height -1
-                            x: imageMarqueurPostesEtTours.x + imageMarqueurPostesEtTours.width/2 - (_nomDuPoste.width/2) -3
-                            radius: 3
-                            z:150
-                            Text {
-                                id: _nomDuPoste
-                                //text: nom.size < 10 ? (" "+nom+" ") : (" "+nom.substring(0,9) + "… ") // bug … ?
-                                text: " "+nom+" "
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
-
-                            }
-                        }
-
-                        Rectangle {
-                            id: imageMarqueurPostesEtTours
-
-                            // Formule compliquée pour placer le marqueur correctement en prenant en compte la taille de l'écran
-                            x: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? ((posx * rectangleBordurePlan.height)+ ((rectangleBordurePlan.width-rectangleBordurePlan.height)/2) -imageMarqueurPostesEtTours.width/2) : ((posx * rectangleBordurePlan.width) -imageMarqueurPostesEtTours.width/2)
-                            y: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? ((posy * rectangleBordurePlan.height)-imageMarqueurPostesEtTours.height/2) : ((posy * rectangleBordurePlan.width)+ ((rectangleBordurePlan.height-rectangleBordurePlan.width)/2)  -imageMarqueurPostesEtTours.height/2)
-
-                            // Fonction compliqué pour adapter la taille du marqueur à la taille de l'écran
-                            height: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? (70/1000) * rectangleBordurePlan.height : (70/1000) * rectangleBordurePlan.width
-                            width: (rectangleBordurePlan.width > rectangleBordurePlan.height) ? (70/1000) * rectangleBordurePlan.width : (70/1000) * rectangleBordurePlan.width
-
-                            radius: 100
-                            border.width: 4
-                            border.color: "red"
-
-
-                             Connections {
-                                target: app
-
-                                onIdPosteChanged: {
-
-                                    imageMarqueurPostesEtTours.border.color = (app.id_poste == id) ? "#3498db" : "red"
-                                    console.log("maj couleur")
-                                }
-
-                            }
-
-                            z:1
-
-                            MouseArea {
-                                id: mouseArea
-                                anchors.fill: imageMarqueurPostesEtTours
-                                acceptedButtons: Qt.RightButton | Qt.LeftButton
-                                drag.target: parent
-                                cursorShape: Qt.PointingHandCursor
-                                drag.maximumX: rectangleBordurePlan.width
-                                drag.minimumX: 0
-                                drag.maximumY: rectangleBordurePlan.height
-                                drag.minimumY: 0
-                                z:100
-
-                                onReleased: {
-
-
-                                    app.setRatioX((imageMarqueurPostesEtTours.x/rectangleBordurePlan.width)+(imageMarqueurPostesEtTours.width/rectangleBordurePlan.width)/2)
-                                    app.setRatioY((imageMarqueurPostesEtTours.y/rectangleBordurePlan.height)+(imageMarqueurPostesEtTours.height/rectangleBordurePlan.height)/2)
-                                    app.modifierPositionPoste(posx,posy);
-                                    //imageMarqueurPostesEtTours.border.color = "red";
-                                    imageMarqueurPostesEtTours.border.width= 4
-
-                                }
-
-                                onPressed: {
-                                    app.setIdPoste(id);
-                                    //imageMarqueurPostesEtTours.border.color = "#3498db";
-                                    imageMarqueurPostesEtTours.border.width= 5
-
-                                    imageMarqueurPostesEtTours.z = 149;
-
-                                    if(mouse.button == Qt.RightButton)
-                                    {
-                                        contextMenu.popup();
-
-                                    }
-
-                                    if(mouse.button == Qt.LeftButton)
-                                    {
-                                        console.log(index)
-                                        app.setIdPosteTour(id);
-                                        app.setResponsables();
-
-                                        descriptionPoste.visible = true;
-                                        _nomPoste.text = app.planComplet.getDataFromModel(index,"nom")
-                                        _descriptionPoste.text = app.planComplet.getDataFromModel(index,"description");
-                                        tableauResponsable.model = app.responsables;
-                                        tableauResponsable.resizeColumnsToContents();
-                                        tableauTours.model = app.fiche_poste_tour;
-                                        imageMarqueurPostesEtTours.z = 149;
-                                        nomBulle.z = 150;
-
-                                    }
-                                }
-
-
-
-                            }
-                            Menu {
-                                id: contextMenu
-
-                                MenuItem {
-                                    text: qsTr("Supprimer")
-                                    onTriggered: {
-                                        app.rafraichirStatistiquePoste(id,nom);
-                                        if (app.getNombreDeTours() != 0 || app.getNombreDAffectations() !=0)
-                                        {
-                                            Fonctions.afficherFenetreSupprimerPoste(id);
-                                        }
-                                        else
-                                        {
-                                            app.supprimerPoste(id);
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-
-
-
-
-                    }
-                }
-
-            }
-
-
-
         }
 
-        Rectangle {
+        Rectangle { // Bloc de définition du poste et de ses tours, invisible par défaut
             id: descriptionPoste
-            width: 2* (parent.width / 5)
-            color:"white"
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 10
-            anchors.right: parent.right
-            anchors.rightMargin:10
             visible: false
-            // border.color: "black"
-            // border.width: 1
+            Layout.fillWidth: true; Layout.fillHeight: true
 
             Label {
                 id : _nom
                 text: "Poste:"
-                anchors.top: parent.top
-                anchors.left: parent.left
-
-                anchors.margins: 10
             }
 
             TextField {
                 id: _nomPoste
                 placeholderText: "Nom du poste"
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.topMargin:5
-                anchors.left: _descriptionPoste.left
                 onEditingFinished: {
                     console.log("Edition finie, je suis appellé!!");
                     app.modifierNomPoste(_nomPoste.text)
                 }
-
             }
 
             Label {
                 id : _description
                 text: "Description:"
-                anchors.top: _nom.bottom
-                anchors.left: parent.left
-                anchors.margins: 10
             }
 
             TextArea { // TODO : Retour à la ligne automatique
                 id: _descriptionPoste
-                anchors.top: _nomPoste.bottom
-                anchors.topMargin:5
-                anchors.left: _description.right
-                anchors.right: parent.right
-                anchors.rightMargin:10
-                anchors.leftMargin: 10
-                height:parent.height/6
-
             }
 
             Button {
                 id: _btnSauvegarderChangements
-                anchors.top: _descriptionPoste.bottom
-                anchors.topMargin: 5
-                anchors.right: parent.right
-                anchors.rightMargin: 15
-                //anchors.horizontalCenter: parent.horizontalCenter
                 text: "Enregistrer"
                 onClicked: {
                     app.modifierNomPoste(_nomPoste.text)
                     app.modifierDescriptionPoste(_descriptionPoste.text)
                     app.rechargerPlan();
                 }
-
-
             }
 
             RectangleTitre {
@@ -305,21 +78,11 @@ Item {
                 id: blockResponsable
                 couleur : "#bdc3c7"
                 titre: "Responsable"
-                height: tableauResponsable.height + ajouterResponsable.height + tableauResponsable.anchors.margins + 5
-                anchors.top: _btnSauvegarderChangements.bottom
-                anchors.topMargin: 10
-                width:parent.width *0.95
-                anchors.horizontalCenter: parent.horizontalCenter
 
-                TableView {
-
-
+                TableView { // liste des responsables
                     id: tableauResponsable
-                    height: contenu.height/6
-                    anchors.top: parent.top
-                    anchors.margins: 10
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+
+                    model: app.responsables
                     sortIndicatorVisible: true
 
                     TableViewColumn{ role: "id_personne"  ; title: "id" ;  visible: true}
@@ -330,131 +93,84 @@ Item {
 
                     Connections {
                         target: app
-
                         onTableauResponsablesChanged: {
-                            tableauResponsable.model = app.responsables;
+                            // tableauResponsable.model = app.responsables;
                             console.log("maj")
                         }
-
                     }
-
                 }
-
 
                 ComboBox {
                     id: choixResponsable
+
                     editable: true
                     model: app.liste_des_disponibilites_de_l_evenement
-
-                    anchors.right: ajouterResponsable.left
-                    anchors.rightMargin: 10
-                    anchors.top: tableauResponsable.bottom
-                    width: parent.width*0.50
                     textRole: "nom_personne"
 
                     onCurrentIndexChanged: {
                         console.log(currentIndex) // On appelle la fonction permettant entre autre de charger toutes les informations du nouvel évenement
                     }
-
                 }
-
-
 
                 Button {
                     id: ajouterResponsable
-                    anchors.top: choixResponsable.top
-                    anchors.right: rejeterResponsable.left
                     text: " + "
-                    onClicked: { app.ajouterResponsable(app.liste_des_disponibilites_de_l_evenement.getDataFromModel(choixResponsable.currentIndex,"id_personne"))}
+                    onClicked: {
+                        app.ajouterResponsable(
+                                    app.liste_des_disponibilites_de_l_evenement.getDataFromModel(
+                                        choixResponsable.currentIndex,"id_personne"
+                                        )
+                                    )
+                    }
                 }
 
                 Button {
                     id: rejeterResponsable
-                    anchors.top: choixResponsable.top
-                    anchors.right: parent.right
                     text: " - "
-
                     onClicked: {
                         console.log("QML rejete : "+ app.responsables.getDataFromModel(tableauResponsable.currentRow,"id_personne"))
                         app.rejeterResponsable(app.responsables.getDataFromModel(tableauResponsable.currentRow,"id_personne"));
-
                     }
-
                 }
-
             }
 
-            TableView {
-
-                Connections {
-                    target: app
-
-                    onTableauTourChanged: {
-                        tableauTours.model = app.fiche_poste_tour;
-                    }
-
-                }
-
+            TableView { // tableau modifiable des tours du poste
                 id: tableauTours
-                width:parent.width *0.95
-                height: parent.height * 0.30
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top:blockResponsable.bottom
-                anchors.topMargin: 25
                 selectionMode: SelectionMode.SingleSelection
-                TableViewColumn{ role: "id"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:(3*(tableauTours.width/10))-1; visible: false;delegate: id_tour}
-                TableViewColumn{ role: "debut"  ; title: "Debut du tour" ;  horizontalAlignment: Text.AlignHCenter; width:(4*(tableauTours.width/10))-1;delegate: debut}
-                TableViewColumn{ role: "fin" ; title: "Fin du tour" ; horizontalAlignment: Text.AlignHCenter;width:(4*(tableauTours.width/10))-1; delegate: fin}
-                TableViewColumn{ role: "min"  ; title: "Min" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/10)-1; delegate: nombre}
-                TableViewColumn{ role: "max" ; title: "Max" ; horizontalAlignment: Text.AlignHCenter;width:(tableauTours.width/10)-1; delegate: nombre}
+                model: app.fiche_poste_tour
 
+                TableViewColumn{ role: "id";    title: "id";            horizontalAlignment: Text.AlignHCenter; width: 3*tableauTours.width/10 - 1; delegate: id_tour; visible: false }
+                TableViewColumn{ role: "debut"; title: "Debut du tour"; horizontalAlignment: Text.AlignHCenter; width: 4*tableauTours.width/10 - 1; delegate: debut }
+                TableViewColumn{ role: "fin";   title: "Fin du tour";   horizontalAlignment: Text.AlignHCenter; width: 4*tableauTours.width/10 - 1; delegate: fin }
+                TableViewColumn{ role: "min";   title: "Min";           horizontalAlignment: Text.AlignHCenter; width:   tableauTours.width/10 - 1; delegate: nombre }
+                TableViewColumn{ role: "max";   title: "Max";           horizontalAlignment: Text.AlignHCenter; width:   tableauTours.width/10 - 1; delegate: nombre }
 
-
-                // TODO : - ERREUR :  Property 'getMonth' of object  is not a function
-
-
-
-                Component {
+                Component { // le champ date de debut
                     id: debut
 
                     Item {
 
                         Text {
                             id: inputDate
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
                             color: styleData.selected ? "white" : "black"
                             text: Fonctions.dateFR(styleData.value)
                         }
 
                         Button {
                             id: boutonCalendrier
-                            anchors.top: parent.top
-                            anchors.topMargin: 1
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 1
-                            anchors.left: inputDate.right
-                            anchors.leftMargin: parent.width*0.05
                             width: parent.width*0.15
                             text: "v"
                             onClicked : { Fonctions.afficherFenetreAjouterTour("debut",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id"),styleData.value.getHours(),styleData.value.getMinutes())}
                         }
-
-
-
-
                     }
-
                 }
 
-                Component {
+                Component { // un champ date
                     id: fin
 
-                    Item {
+                    Item { // une date avec un bouton pour en selectionner une autre
 
-
-                        Text {
+                        Text { // date
                             id: inputDate
                             anchors.top: parent.top
                             anchors.left: parent.left
@@ -465,33 +181,20 @@ Item {
 
                         Button {
                             id: boutonCalendrier
-                            anchors.top: parent.top
-                            anchors.topMargin: 1
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 1
-                            anchors.left: inputDate.right
-                            anchors.leftMargin: parent.width*0.05
                             width: parent.width*0.15
                             text: "v"
                             onClicked : { Fonctions.afficherFenetreAjouterTour("fin",styleData.value,tableauTours.model.getDataFromModel(styleData.row,"id"),styleData.value.getHours(),styleData.value.getMinutes())}
                         }
-
-
-
-
                     }
-
                 }
 
-
-
-                Component {
+                Component { // un champ nombre ???
                     id: nombre
 
-                    Item {
-                        TextInput
-                        {
-                            id: nouveauNombre
+                    Item { // ???
+
+                        TextInput {
+                            id: nouveauNombre // FIXME, même id utilisé plus bas
                             anchors.fill: parent
                             text: styleData.value
                             color: styleData.selected ? "white" : "black"
@@ -515,8 +218,8 @@ Item {
 
                         }
 
-                        MouseArea {
-                            id: zoneSelection
+                        MouseArea { // ???
+                            id: zoneSelection // FIXME, même id utilisé plus bas
                             anchors.fill: parent
                             onClicked: {
                                 console.log("clic");
@@ -525,22 +228,17 @@ Item {
                                 console.log(styleData.role);
                                 nouveauNombre.forceActiveFocus();
                                 console.log(tableauTours.model.getDataFromModel(styleData.row,"id"))
-
                             }
                         }
-
                     }
                 }
 
-                Component {
+                Component { // ???
                     id: id_tour
 
                     Item {
 
-
-
-                        TextInput
-                        {
+                        TextInput { // ???
                             //property int idDuTour: 0
                             id: nouveauNombre
                             anchors.fill: parent
@@ -548,36 +246,33 @@ Item {
                             // activeFocusOnPress: false
                             //   selectByMouse: true
                             onAccepted: console.log(styleData.value + " " +nouveauNombre.text)
-
                         }
 
-                        MouseArea {
+                        MouseArea { // ???
                             id: zoneSelection
                             anchors.fill: parent
                             onClicked: {
-                                console.log("clic");
                                 tableauTours.selection.clear();
-                                tableauTours.selection.select(styleData.row );
-
+                                tableauTours.selection.select(styleData.row);
                                 nouveauNombre.forceActiveFocus();
-
                             }
                         }
-
                     }
                 }
 
+                Connections { // ???
+                    target: app
+                    onTableauTourChanged: {
+                        tableauTours.model = app.fiche_poste_tour;
+                    }
+                }
             }
 
             Button {
                 id: _btnAjouterTour
                 text: "+"
-                anchors.top: tableauTours.bottom
-                anchors.right: _btnSupprimerTour.left
-                anchors.topMargin: 5
                 onClicked: {
-                    if(tableauTours.rowCount == 0)
-                    {
+                    if(tableauTours.rowCount == 0) {
                         app.insererTour(app.heureMin,1,1);
                         tableauTours.selection.select(0);
                     }
@@ -591,24 +286,10 @@ Item {
             Button {
                 id: _btnSupprimerTour
                 text: "-"
-                anchors.top: tableauTours.bottom
-                anchors.right: parent.right
-                anchors.topMargin: 5
-                anchors.rightMargin: 15
                 onClicked: {
-                    console.log("Row: "+ tableauTours.currentRow);
-                    console.log("A supprimer: " + tableauTours.model.getDataFromModel(tableauTours.currentRow,"id"));
                     app.supprimerTour(tableauTours.model.getDataFromModel(tableauTours.currentRow,"id"));
                 }
             }
-
-
-
         }
-
-
-
-
-
     }
 }

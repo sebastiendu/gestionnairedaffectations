@@ -35,5 +35,6 @@
         <file>FicheDuPoste.qml</file>
         <file>ListeDesToursDuMoment.qml</file>
         <file>PlanDesPostesDansLeTemps.qml</file>
+        <file>PlanDeLEvenement.qml</file>
     </qresource>
 </RCC>

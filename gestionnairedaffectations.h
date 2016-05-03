@@ -11,6 +11,7 @@
 #include <QTemporaryFile>
 #include <QUrl>
 #include "toursparpostemodel.h"
+#include "modeledelalistedespostesdelevenementparheure.h"
 
 class GestionnaireDAffectations : public QGuiApplication
 {
@@ -28,17 +29,16 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* liste_des_affectations_de_la_disponibilite MEMBER m_liste_des_affectations_de_la_disponibilite NOTIFY liste_des_affectations_de_la_disponibiliteChanged)
     Q_PROPERTY(QSortFilterProxyModel* proxy_de_la_liste_des_disponibilites_de_l_evenement MEMBER m_proxy_de_la_liste_des_disponibilites_de_l_evenement NOTIFY proxy_de_la_liste_des_disponibilites_de_l_evenementChanged)
     Q_PROPERTY(SqlQueryModel* liste_des_disponibilites_de_l_evenement MEMBER m_liste_des_disponibilites_de_l_evenement NOTIFY liste_des_disponibilites_de_l_evenementChanged)
-    Q_PROPERTY(SqlQueryModel* postes MEMBER m_postes NOTIFY postesChanged)
+    Q_PROPERTY(SqlQueryModel* liste_des_postes_de_l_evenement MEMBER m_liste_des_postes_de_l_evenement NOTIFY liste_des_postes_de_l_evenementChanged)
     Q_PROPERTY(SqlQueryModel* fiche_de_la_disponibilite MEMBER m_fiche_de_la_disponibilite NOTIFY ficheDeLaDisponibiliteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_personne MEMBER m_fiche_personne)
-    Q_PROPERTY(SqlQueryModel* fiche_poste MEMBER m_fiche_poste NOTIFY fiche_posteChanged)
     Q_PROPERTY(SqlQueryModel* fiche_poste_tour MEMBER m_fiche_poste_tour NOTIFY fiche_posteTourChanged)
     Q_PROPERTY(SqlQueryModel* fiche_de_l_affectation_de_la_disponibilite_au_tour MEMBER m_fiche_de_l_affectation_de_la_disponibilite_au_tour NOTIFY fiche_de_l_affectation_de_la_disponibilite_au_tourChanged)
     Q_PROPERTY(SqlQueryModel* fiche_de_l_affectation MEMBER m_fiche_de_l_affectation NOTIFY fiche_de_l_affectationChanged)
     Q_PROPERTY(SqlQueryModel* fiche_du_tour MEMBER m_fiche_du_tour NOTIFY ficheDuTourChanged)
     Q_PROPERTY(SqlQueryModel* affectations_du_tour MEMBER m_affectations_du_tour NOTIFY affectationsDuTourChanged)
     Q_PROPERTY(SqlQueryModel* lotsDejaCrees MEMBER m_lotsDejaCrees NOTIFY lotDejaCreesChanged)
-    Q_PROPERTY(QSortFilterProxyModel* planCourant MEMBER m_plan NOTIFY planChanged)
+    Q_PROPERTY(ModeleDeLaListeDesPostesDeLEvenementParHeure *proxy_de_la_liste_des_postes_de_l_evenement_par_heure MEMBER m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure NOTIFY proxy_de_la_liste_des_postes_de_l_evenement_par_heureChanged)
     Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
     Q_PROPERTY(QSortFilterProxyModel* proxy_de_la_liste_des_tours_de_l_evenement MEMBER m_proxy_de_la_liste_des_tours_de_l_evenement NOTIFY proxy_de_la_liste_des_tours_de_l_evenementChanged)
     Q_PROPERTY(SqlQueryModel* horaires MEMBER m_horaires NOTIFY horaireChanged)
@@ -153,10 +153,10 @@ signals:
     void settingsChanged();
     void liste_des_evenementsChanged();
     void proxy_de_la_liste_des_disponibilites_de_l_evenementChanged();
-    void postesChanged();
+    void liste_des_postes_de_l_evenementChanged();
     void ficheDeLaDisponibiliteChanged();
     void fiche_posteChanged();
-    void planChanged();
+    void proxy_de_la_liste_des_postes_de_l_evenement_par_heureChanged();
     void planCompletChanged();
     void fiche_de_l_affectationChanged();
     void fiche_de_l_affectation_de_la_disponibilite_au_tourChanged();
@@ -198,13 +198,12 @@ public slots:
 private:
     QSqlDatabase db;
     SqlQueryModel *m_liste_des_evenements;
-    SqlQueryModel *m_postes;
+    SqlQueryModel *m_liste_des_postes_de_l_evenement;
     QSortFilterProxyModel *m_proxy_de_la_liste_des_disponibilites_de_l_evenement;
     SqlQueryModel *m_liste_des_disponibilites_de_l_evenement;
     SqlQueryModel *m_liste_des_affectations_de_la_disponibilite;
     SqlQueryModel *m_fiche_de_la_disponibilite;
     SqlQueryModel *m_fiche_personne; // Est associé à une personne
-    SqlQueryModel *m_fiche_poste;
     SqlQueryModel *m_fiche_poste_tour;
     SqlQueryModel *m_fiche_de_l_affectation;
     SqlQueryModel *m_fiche_de_l_affectation_de_la_disponibilite_au_tour;
@@ -219,7 +218,7 @@ private:
     int m_id_affectation;
     QDateTime m_heureMin, m_heureMax, m_heure, m_heure_courante;
     Settings *m_settings;
-    QSortFilterProxyModel *m_plan;
+    ModeleDeLaListeDesPostesDeLEvenementParHeure *m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure;
     SqlQueryModel *m_planComplet;
     SqlQueryModel *m_liste_des_tours_de_l_evenement;
     SqlQueryModel *m_horaires;

@@ -28,7 +28,7 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     ratioX  =-1;
     ratioY = -1;
     m_liste_des_evenements = new SqlQueryModel;
-    m_postes = new SqlQueryModel;
+    m_liste_des_postes_de_l_evenement = new SqlQueryModel;
     m_fiche_de_l_affectation = new SqlQueryModel;
     m_fiche_de_l_affectation_de_la_disponibilite_au_tour = new SqlQueryModel;
     m_fiche_du_tour = new SqlQueryModel;
@@ -38,12 +38,11 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_proxy_de_la_liste_des_disponibilites_de_l_evenement = new QSortFilterProxyModel(this);
     m_fiche_de_la_disponibilite = new SqlQueryModel;
     m_fiche_personne = new SqlQueryModel;
-    m_fiche_poste = new SqlQueryModel;
     m_fiche_poste_tour = new SqlQueryModel;
     m_liste_des_tours_de_l_evenement = new SqlQueryModel;
     m_proxy_de_la_liste_des_tours_de_l_evenement = new QSortFilterProxyModel(this);
     m_planComplet = new SqlQueryModel;
-    m_plan = new QSortFilterProxyModel(this);
+    m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure = new ModeleDeLaListeDesPostesDeLEvenementParHeure(this);
     m_horaires = new SqlQueryModel;
     m_etat_tour_heure = new QSortFilterProxyModel(this);
     m_etat_tour_heure_sql = new SqlQueryModel;
@@ -144,12 +143,18 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.exec();
         m_liste_des_evenements->setQuery(query);
 
-        query.prepare("select * from poste where id_evenement=? order by nom ");
-        query.addBindValue(idEvenement());
-        query.exec();
-        m_postes->setQuery(query);
-
-        qDebug() << "Id evenement: " << idEvenement();
+        if (query.prepare("select *"
+                          " from poste join nombre_d_affectations_par_poste on id_poste = poste.id"
+                          " where id_evenement = :id_evenement")) {
+            query.bindValue(":id_evenement", idEvenement());
+            if (query.exec()) {
+                m_liste_des_postes_de_l_evenement->setQuery(query);
+            } else {
+                qCritical() << "Echec d'execution de la requête de la liste des postes de l'évenement :" << query.lastError();
+            }
+        } else {
+            qCritical() << "Echec de préparation de la requête de la liste des postes de l'évenement :" << query.lastError();
+        }
 
         query.prepare("select * from benevoles_disponibles where id_evenement=?");
         query.addBindValue(idEvenement());
@@ -163,16 +168,6 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         query.bindValue(":id_disponibilite", m_id_disponibilite);
         query.exec();
         m_fiche_de_la_disponibilite->setQuery(query);
-
-
-        query.prepare("select * from poste_et_tour where id_poste= :poste AND id_evenement = :id_evenement AND debut <= :debut AND fin >= :fin ORDER BY debut ASC"); //AND debut <= :debut AND fin >= :fin"
-        query.bindValue(":poste",m_id_poste);
-        query.bindValue(":id_evenement",idEvenement());
-        query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
-        query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
-
-        query.exec();
-        m_fiche_poste->setQuery(query);
 
         query.prepare("select debut from poste_et_tour where id_evenement = :id GROUP BY debut ORDER BY debut ASC;");
         query.bindValue(":id",idEvenement());
@@ -200,7 +195,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
                 qCritical() << "Echec d'execution de la requête de la fiche de l'affectation de la disponibilite au tour :" << query.lastError();
             }
         } else {
-            qCritical() << "Echec de préparation de la requête de la liste de l'affectation de la disponibilite au tour :" << query.lastError();
+            qCritical() << "Echec de préparation de la requête de la fiche de l'affectation de la disponibilite au tour :" << query.lastError();
         }
 
 
@@ -319,6 +314,8 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
             qCritical() << "Impossible de préparer la requète de chargement des séquences de l'emploi du temps :" << db.lastError().text();
         }
 
+        m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure->setIdEvenement(idEvenement());
+
     } else {
         qCritical() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
     }
@@ -428,10 +425,10 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec(); // On execute la requette
     m_liste_des_disponibilites_de_l_evenement->setQuery(query); // On remplace la requete ayant un id indéfini par une requete avec un id précis (idEvenement)
 
-    query = m_postes->query();
+    query = m_liste_des_postes_de_l_evenement->query();
     query.bindValue(0,idEvenement());
     query.exec();
-    m_postes->setQuery(query);
+    m_liste_des_postes_de_l_evenement->setQuery(query);
 
     query = m_liste_des_evenements->query();
     query.exec();
@@ -441,11 +438,6 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.bindValue(0,0);
     query.exec();
     m_fiche_de_la_disponibilite->setQuery(query);
-
-    query = m_fiche_poste->query();
-    query.bindValue(0,0);
-    query.exec();
-    m_fiche_poste->setQuery(query);
 
     query = m_fiche_de_l_affectation->query();
     query.bindValue(0,0);
@@ -518,18 +510,11 @@ int GestionnaireDAffectations::getEvenementModelIndex() {
 }
 
 void GestionnaireDAffectations::setIdPoste(int id) {
+    qDebug() << "changement de id_poste en " << id;
     m_id_poste = id;
-    QSqlQuery query = m_fiche_poste->query();
-    query.bindValue(":poste", m_id_poste);
-    query.bindValue(":id_evenement",idEvenement());
-    query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
-    query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
-    query.exec();
-    m_fiche_poste->setQuery(query);
 
     qDebug() << "id du poste changé en: " << id;
     emit idPosteChanged();
-
 }
 
 void GestionnaireDAffectations::setIdPosteTour(int id) {
@@ -714,36 +699,10 @@ void GestionnaireDAffectations::setHeureEtatTour() {
 
     m_etat_tour_heure = new QSortFilterProxyModel();
     m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
-    m_plan->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_plan->setFilterKeyColumn(-1);
-
 }
 
 void GestionnaireDAffectations::mettreAJourModelPlan(){
-
-    QSqlQuery query;
-
-    query.prepare("select * from poste_et_tour where id_evenement= :evt AND debut <= :debut AND fin >= :fin order by debut ");
-    query.bindValue(":evt",idEvenement());
-    query.bindValue(":debut",m_heure.toString("yyyy-MM-d h:m:s"));
-    query.bindValue(":fin",m_heure.toString("yyyy-MM-d h:m:s"));
-    query.exec();
-    m_postes = new SqlQueryModel;
-    m_postes->setQuery(query);
-
-
-    m_plan = new QSortFilterProxyModel();
-    m_plan->setSourceModel(m_postes);
-    m_plan->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_plan->setFilterKeyColumn(-1);
-
-    emit planChanged();
-
-    qDebug() << "Nombre de colonne dans plan:" << m_plan->rowCount();
-    qDebug() << m_plan->index(1,1);
-
-    qDebug() << "La date:" << m_heure.toString("yyyy-MM-d h:m:s");
-    qDebug() << "Nombre de postes à ce moment: " << m_postes->rowCount();
+    m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure->setHeure(m_heure);
 }
 
 

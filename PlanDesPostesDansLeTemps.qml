@@ -8,66 +8,9 @@ Item {
     ColumnLayout {
         anchors.fill: parent
 
-        Image { // L'image du plan avec la représentation des postes
-
+        PlanDeLEvenement { // L'image du plan avec la représentation des postes
             Layout.fillWidth: true; Layout.fillHeight: true
-
-            sourceSize { height: 1000; width: 1000 }
-            fillMode: Image.PreserveAspectFit
-            source: "image://plan/" + app.idEvenement
-
-            Rectangle { // Rectangle autour du plan
-                id: cadre
-
-                property int cote: Math.min(parent.width, parent.height)
-
-                width: cote; height: cote
-                anchors.centerIn: parent
-
-                color: "transparent"
-                border { color: "black"; width: 1 }
-
-                Repeater { // les postes sur le plan
-
-                    model: app.planCourant
-                    delegate: Rectangle { // le marqueur de position du poste
-                        height: cadre.cote * 0.07
-                        width: height
-                        y: posy * cadre.cote - height / 2
-                        x: posx * cadre.cote - width / 2
-                        Rectangle {
-                            width: parent.height
-                            height: parent.width
-                            transform: Rotation { angle: -90; origin { x: height/2; y: height/2 } }
-
-                            ProgressBarAffectation {
-                                anchors.fill: parent
-                                acceptees: nombre_affectations_validees_ou_acceptees
-                                proposees: nombre_affectations_proposees
-                                possibles: nombre_affectations_possibles
-                                minimum: min
-                                maximum: max
-                            }
-                        }
-                        Text {
-                            anchors.fill: parent
-
-                            text: nom
-                            font.pixelSize: width/4
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignHCenter
-                            wrapMode: Text.Wrap
-                            maximumLineCount: 4
-                            elide: Text.ElideRight
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: app.setIdTour(id_tour)
-                        }
-                    }
-                }
-            }
+            modeleListeDesPostes: app.proxy_de_la_liste_des_postes_de_l_evenement_par_heure
         }
 
         Text { // Date et heure selectionnées
@@ -78,7 +21,6 @@ Item {
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
         }
-
 
         Slider { // La ligne du temps
             Layout.fillWidth: true;

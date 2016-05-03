@@ -9,7 +9,8 @@ SOURCES += main.cpp \
     plansvgimageprovider.cpp \
     abstracttablemodel.cpp \
     toursparpostemodel.cpp \
-    sortfilterproxymodel.cpp
+    sortfilterproxymodel.cpp \
+    modeledelalistedespostesdelevenementparheure.cpp
 
 RESOURCES += \
     gestionnairedaffectations.qrc
@@ -27,7 +28,8 @@ HEADERS += \
     plansvgimageprovider.h \
     abstracttablemodel.h \
     toursparpostemodel.h \
-    sortfilterproxymodel.h
+    sortfilterproxymodel.h \
+    modeledelalistedespostesdelevenementparheure.h
 
 TRANSLATIONS = \
     traductions/gestionnairedaffectations_eu.ts
@@ -37,3 +39,6 @@ SOURCES += \
     *.qml \
     *.js
 }
+
+DISTFILES += \
+    PlanDeLEvenement.qml
