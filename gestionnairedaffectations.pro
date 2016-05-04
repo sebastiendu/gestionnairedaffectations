@@ -10,7 +10,8 @@ SOURCES += main.cpp \
     abstracttablemodel.cpp \
     toursparpostemodel.cpp \
     sortfilterproxymodel.cpp \
-    modeledelalistedespostesdelevenementparheure.cpp
+    modeledelalistedespostesdelevenementparheure.cpp \
+    sqltablemodel.cpp
 
 RESOURCES += \
     gestionnairedaffectations.qrc
@@ -29,7 +30,8 @@ HEADERS += \
     abstracttablemodel.h \
     toursparpostemodel.h \
     sortfilterproxymodel.h \
-    modeledelalistedespostesdelevenementparheure.h
+    modeledelalistedespostesdelevenementparheure.h \
+    sqltablemodel.h
 
 TRANSLATIONS = \
     traductions/gestionnairedaffectations_eu.ts

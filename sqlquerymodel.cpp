@@ -53,8 +53,11 @@ QVariant SqlQueryModel::getDataFromModel(int ligne, QString colonne)
 
 void SqlQueryModel::reload()
 {
-    // FIXME : il doit y avoir un moyen plus habile
-    setQuery(query());
+    if (query().exec()) {
+        setQuery(query());
+    } else {
+        qCritical() << tr("Echec de ré-execution de la requète %1 : %2").arg(query().lastQuery()).arg(lastError().text());
+    }
 }
 
 int SqlQueryModel::rowCount()

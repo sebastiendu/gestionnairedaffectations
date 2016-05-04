@@ -41,7 +41,6 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     m_fiche_poste_tour = new SqlQueryModel;
     m_liste_des_tours_de_l_evenement = new SqlQueryModel;
     m_proxy_de_la_liste_des_tours_de_l_evenement = new QSortFilterProxyModel(this);
-    m_planComplet = new SqlQueryModel;
     m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure = new ModeleDeLaListeDesPostesDeLEvenementParHeure(this);
     m_horaires = new SqlQueryModel;
     m_etat_tour_heure = new QSortFilterProxyModel(this);
@@ -221,6 +220,9 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
             qCritical() << "Echec de préparation de la requête de lecture de la fiche du tour :" << query.lastError();
         }
 
+        m_fiche_du_poste = new SqlTableModel(this, db);
+        m_fiche_du_poste->setTable("poste");
+
         if (query.prepare("select * from affectations"
                           " where id_tour = :tour"
                           " order by"
@@ -253,11 +255,6 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         } else {
             qCritical() << "Echec de préparation de la requête du remplissage par heure :" << query.lastError();
         }
-
-        query.prepare("select * from poste where id_evenement= :evt;");
-        query.bindValue(":evt",idEvenement());
-        query.exec();
-        m_planComplet->setQuery(query);
 
         qDebug() << query.lastError().text() ;
 
@@ -425,11 +422,6 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.exec(); // On execute la requette
     m_liste_des_disponibilites_de_l_evenement->setQuery(query); // On remplace la requete ayant un id indéfini par une requete avec un id précis (idEvenement)
 
-    query = m_liste_des_postes_de_l_evenement->query();
-    query.bindValue(0,idEvenement());
-    query.exec();
-    m_liste_des_postes_de_l_evenement->setQuery(query);
-
     query = m_liste_des_evenements->query();
     query.exec();
     m_liste_des_evenements->setQuery(query);
@@ -463,17 +455,6 @@ void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
     query.bindValue(0,0);
     query.exec();
     m_affectations_du_tour->setQuery(query);
-
-    query = m_planComplet->query();
-    query.bindValue(0,idEvenement());
-    query.exec();
-    m_planComplet->setQuery(query);
-
-    query = m_liste_des_tours_de_l_evenement->query();
-    query.bindValue(0,idEvenement());
-    query.exec();
-    m_liste_des_tours_de_l_evenement->setQuery(query);
-
 
     query = m_etat_tour_heure_sql ->query();
     query.bindValue(0,idEvenement());
@@ -510,11 +491,15 @@ int GestionnaireDAffectations::getEvenementModelIndex() {
 }
 
 void GestionnaireDAffectations::setIdPoste(int id) {
-    qDebug() << "changement de id_poste en " << id;
     m_id_poste = id;
-
-    qDebug() << "id du poste changé en: " << id;
     emit idPosteChanged();
+
+    m_fiche_du_poste->setFilter(QString("id=%1").arg(m_id_poste));
+    if (m_fiche_du_poste->select()) {
+        emit fiche_du_posteChanged();
+    } else {
+        qCritical() << "Echec d'execution de la requête de la fiche du poste" << id << ":" << m_fiche_du_poste->lastError();
+    }
 }
 
 void GestionnaireDAffectations::setIdPosteTour(int id) {
@@ -732,93 +717,28 @@ void GestionnaireDAffectations::rejeterResponsable(int id){
     tableauResponsablesChanged();
 }
 
-void GestionnaireDAffectations::insererPoste(QString poste, QString description, bool autonome, float posx, float posy) {
+bool GestionnaireDAffectations::insererPoste(QString nom, QString description, bool autonome, float posx, float posy) {
     QSqlQuery query;
-    query.prepare("INSERT INTO poste (id_evenement,nom,description,posx,posy,autonome) VALUES (:id_evenement, :poste, :description, :posx, :posy, :autonome);");
-    query.bindValue(":id_evenement",idEvenement());
-    query.bindValue(":poste",poste);
-    query.bindValue(":autonome",autonome);
-    query.bindValue(":description",description);
-    query.bindValue(":posx",posx);
-    query.bindValue(":posy",posy);
-    query.exec();
-    qDebug() << query.lastError().text();
-
-    rechargerPlan();
-}
-
-void GestionnaireDAffectations::modifierPositionPoste(float ancienX,float ancienY) {
-
-
-    if(ancienX == ratioX && ancienY == ratioY)
-    {
-        qDebug() << "Pas de requetes, la position n'a pas changée";
+    bool r = false;
+    if (query.prepare("insert into poste (id_evenement, nom, description, posx, posy, autonome)"
+                      "     values (:id_evenement, :nom, :description, :posx, :posy, :autonome)")) {
+        query.bindValue(":id_evenement", idEvenement());
+        query.bindValue(":nom", nom);
+        query.bindValue(":autonome", autonome);
+        query.bindValue(":description", description);
+        query.bindValue(":posx", posx);
+        query.bindValue(":posy", posy);
+        if (query.exec()) {
+            setIdPoste(query.lastInsertId().toInt());
+            m_liste_des_postes_de_l_evenement->reload();
+            r = true;
+        } else {
+            qCritical() << tr("Echec d'execution de la requète de création du nouveau poste : %1").arg(query.lastError().text());
+        }
+    } else {
+        qCritical() << tr("Echec de préparation de la requète de création du nouveau poste : %1").arg(query.lastError().text());
     }
-    else
-    {
-        QSqlQuery query;
-        query.prepare("UPDATE poste SET posx= :newx , posy = :newy WHERE id = :id");
-        query.bindValue(":newx",ratioX);
-        query.bindValue(":newy",ratioY);
-        query.bindValue(":id",m_id_poste);
-
-        query.exec();
-        qDebug() << query.lastError().text();
-
-    }
-
-}
-
-
-void GestionnaireDAffectations::supprimerPoste(int id){
-
-    QSqlQuery query;
-
-    query.prepare("DELETE FROM poste WHERE id = :id;");
-    query.bindValue(":id",id);
-    query.exec();
-    qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
-
-    setIdPoste(-1);
-    rechargerPlan();
-}
-
-
-void GestionnaireDAffectations::modifierNomPoste(QString nom) {
-
-    QSqlQuery query;
-    query.prepare("UPDATE poste SET nom = :nom WHERE id = :id");
-    query.bindValue(":nom",nom);
-    query.bindValue(":id",m_id_poste);
-    query.exec();
-
-    qDebug() << "nom du poste " << m_id_poste << "modifié en " << nom;
-    rechargerPlan();
-
-
-}
-
-void GestionnaireDAffectations::modifierDescriptionPoste(QString description) {
-
-    QSqlQuery query;
-    query.prepare("UPDATE poste SET description = :description WHERE id = :id");
-    query.bindValue(":description",description);
-    query.bindValue(":id",m_id_poste);
-    query.exec();
-
-    qDebug() << query.lastError().text();
-
-}
-
-void GestionnaireDAffectations::rechargerPlan(){
-
-    QSqlQuery query;
-    query = m_planComplet->query();
-    query.bindValue(0,idEvenement());
-    query.exec();
-    m_planComplet->setQuery(query);
-
-    planCompletChanged();
+    return r;
 }
 
 void GestionnaireDAffectations::annulerAffectation(QString commentaire){

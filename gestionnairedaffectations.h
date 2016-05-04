@@ -12,6 +12,7 @@
 #include <QUrl>
 #include "toursparpostemodel.h"
 #include "modeledelalistedespostesdelevenementparheure.h"
+#include "sqltablemodel.h"
 
 class GestionnaireDAffectations : public QGuiApplication
 {
@@ -36,10 +37,10 @@ class GestionnaireDAffectations : public QGuiApplication
     Q_PROPERTY(SqlQueryModel* fiche_de_l_affectation_de_la_disponibilite_au_tour MEMBER m_fiche_de_l_affectation_de_la_disponibilite_au_tour NOTIFY fiche_de_l_affectation_de_la_disponibilite_au_tourChanged)
     Q_PROPERTY(SqlQueryModel* fiche_de_l_affectation MEMBER m_fiche_de_l_affectation NOTIFY fiche_de_l_affectationChanged)
     Q_PROPERTY(SqlQueryModel* fiche_du_tour MEMBER m_fiche_du_tour NOTIFY ficheDuTourChanged)
+    Q_PROPERTY(SqlTableModel* fiche_du_poste MEMBER m_fiche_du_poste NOTIFY fiche_du_posteChanged)
     Q_PROPERTY(SqlQueryModel* affectations_du_tour MEMBER m_affectations_du_tour NOTIFY affectationsDuTourChanged)
     Q_PROPERTY(SqlQueryModel* lotsDejaCrees MEMBER m_lotsDejaCrees NOTIFY lotDejaCreesChanged)
     Q_PROPERTY(ModeleDeLaListeDesPostesDeLEvenementParHeure *proxy_de_la_liste_des_postes_de_l_evenement_par_heure MEMBER m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure NOTIFY proxy_de_la_liste_des_postes_de_l_evenement_par_heureChanged)
-    Q_PROPERTY(SqlQueryModel* planComplet MEMBER m_planComplet NOTIFY planCompletChanged)
     Q_PROPERTY(QSortFilterProxyModel* proxy_de_la_liste_des_tours_de_l_evenement MEMBER m_proxy_de_la_liste_des_tours_de_l_evenement NOTIFY proxy_de_la_liste_des_tours_de_l_evenementChanged)
     Q_PROPERTY(SqlQueryModel* horaires MEMBER m_horaires NOTIFY horaireChanged)
     Q_PROPERTY(QSortFilterProxyModel* etat_tour_heure MEMBER m_etat_tour_heure  NOTIFY etatTourHeureChanged)
@@ -85,14 +86,9 @@ public:
     Q_INVOKABLE void updateEvenement(QString nom, QString lieu, bool archive);
 
 
-    Q_INVOKABLE void insererPoste(QString,QString,bool, float,float);
-    Q_INVOKABLE void supprimerPoste(int);
-    Q_INVOKABLE void rafraichirStatistiquePoste(int n, QString nom);
-    Q_INVOKABLE void modifierPositionPoste(float x,float y);
-    Q_INVOKABLE void modifierNomPoste(QString nom);
-    Q_INVOKABLE void modifierDescriptionPoste(QString nom);
-    Q_INVOKABLE void rechargerPlan();
+    Q_INVOKABLE bool insererPoste(QString nom, QString description, bool autonome, float posx, float posy);
 
+    Q_INVOKABLE void rafraichirStatistiquePoste(int n, QString nom);
 
     Q_INVOKABLE void modifierTourDebut(QDateTime date, int heure, int minutes, int id);
     Q_INVOKABLE void modifierTourFin(QDateTime date, int heure, int minutes, int id);
@@ -162,6 +158,7 @@ signals:
     void fiche_de_l_affectation_de_la_disponibilite_au_tourChanged();
     void affectationsDuTourChanged();
     void ficheDuTourChanged();
+    void fiche_du_posteChanged();
     void fiche_posteTourChanged();
     void affectationsAccepteesValideesOuProposeesDuTourChanged();
     void proxy_de_la_liste_des_tours_de_l_evenementChanged();
@@ -208,6 +205,7 @@ private:
     SqlQueryModel *m_fiche_de_l_affectation;
     SqlQueryModel *m_fiche_de_l_affectation_de_la_disponibilite_au_tour;
     SqlQueryModel *m_fiche_du_tour;
+    SqlTableModel *m_fiche_du_poste;
     SqlQueryModel *m_affectations_du_tour;
     SqlQueryModel *m_postes_tours_affectations;
     SqlQueryModel *m_lotsDejaCrees;
@@ -219,7 +217,6 @@ private:
     QDateTime m_heureMin, m_heureMax, m_heure, m_heure_courante;
     Settings *m_settings;
     ModeleDeLaListeDesPostesDeLEvenementParHeure *m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure;
-    SqlQueryModel *m_planComplet;
     SqlQueryModel *m_liste_des_tours_de_l_evenement;
     SqlQueryModel *m_horaires;
     QSortFilterProxyModel *m_proxy_de_la_liste_des_tours_de_l_evenement;

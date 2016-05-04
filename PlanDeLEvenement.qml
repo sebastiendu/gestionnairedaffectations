@@ -7,7 +7,7 @@ Image {
     property var modeleListeDesPostes // id_poste, nom, min, max, nombre_affectations_*
     property var fonctionSelectionnerPoste: app.setIdPoste // (id_poste)
     property var fonctionAjouterPoste // (x, y)
-    property var fonctionDeplacerPoste // (id_poste, x, y)
+    property var fonctionDeplacerPoste // (x, y)
     property var fonctionSupprimerPoste // (id_poste)
     readonly property int cote: Math.min(width, height)
 
@@ -35,15 +35,21 @@ Image {
             delegate: Rectangle {
                 property int _id_poste: id_poste
 
-                height: cote * 0.07
-                width: height
+                height: cote * 0.08
+                width: cote * 0.08
                 y: posy * cote - height / 2
                 x: posx * cote - width / 2
 
+                border.width: 1
+                border.color: app.id_poste === id_poste ? "#77FF77" : "#007700"
+                color: app.id_poste === id_poste ? "#FFFF77" : "#777700"
+                radius: height/2
+
                 Rectangle { // TODO : Remplacer cette barre par des cercles concentriques
-                    width: parent.height
-                    height: parent.width
-                    transform: Rotation { angle: -90; origin { x: height/2; y: height/2 } }
+                    width: parent.height/2
+                    height: parent.width/2
+                    anchors.centerIn: parent
+                    transform: Rotation { angle: -90; origin { x: width/4; y: height/4 } }
 
                     ProgressBarAffectation {
                         anchors.fill: parent
@@ -59,7 +65,8 @@ Image {
                     anchors.fill: parent
 
                     text: nom
-                    font.pixelSize: width/4
+                    font.pixelSize: height/4
+
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
@@ -83,20 +90,23 @@ Image {
                         maximumY: cadre.height - parent.height
                     }
 
-                    onReleased: if (drag.active) {
-                                    fonctionDeplacerPoste(parent._id_poste, parent.x/cote, parent.y/cote);
-                                } else if (mouse.button == Qt.LeftButton) {
-                                    fonctionSelectionnerPoste(parent._id_poste);
-                                }
-                    onPressed: if (mouse.button == Qt.RightButton && fonctionSupprimerPoste) {
-                                   contextMenu.popup();
-                               }
                     Menu {
                         id: contextMenu
 
                         MenuItem {
                             text: qsTr("Supprimer")
                             onTriggered: fonctionSupprimerPoste(parent._id_poste);
+                        }
+                    }
+
+                    onReleased: if (drag.active) fonctionDeplacerPoste(
+                                                     (parent.x + parent.width /2) / cote,
+                                                     (parent.y + parent.height/2) / cote
+                                                     );
+                    onPressed: {
+                        fonctionSelectionnerPoste(parent._id_poste);
+                        if (mouse.button == Qt.RightButton && fonctionSupprimerPoste) {
+                            contextMenu.popup();
                         }
                     }
                 }
