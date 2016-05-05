@@ -5,7 +5,6 @@ import QtQuick.Layouts 1.1
 // TODO : sortir le slider et le plan dans leur propre fichier
 
 Item  {
-    anchors.fill: parent
 
     RowLayout {
         anchors.fill: parent

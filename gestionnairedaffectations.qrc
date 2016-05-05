@@ -4,11 +4,9 @@
         <file>nouvelevenement.qml</file>
         <file>fonctions.js</file>
         <file>personne.png</file>
-        <file>marqueur.qml</file>
         <file>ScrollBar.qml</file>
         <file>parametres_de_connexion.qml</file>
         <file>nouveauPoste.qml</file>
-        <file>supprimerPoste.qml</file>
         <file>RectangleTitre.qml</file>
         <file>Calendrier.qml</file>
         <file>Q_AffectationsListe.qml</file>

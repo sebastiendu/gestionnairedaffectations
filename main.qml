@@ -23,8 +23,6 @@ ApplicationWindow { // Fenetre principale
     minimumHeight: 500
     color: "#ffffff"
 
-
-
     Action {
         id: nouvelEvenement
         text: qsTr("&Nouveau")
@@ -42,8 +40,6 @@ ApplicationWindow { // Fenetre principale
             window.show() // On ouvre la fenetre d'ajout du nouvel évenement
         }
     }
-
-
 
     Action {
         id: parametresDeConnexion
@@ -69,7 +65,6 @@ ApplicationWindow { // Fenetre principale
         tooltip: "Définir les paramètres d'envoi des messages de courriel par lot"
         onTriggered: parametresCourriel.open()
     }
-
 
     Action {
         id: actionOuvrirEvenement
@@ -178,6 +173,7 @@ ApplicationWindow { // Fenetre principale
 
         TableView { // Le menu déroulant permettant de sélectionner l'événement
             id: tableauEvenement
+            property int _id_evenement
             // height:50
             anchors.right: parent.right
             anchors.rightMargin: 0
@@ -187,7 +183,7 @@ ApplicationWindow { // Fenetre principale
             anchors.topMargin: 0
 
             model: app.liste_des_evenements // On charge la liste des évenement du menu déroulant
-            selectionMode: SelectionMode.SingleSelection
+            selectionMode: SelectionMode.SingleSelection // FIXME: default
             TableViewColumn{ role: "id"  ; title: "id" ; horizontalAlignment: Text.AlignHCenter; width:((tableauEvenement.width/10))-1; visible: false;}
             TableViewColumn{ role: "nom"  ; title: "Nom" ; horizontalAlignment: Text.AlignHCenter;width:3*(tableauEvenement.width/10)-1}
             TableViewColumn{ role: "archive" ; title: "Archivé" ; horizontalAlignment: Text.AlignHCenter;width:(1.5*tableauEvenement.width/10)-1;}
@@ -198,33 +194,27 @@ ApplicationWindow { // Fenetre principale
             rowDelegate: Rectangle {
 
                 color: styleData.selected ? Qt.rgba(0,0,1,0.5) : "white"
+
                 MouseArea {
                     anchors.fill: parent
                     onDoubleClicked: {
-
-                        app.setIdEvenementFromModelIndex(styleData.row)
+                        app.setIdEvenement(model.id);
                         fenetreOuvrirEvenement.close();
-
-
-
                     }
 
                     onClicked: {
                         tableauEvenement.currentRow = styleData.row
                         tableauEvenement.selection.clear();
                         tableauEvenement.selection.select(styleData.row);
+                        app.setIdEvenement(model.id); // FIXME : devrait être dans onAccepted de la Dialog
                     }
                 }
             }
-
-
         }
-
-
 
         onAccepted : {
 
-            if(tableauEvenement.currentRow != -1) app.setIdEvenementFromModelIndex(tableauEvenement.currentRow);
+            //if(tableauEvenement.currentRow != -1) app.setIdEvenement( tableauEvenement.id_evenement); // FIXME setIdEvenement()
             fenetreOuvrirEvenement.close();
 
         }
@@ -243,9 +233,9 @@ ApplicationWindow { // Fenetre principale
             target: app
             onListe_des_evenementsChanged: {
 
-                _inputFin.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")))
-                _inputDebut.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")))
-                console.log(Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin"))));
+                _inputFin.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "fin")))
+                _inputDebut.text = Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "debut")))
+                console.log(Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "fin"))));
             }
 
             onFermerFenetreProprietesEvenement : {
@@ -257,11 +247,11 @@ ApplicationWindow { // Fenetre principale
 
 
         Text { id: _nom; text: "Nom: \t";anchors.left: parent.left;anchors.leftMargin: 20 }
-        TextField {id: _inputNom; anchors.left: _nom.right; width: 200; text: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "nom");anchors.leftMargin: 20}
+        TextField {id: _inputNom; anchors.left: _nom.right; width: 200; text: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "nom");anchors.leftMargin: 20}
         Text { text: "Lieu: \t" ;id: _lieu; anchors.top: _nom.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
-        TextField { id: _inputLieu; anchors.left: _lieu.right; width: 200;  anchors.top: _nom.bottom; text: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "lieu");anchors.topMargin:20;anchors.leftMargin: 20}
+        TextField { id: _inputLieu; anchors.left: _lieu.right; width: 200;  anchors.top: _nom.bottom; text: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "lieu");anchors.topMargin:20;anchors.leftMargin: 20}
         Text { text: "Debut: \t"; id: _debut; anchors.top: _lieu.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
-        TextField {id: _inputDebut; anchors.left: _debut.right;  readOnly: true; width: 200;  anchors.top: _lieu.bottom; text: Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")));anchors.topMargin:20;anchors.leftMargin: 20}
+        TextField {id: _inputDebut; anchors.left: _debut.right;  readOnly: true; width: 200;  anchors.top: _lieu.bottom; text: Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "debut")));anchors.topMargin:20;anchors.leftMargin: 20}
 // FIXME: le bouton debut mène à une pop-up de choix de date et heure mais sans bouton de validation, et qui s'appelle "Ajouter un tour" !
         Button {
             id: boutonCalendrierDebut
@@ -270,11 +260,11 @@ ApplicationWindow { // Fenetre principale
             anchors.leftMargin: 10
             width: 30
             text: "v"
-            onClicked : { Fonctions.afficherFenetreCalendrier("debut",app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut"),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")).getHours(),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "debut")).getMinutes())}
+            onClicked : { Fonctions.afficherFenetreCalendrier("debut",app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "debut"),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "debut")).getHours(),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "debut")).getMinutes())}
         }
 
         Text { text: "Fin: \t";id: _fin; anchors.top: _debut.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
-        TextField{ id: _inputFin; anchors.top: _debut.bottom;  readOnly: true; width: 200; anchors.left: _fin.right; text: Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")));anchors.topMargin:20;anchors.leftMargin: 20}
+        TextField{ id: _inputFin; anchors.top: _debut.bottom;  readOnly: true; width: 200; anchors.left: _fin.right; text: Fonctions.dateFR(new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "fin")));anchors.topMargin:20;anchors.leftMargin: 20}
         Button {
             id: boutonCalendrierFin
             anchors.top: _inputFin.top
@@ -282,11 +272,11 @@ ApplicationWindow { // Fenetre principale
             anchors.leftMargin: 10
             width: 30
             text: "v"
-            onClicked : { Fonctions.afficherFenetreCalendrier("fin",app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin"),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")).getHours(),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "fin")).getMinutes())}
+            onClicked : { Fonctions.afficherFenetreCalendrier("fin",app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "fin"),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "fin")).getHours(),new Date(app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "fin")).getMinutes())}
         }
 
         Text { text: "Archivé: \t" ; id: _archive; anchors.top: _fin.bottom; anchors.left: parent.left;anchors.topMargin:20;anchors.leftMargin: 20}
-        CheckBox { id: _checkboxArchive; anchors.top: _fin.bottom; anchors.left: _archive.right;anchors.topMargin:20;anchors.leftMargin: 20; checked: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "archive") }
+        CheckBox { id: _checkboxArchive; anchors.top: _fin.bottom; anchors.left: _archive.right;anchors.topMargin:20;anchors.leftMargin: 20; checked: app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "archive") }
 
         Button {
             id: _boutonChangerPlan
@@ -306,7 +296,7 @@ ApplicationWindow { // Fenetre principale
             anchors.leftMargin: (proprietesEvenement.width - width) /2
             width: 200
             text: "Enregistrer"
-            //text: app.liste_des_evenements.getDataFromModel(app.idEvenement, "id")
+            //text: app.liste_des_evenements.getDataFromModel(app.id_evenement, "id")
 
             onClicked : {
                 app.updateEvenement(_inputNom.text, _inputLieu.text, _checkboxArchive.checked);
@@ -328,7 +318,7 @@ ApplicationWindow { // Fenetre principale
         icon: StandardIcon.Warning
         standardButtons: StandardButton.Yes |StandardButton.No
             text: "Etes vous sur de vouloir supprimer l'événemeent <b><i>"
-                  + app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.idEvenement), "nom")
+                  + app.liste_des_evenements.getDataFromModel(app.liste_des_evenements.getIndexFromId(app.id_evenement), "nom")
                   + "</b></i> ?"
 
         onYes : {
@@ -393,15 +383,12 @@ ApplicationWindow { // Fenetre principale
         modality: Qt.ApplicationModal
     }
 
-
-
     onClosing: {
         app.settings.setValue("x", x)
         app.settings.setValue("y", y)
         app.settings.setValue("width", width)
         app.settings.setValue("height", height)
     }
-
 
     menuBar: MenuBar { // La barre de menu
         Menu {
@@ -420,6 +407,7 @@ ApplicationWindow { // Fenetre principale
             MenuItem {
                 text: qsTr("Quitter")
                 onTriggered: Qt.quit();
+                shortcut: StandardKey.Quit
             }
         }
 
@@ -429,12 +417,10 @@ ApplicationWindow { // Fenetre principale
             MenuItem { action: parametresDeCourriel }
         }
 
-
         Menu {
             title: qsTr("&Aide")
             MenuItem { text: qsTr("En savoir plus …");onTriggered: enSavoirPlus.visible = true}
         }
-
 
         Menu {
             title: qsTr("&Générer Etat")
@@ -459,130 +445,76 @@ ApplicationWindow { // Fenetre principale
                 onTriggered: app.genererExportGeneral();
             }
         }
-
     }
-
-
-
 
     TabView { // Les differents onglets
         id: onglet
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.rightMargin: 0
-        anchors.left: parent.left
-        anchors.leftMargin: 0
-        anchors.bottom: parent.bottom
-
-
+        anchors.fill: parent
+        currentIndex: 0 // TODO : si pas de connexion, montrer l'écran de connexion
+                        // sinon si pas d'evenement, ecran de selection/creation de l'ev.
+                        // sinon s'il n'y a pas de poste ou s'il n'y a pas de tour, ecran de definition des postes et tour de l'ev
+                        // si pas de disponibilité, ecran de sollicitation et/ou d'inscription
+                        // s'il y a des tours sans affectation, gestion des affectations
+                        // s'il reste à valider des affectations, écran des demandes
+                        // et sinon proposer la génération des états
 
         Tab {
-            id: postesEtTours
             title : "Postes & Tours"
 
-
             Q_PosteEtTour{
-
             }
         }
 
-
         Tab {
-            id: solliciterAnciensBenevoles
             title: "Solliciter d'anciens bénévoles"
 
-
             Q_SolliciterAnciensBenevoles {
-
             }
         }
 
-
         Tab {
-            id: candidaturesAValider
             title : "Candidature à valider"
-            anchors.fill: parent
+
             Q_CandidatureAValider {
-
             }
-
         }
 
         Tab {
-            id:inscrireBenevole
             title: "Inscrire un bénévole"
 
             Q_InscrireBenevole {
-
             }
         }
 
-
         Tab {
-            id: carte
             title: "Affectations (Plan)"
 
-
             Q_AffectationPlan {
-                anchors.fill: parent
             }
-
         }
 
-
         Tab {
-            id: affectationsListe
             title: "Affectations (Liste)"
-            anchors.fill: parent
-
 
             Q_AffectationsListe {
-
             }
-
         }
 
         Tab {
-            id: emploiDuTemps
             title: "Emploi du temps"
-            anchors.fill: parent
-
 
             Q_EmploiDuTemps {
-
             }
-
         }
 
-
         Tab {
-            id: soumettreAffectations
             title: "Soumettre affectations"
 
             Q_SoumettreAffectation {
-
             }
         }
-
-
-
-
-
     }
 
-
-    StatusBar { // Barre de statut, indique la date
-        id: statusbar
-        anchors.right: parent.right
-        anchors.rightMargin: 0
-        anchors.left: parent.left
-        anchors.leftMargin: 0
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 0
-        Label {
-            text: Fonctions.dateBarreStatut(app.heure)
-        }
-    }
     MessageDialog {
         id: messageDErreur
     }

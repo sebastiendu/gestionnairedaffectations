@@ -29,21 +29,20 @@ Item {
                     console.log("une erreur s'est produite avec insertRows")
                 }
             }
-            fonctionDeplacerPoste: function (id_poste, x, y) {
-                app.setIdPoste(id_poste);
-                app.fiche_du_poste.setData(0, "posx", x);
-                app.fiche_du_poste.setData(0, "posy", y);
-                app.fiche_du_poste.submit();
+            fonctionDeplacerPoste: function (x, y) {
+                if (app.fiche_du_poste.setData(0, "posx", x)
+                        && app.fiche_du_poste.setData(0, "posy", y)
+                        ) {
+                    if (app.fiche_du_poste.submitAll()) {
+                    } else {
+                        console.log("submitAll faillit");
+                    }
+                } else {
+                    console.log("setData a raté");
+                }
             }
-            fonctionSupprimerPoste: function (id_poste) {
-                app.setIdPoste(id_poste);
-                app.rafraichirStatistiquePoste(id_poste, "hop"); // FIXME
-                if (app.getNombreDeTours() > 0 || app.getNombreDAffectations() > 0) {
-                    Fonctions.afficherFenetreSupprimerPoste(id_poste); // FIXME
-                }
-                else {
-                    app.fiche_du_poste.removeRows(0, 1); // TODO : implémenter
-                }
+            fonctionSupprimerPoste: function (id_poste) { // TODO : déplacer dans FicheDuPoste
+                app.fiche_du_poste.removeRows(0, 1);
             }
         }
 

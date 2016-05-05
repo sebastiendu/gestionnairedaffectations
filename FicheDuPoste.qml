@@ -1,13 +1,11 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
+import QtQuick.Dialogs 1.1
 
 Rectangle {
-    Layout.fillWidth: true; Layout.fillHeight: true
-    Layout.preferredWidth: 200 // FIXME
 
     ListView {
-        id: fiche_du_poste
         anchors.fill: parent
         model: app.fiche_du_poste
 
@@ -56,6 +54,25 @@ Rectangle {
                     } else app.insererPoste(nom, description, autonome, posx, posy)
                 }
             }
+//MessageDialog  {
+//    visible: false
+//    modality: Qt.ApplicationModal
+//    title: "Supprimer le poste"
+//    icon: StandardIcon.Warning
+//    text: qsTr("Attention, le poste <i>%1</i> \
+//a %2 tours de travail et %3 affectations. \
+//<br><br>Voulez-vous vraiment <u>supprimer</u> ce poste, ses tours et les affectations liées ?")
+//    .arg(nom)
+//    .arg(nombre_tours)
+//    .arg(nombre_affectations)
+//    standardButtons: StandardButton.Yes | StandardButton.No
+
+//    onNo: Qt.close
+//    onYes: {
+//        // TODO : app.fiche_du_poste.deleteRow(0);
+//        Qt.close;
+//    }
+//}
         }
     }
 }

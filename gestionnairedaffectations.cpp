@@ -8,7 +8,13 @@
 #include "gestionnairedaffectations.h"
 
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
-    QGuiApplication(argc,argv)
+    QGuiApplication(argc,argv),
+    m_id_evenement(0),
+    m_id_personne(0),
+    m_id_disponibilite(0),
+    m_id_poste(0),
+    m_id_tour(0),
+    m_id_affectation(0)
 {
     QCoreApplication::setOrganizationName("Les Développements Durables");
     QCoreApplication::setOrganizationDomain("ldd.fr");
@@ -21,36 +27,51 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
 
     //qInstallMessageHandler(gestionDesMessages);
 
-    m_settings = new Settings;
+    m_settings = new Settings(this);
 
-    m_id_disponibilite=0;
-    m_id_poste=0;
-    ratioX  =-1;
-    ratioY = -1;
-    m_liste_des_evenements = new SqlQueryModel;
-    m_liste_des_postes_de_l_evenement = new SqlQueryModel;
-    m_fiche_de_l_affectation = new SqlQueryModel;
-    m_fiche_de_l_affectation_de_la_disponibilite_au_tour = new SqlQueryModel;
-    m_fiche_du_tour = new SqlQueryModel;
-    m_liste_des_affectations_de_la_disponibilite = new SqlQueryModel;
-    m_affectations_du_tour = new SqlQueryModel;
-    m_liste_des_disponibilites_de_l_evenement = new SqlQueryModel;
-    m_proxy_de_la_liste_des_disponibilites_de_l_evenement = new QSortFilterProxyModel(this);
-    m_fiche_de_la_disponibilite = new SqlQueryModel;
-    m_fiche_personne = new SqlQueryModel;
-    m_fiche_poste_tour = new SqlQueryModel;
-    m_liste_des_tours_de_l_evenement = new SqlQueryModel;
+    m_liste_des_evenements = new SqlQueryModel(this);
+    m_personnes_doublons = new SqlQueryModel(this);
+    m_toursParPosteModel = new ToursParPosteModel(this);
+
+    m_liste_des_modeles_qui_dependent_de_id_personne
+            << (m_fiche_personne = new SqlQueryModel(this))
+            ;
+
+    m_liste_des_modeles_qui_dependent_de_id_evenement
+            << (m_liste_des_postes_de_l_evenement         = new SqlQueryModel(this))
+            << (m_liste_des_disponibilites_de_l_evenement = new SqlQueryModel(this))
+            << (m_lotsDejaCrees                           = new SqlQueryModel(this))
+            << (m_remplissage_par_heure                   = new SqlQueryModel(this))
+            << (m_liste_des_tours_de_l_evenement          = new SqlQueryModel(this))
+            << (m_candidatures_en_attente                 = new SqlQueryModel(this))
+            << (m_sequence_emploi_du_temps                = new SqlQueryModel(this))
+            << m_fiche_personne
+            ;
+
+    m_liste_des_modeles_qui_dependent_de_id_disponibilite
+            << (m_fiche_de_la_disponibilite                  = new SqlQueryModel(this))
+            << (m_liste_des_affectations_de_la_disponibilite = new SqlQueryModel(this))
+            << (m_fiche_de_l_affectation_de_la_disponibilite_au_tour = new SqlQueryModel(this))
+            ;
+
+    m_liste_des_modeles_qui_dependent_de_id_poste
+            << (m_liste_des_tours_du_poste = new SqlQueryModel(this))
+            << (m_responsables             = new SqlQueryModel(this))
+            ;
+
+    m_liste_des_modeles_qui_dependent_de_id_tour
+            << (m_affectations_du_tour = new SqlQueryModel(this))
+            << (m_fiche_du_tour        = new SqlQueryModel(this))
+            << m_fiche_de_l_affectation_de_la_disponibilite_au_tour
+            ;
+
+    m_liste_des_modeles_qui_dependent_de_id_affectation
+            << (m_fiche_de_l_affectation = new SqlQueryModel(this))
+            ;
+
     m_proxy_de_la_liste_des_tours_de_l_evenement = new QSortFilterProxyModel(this);
+    m_proxy_de_la_liste_des_disponibilites_de_l_evenement = new QSortFilterProxyModel(this);
     m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure = new ModeleDeLaListeDesPostesDeLEvenementParHeure(this);
-    m_horaires = new SqlQueryModel;
-    m_etat_tour_heure = new QSortFilterProxyModel(this);
-    m_etat_tour_heure_sql = new SqlQueryModel;
-    m_lotsDejaCrees = new SqlQueryModel;
-    m_candidatures_en_attente =  new SqlQueryModel;
-    m_personnes_doublons = new SqlQueryModel;
-    m_responsables = new SqlQueryModel;
-    m_sequence_emploi_du_temps = new SqlQueryModel;
-    m_remplissage_par_heure = new SqlQueryModel;
 
     if(!m_settings->contains("database/databaseName")) {
         if(!m_settings->contains("database/hostName")) {
@@ -77,8 +98,13 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
         ouvrirLaBase();
     }
 
+    connect(this,SIGNAL(idEvenementChanged(int)),this,SLOT(mettreAJourLesModelesQuiDependentDeIdEvenement(int)));
+    connect(this,SIGNAL(idPersonneChanged(int)),this,SLOT(mettreAJourLesModelesQuiDependentDeIdPersonne(int)));
+    connect(this,SIGNAL(idDisponibiliteChanged(int)),this,SLOT(mettreAJourLesModelesQuiDependentDeIdDisponibilite(int)));
+    connect(this,SIGNAL(idPosteChanged(int)),this,SLOT(mettreAJourLesModelesQuiDependentDeIdPoste(int)));
+    connect(this,SIGNAL(idTourChanged(int)),this,SLOT(mettreAJourLesModelesQuiDependentDeIdTour(int)));
+    connect(this,SIGNAL(idAffectationChanged(int)),this,SLOT(mettreAJourLesModelesQuiDependentDeIdAffectation(int)));
     connect(this,SIGNAL(heureChanged()),this,SLOT(mettreAJourModelPlan()));
-    connect(this,SIGNAL(heureCouranteChanged()),this,SLOT(setHeureEtatTour()));
 }
 
 GestionnaireDAffectations::~GestionnaireDAffectations()
@@ -145,7 +171,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         if (query.prepare("select *"
                           " from poste join nombre_d_affectations_par_poste on id_poste = poste.id"
                           " where id_evenement = :id_evenement")) {
-            query.bindValue(":id_evenement", idEvenement());
+            query.bindValue(":id_evenement", getIdEvenement());
             if (query.exec()) {
                 m_liste_des_postes_de_l_evenement->setQuery(query);
             } else {
@@ -155,28 +181,36 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
             qCritical() << "Echec de préparation de la requête de la liste des postes de l'évenement :" << query.lastError();
         }
 
-        query.prepare("select * from benevoles_disponibles where id_evenement=?");
-        query.addBindValue(idEvenement());
+        query.prepare("SELECT * FROM fiche_benevole WHERE id_personne = :id_personne AND id_evenement = :id_evenement");
+        query.bindValue(":id_personne", m_id_personne);
+        query.bindValue(":id_evenement", getIdEvenement());
         query.exec();
-        m_liste_des_disponibilites_de_l_evenement->setQuery(query);
-        m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setSourceModel(m_liste_des_disponibilites_de_l_evenement);
-        m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
-        m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterKeyColumn(-1);
+        m_fiche_personne->setQuery(query);
+
+
+        if (query.prepare("select * from benevoles_disponibles where id_evenement=:id_evenement")) {
+            query.bindValue(":id_evenement", getIdEvenement());
+            if (query.exec()) {
+                m_liste_des_disponibilites_de_l_evenement->setQuery(query);
+                m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setSourceModel(m_liste_des_disponibilites_de_l_evenement);
+                m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
+                m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterKeyColumn(-1);
+            } else {
+                qCritical() << "Echec d'execution de la requête de la liste des disponibilités de l'évènement :" << query.lastError();
+            }
+        } else {
+            qCritical() << "Echec de préparation de la requête de la liste des disponibilités de l'évènement :" << query.lastError();
+        }
 
         query.prepare("select * from fiche_benevole where id_disponibilite=:id_disponibilite");
         query.bindValue(":id_disponibilite", m_id_disponibilite);
         query.exec();
         m_fiche_de_la_disponibilite->setQuery(query);
 
-        query.prepare("select debut from poste_et_tour where id_evenement = :id GROUP BY debut ORDER BY debut ASC;");
-        query.bindValue(":id",idEvenement());
+        query.prepare("select * from tours where id_poste= :id_poste ORDER BY debut ASC;");
+        query.bindValue(":id_poste",m_id_poste);
         query.exec();
-        m_horaires->setQuery(query);
-
-        query.prepare("select * from tours where id_poste= :poste ORDER BY debut ASC;");
-        query.bindValue(":poste",m_id_poste);
-        query.exec();
-        m_fiche_poste_tour->setQuery(query);
+        m_liste_des_tours_du_poste->setQuery(query);
 
         query.prepare("select * from affectations where id_affectation=:id_affectation");
         query.bindValue(":id_affectation",m_id_affectation);
@@ -224,7 +258,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         m_fiche_du_poste->setTable("poste");
 
         if (query.prepare("select * from affectations"
-                          " where id_tour = :tour"
+                          " where id_tour = :id_tour"
                           " order by"
                           " statut_affectation = 'possible' desc,"
                           " statut_affectation = 'proposee' desc,"
@@ -233,7 +267,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
                           " statut_affectation = 'rejetee' desc,"
                           " statut_affectation = 'annulee' desc"
                           )) {
-            query.bindValue(":tour",m_id_tour);
+            query.bindValue(":id_tour",m_id_tour);
             if (query.exec()) {
                 m_affectations_du_tour->setQuery(query);
             } else {
@@ -246,7 +280,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
         if (query.prepare("select * from remplissage_par_heure"
                           " where id_evenement = :id_evenement"
                           " order by heure")) {
-            query.bindValue(":id_evenement", idEvenement());
+            query.bindValue(":id_evenement", getIdEvenement());
             if (query.exec()) {
                 m_remplissage_par_heure->setQuery(query);
             } else {
@@ -256,52 +290,36 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
             qCritical() << "Echec de préparation de la requête du remplissage par heure :" << query.lastError();
         }
 
-        qDebug() << query.lastError().text() ;
-
         query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
-        query.bindValue(":id_evenement",idEvenement());
+        query.bindValue(":id_evenement",getIdEvenement());
         query.exec();
         m_candidatures_en_attente->setQuery(query);
 
 
         query.prepare("select * from poste_et_tour where id_evenement= :id_evenement ORDER BY nom, debut ASC;");
-        query.bindValue(":id_evenement",idEvenement());
+        query.bindValue(":id_evenement",getIdEvenement());
         query.exec();
         m_liste_des_tours_de_l_evenement->setQuery(query);
         m_proxy_de_la_liste_des_tours_de_l_evenement->setSourceModel(m_liste_des_tours_de_l_evenement);
         m_proxy_de_la_liste_des_tours_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
         m_proxy_de_la_liste_des_tours_de_l_evenement->setFilterKeyColumn(-1);
 
-        query.prepare("SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < :debut  AND fin > :fin) or t.debut is null AND id_evenement = :evt ORDER BY nom ;");
-        query.bindValue(":evt",idEvenement());
-        query.bindValue(":debut",m_heure_courante.toString("yyyy-MM-d h:m:s"));
-        query.bindValue(":fin",m_heure_courante.toString("yyyy-MM-d h:m:s"));
-        query.exec();
-        m_etat_tour_heure_sql->setQuery(query);
-
-        query.prepare("select date_de_creation, titre, traite, id, cle from lot;");
+        query.prepare("select id_evenement, date_de_creation, titre, traite, id, cle"
+                      " from lot"
+                      " where id_evenement = :id_evenement");
+        query.bindValue(":id_evenement", getIdEvenement());
         query.exec();
         m_lotsDejaCrees->setQuery(query);
 
-        /*   m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
-        m_etat_tour_heure->setFilterCaseSensitivity(Qt::CaseInsensitive);
-        m_etat_tour_heure->setFilterKeyColumn(-1); */
+        m_toursParPosteModel->setIdEvenement(getIdEvenement());
 
-        query.prepare("select debut, fin from evenement where id=?");
-        query.addBindValue(idEvenement());
+        query.prepare("SELECT * FROM responsable JOIN personne ON responsable.id_personne=personne.id WHERE responsable.id_poste = :id_poste ");
+        query.bindValue(":id_poste", m_id_poste);
         query.exec();
-        if (query.next()) {
-            setProperty("heureMin", query.value("debut").toDateTime());
-            setProperty("heureMax", query.value("fin").toDateTime());
-            setProperty("heure", query.value("debut").toDateTime());
-        }
+        m_responsables->setQuery(query);
 
-
-        m_toursParPosteModel = new ToursParPosteModel(this);
-        m_toursParPosteModel->setIdEvenement(idEvenement());
-
-        if (query.prepare("select * from libelle_sequence_evenement where id_evenement=?")) {
-            query.addBindValue(idEvenement());
+        if (query.prepare("select * from libelle_sequence_evenement where id_evenement=:id_evenement")) {
+            query.bindValue(":id_evenement", getIdEvenement());
             if (query.exec()) {
                 m_sequence_emploi_du_temps->setQuery(query);
             } else {
@@ -311,7 +329,7 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
             qCritical() << "Impossible de préparer la requète de chargement des séquences de l'emploi du temps :" << db.lastError().text();
         }
 
-        m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure->setIdEvenement(idEvenement());
+        m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure->setIdEvenement(getIdEvenement());
 
     } else {
         qCritical() << "Impossible d'ouvrir la connexion à la base :" << db.lastError().text();
@@ -319,16 +337,19 @@ bool GestionnaireDAffectations::ouvrirLaBase(QString password) {
     return db.isOpen();
 }
 
-
-int GestionnaireDAffectations::idEvenement() { // Retourne la valeur de la cle "id_evenement", qui ne peux être accédée que via un QSettings
-    QSettings settings;
-    return settings.value("id_evenement", 1).toInt();
+int GestionnaireDAffectations::getIdEvenement() {
+    if (m_id_evenement == 0) {
+        QSettings settings;
+        m_id_evenement = settings.value("id_evenement", 1).toInt();
+    }
+    return m_id_evenement;
 }
 
 void GestionnaireDAffectations::setIdEvenement(int id) {
     QSettings settings;
     settings.setValue("id_evenement", id);
-    emit idEvenementChanged();
+    m_id_evenement = id;
+    emit idEvenementChanged(id);
 }
 
 void GestionnaireDAffectations::setDebutEvenement(QDateTime date, int heure, int minutes)
@@ -340,15 +361,13 @@ void GestionnaireDAffectations::setDebutEvenement(QDateTime date, int heure, int
     dateEtHeure = date.addSecs(heure*3600 + minutes*60);
 
 
-    query.prepare("UPDATE evenement SET debut = :debut WHERE id = :id");
+    query.prepare("UPDATE evenement SET debut = :debut WHERE id = :id_evenement");
     query.bindValue(":debut",dateEtHeure.toUTC());
-    query.bindValue(":id",idEvenement());
+    query.bindValue(":id_evenement", getIdEvenement());
 
     if(query.exec())
     {
-        query = m_liste_des_evenements->query();
-        query.exec();
-        m_liste_des_evenements->setQuery(query);
+        m_liste_des_evenements->reload();
 
         liste_des_evenementsChanged();
     }
@@ -367,15 +386,13 @@ void GestionnaireDAffectations::setFinEvenement(QDateTime date, int heure, int m
     dateEtHeure = date.addSecs(heure*3600 + minutes*60);
 
 
-    query.prepare("UPDATE evenement SET fin = :fin WHERE id = :id");
+    query.prepare("UPDATE evenement SET fin = :fin WHERE id = :id_evenement");
     query.bindValue(":fin",dateEtHeure);
-    query.bindValue(":id",idEvenement());
+    query.bindValue(":id_evenement", getIdEvenement());
 
     if(query.exec())
     {
-        query = m_liste_des_evenements->query();
-        query.exec();
-        m_liste_des_evenements->setQuery(query);
+        m_liste_des_evenements->reload();
 
         liste_des_evenementsChanged();
     }
@@ -392,16 +409,14 @@ void GestionnaireDAffectations::updateEvenement(QString nom, QString lieu, bool 
     query.bindValue(":nom",nom);
     query.bindValue(":lieu",lieu);
     query.bindValue(":archive",archive);
-    query.bindValue(":id",idEvenement());
+    query.bindValue(":id_evenement", getIdEvenement());
 
     if(query.exec())
     {
-        query = m_liste_des_evenements->query();
-        query.exec();
-        m_liste_des_evenements->setQuery(query);
+        m_liste_des_evenements->reload();
 
         liste_des_evenementsChanged();
-        fermerFenetreProprietesEvenement();
+        fermerFenetreProprietesEvenement(); // FIXME, bizarre comme comm avec le qml - est-ce un appel asynchrone ?
     }
     else
     {
@@ -409,90 +424,13 @@ void GestionnaireDAffectations::updateEvenement(QString nom, QString lieu, bool 
     }
 }
 
-void GestionnaireDAffectations::setIdEvenementFromModelIndex(int index) {
-
-    qDebug() << "L'id recu:" << index;
-
-    this->setIdEvenement(m_liste_des_evenements->getIdFromIndex(index));
-
-    qDebug() << "L'id mis en index: " << m_liste_des_evenements->getIdFromIndex(index);
-
-    QSqlQuery query = m_liste_des_disponibilites_de_l_evenement->query(); // On fait un select des bénévoles participant à un événement avec un id précis
-    query.bindValue(0,idEvenement()); // Cet id correspond à l'id evenement
-    query.exec(); // On execute la requette
-    m_liste_des_disponibilites_de_l_evenement->setQuery(query); // On remplace la requete ayant un id indéfini par une requete avec un id précis (idEvenement)
-
-    query = m_liste_des_evenements->query();
-    query.exec();
-    m_liste_des_evenements->setQuery(query);
-
-    query = m_fiche_de_la_disponibilite->query();
-    query.bindValue(0,0);
-    query.exec();
-    m_fiche_de_la_disponibilite->setQuery(query);
-
-    query = m_fiche_de_l_affectation->query();
-    query.bindValue(0,0);
-    query.exec();
-    m_fiche_de_l_affectation->setQuery(query);
-
-    query = m_fiche_de_l_affectation_de_la_disponibilite_au_tour->query();
-    query.bindValue(0,0);
-    query.exec();
-    m_fiche_de_l_affectation_de_la_disponibilite_au_tour->setQuery(query);
-
-    query = m_fiche_du_tour->query(); // FIXME: est-ce vraiment nécessaire ?
-    query.bindValue(0,0);
-    query.exec();
-    m_fiche_du_tour->setQuery(query);
-
-    query = m_liste_des_affectations_de_la_disponibilite->query(); // FIXME: est-ce vraiment nécessaire ?
-    query.bindValue(0,0);
-    query.exec();
-    m_liste_des_affectations_de_la_disponibilite->setQuery(query);
-
-    query = m_affectations_du_tour->query();
-    query.bindValue(0,0);
-    query.exec();
-    m_affectations_du_tour->setQuery(query);
-
-    query = m_etat_tour_heure_sql ->query();
-    query.bindValue(0,idEvenement());
-    query.exec();
-    m_etat_tour_heure_sql ->setQuery(query);
-
-    query = m_horaires->query();
-    query.bindValue(0,idEvenement());
-    query.exec();
-    m_horaires->setQuery(query);
-
-    query = m_candidatures_en_attente->query();
-    query.bindValue(0,idEvenement());
-    query.exec();
-    m_candidatures_en_attente->setQuery(query);
-
-    query = m_candidatures_en_attente->query();
-    query.exec();
-    m_candidatures_en_attente->setQuery(query);
-
-    query.prepare("select debut, fin from evenement where id=?");
-    query.addBindValue(idEvenement());
-    query.exec();
-    if (query.next()) {
-        setProperty("heureMin", query.value("debut").toDateTime());
-        setProperty("heureMax", query.value("fin").toDateTime());
-        setProperty("heure", query.value("debut").toDateTime());
-    }
-
-}
-
 int GestionnaireDAffectations::getEvenementModelIndex() {
-    return m_liste_des_evenements->getIndexFromId(idEvenement());
+    return m_liste_des_evenements->getIndexFromId(getIdEvenement());
 }
 
 void GestionnaireDAffectations::setIdPoste(int id) {
     m_id_poste = id;
-    emit idPosteChanged();
+    emit idPosteChanged(id);
 
     m_fiche_du_poste->setFilter(QString("id=%1").arg(m_id_poste));
     if (m_fiche_du_poste->select()) {
@@ -502,107 +440,37 @@ void GestionnaireDAffectations::setIdPoste(int id) {
     }
 }
 
-void GestionnaireDAffectations::setIdPosteTour(int id) {
-    m_id_poste = id;
-    QSqlQuery query;
-    query.prepare("select * from tours where id_poste= :poste ORDER BY debut ASC;");
-    query.bindValue(":poste", id);
-    query.exec();
-    m_fiche_poste_tour->setQuery(query);
+void GestionnaireDAffectations::setIdPosteTour(int id_poste) { // FIXME : deprecated
+    setIdPoste(id_poste);
 }
 
-void GestionnaireDAffectations::setIdTourPoste(int id) {
-    QSqlQuery query;
-    query.prepare("select * from poste_et_tour WHERE id_tour = :tour;");
-    query.bindValue(":tour", id);
-    query.exec();
-    m_fiche_poste_tour->setQuery(query);
+void GestionnaireDAffectations::setIdTourPoste(int id_tour) { // FIXME : deprecated
+    setIdTour(id_tour);
 }
 
 void GestionnaireDAffectations::setIdAffectation(int id)
 {
-    qDebug() << "modification de m_id_affectation en" << id;
     m_id_affectation = id;
-    QSqlQuery query = m_fiche_de_l_affectation->query();
-    query.bindValue(":id_affectation", m_id_affectation);
-    query.exec();
-    m_fiche_de_l_affectation->setQuery(query);
-
-    emit id_affectationChanged();
-
-    qDebug() << "m_id_affectation changé en" << id;
-}
-
-
-void GestionnaireDAffectations::setResponsables() {
-    QSqlQuery query;
-    query.prepare("SELECT * FROM responsable JOIN personne ON responsable.id_personne=personne.id WHERE responsable.id_poste = :id_poste ");
-    query.bindValue(":id_poste", m_id_poste);
-    query.exec();
-    qDebug() << m_id_poste;
-    m_responsables->setQuery(query);
+    emit idAffectationChanged(id);
 }
 
 void GestionnaireDAffectations::setIdTour(int id) {
-    qDebug() << "modification de m_id_tour en" << id;
     m_id_tour = id;
-
-    QSqlQuery query = m_fiche_du_tour->query();
-    query.bindValue(":id_tour", m_id_tour);
-    query.exec();
-    m_fiche_du_tour->setQuery(query);
-
-    query = m_affectations_du_tour->query();
-    query.bindValue(":tour", m_id_tour);
-    query.exec();
-    m_affectations_du_tour->setQuery(query);
-
-    query = m_fiche_de_l_affectation_de_la_disponibilite_au_tour->query();
-    query.bindValue(":id_tour", m_id_tour);
-    query.exec();
-    m_fiche_de_l_affectation_de_la_disponibilite_au_tour->setQuery(query);
-
-    emit id_tourChanged();
-
-    qDebug() << "m_id_tour changé en" << id;
+    emit idTourChanged(id);
 }
 
 void GestionnaireDAffectations::setIdDisponibilite(int id) {
-    qDebug() << "m_id_disponibilite va changer vers" << id;
     m_id_disponibilite = id;
-
-    QSqlQuery query = m_fiche_de_la_disponibilite->query();
-    query.bindValue(":id_disponibilite", m_id_disponibilite);
-    query.exec();
-    m_fiche_de_la_disponibilite->setQuery(query);
-
-    query = m_liste_des_affectations_de_la_disponibilite->query();
-    query.bindValue(":id_disponibilite", m_id_disponibilite);
-    query.exec();
-    m_liste_des_affectations_de_la_disponibilite->setQuery(query);
-
-    query = m_fiche_de_l_affectation_de_la_disponibilite_au_tour->query();
-    query.bindValue(":id_disponibilite", m_id_disponibilite);
-    query.exec();
-    m_fiche_de_l_affectation_de_la_disponibilite_au_tour->setQuery(query);
-
-    emit id_disponibiliteChanged();
-
-    qDebug() << "m_id_disponibilite vaut maintenant" << id;
+    emit idDisponibiliteChanged(id);
 }
 
 void GestionnaireDAffectations::setIdPersonne(int id) {
-    QSqlQuery query;
-    query.prepare("SELECT * FROM fiche_benevole WHERE id_personne = :id_personne AND id_evenement = :id_evenement");
-    query.bindValue(":id_personne", id);
-    query.bindValue(":id_evenement", idEvenement());
-    query.exec();
-    m_fiche_personne->setQuery(query);
+    m_id_personne = id;
+    emit idPersonneChanged(id);
 }
 
-
 void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTime debut, QDateTime fin, int heureDebut, int heureFin, QString lieu, int id_evenement_precedent) {
-
+    // FIXME: ne pas séparer la date de l'heure dans le QML (pour debut et fin)
     QDateTime dateEtHeureDebut;
     dateEtHeureDebut = debut.addSecs(heureDebut*3600);
 
@@ -610,37 +478,29 @@ void GestionnaireDAffectations::enregistrerNouvelEvenement(QString nom, QDateTim
     dateEtHeureFin = fin.addSecs(heureFin*3600);
 
     QSqlQuery query;
-    query.prepare("insert into evenement (nom, debut, fin, lieu, id_evenement_precedent) values (?,?,?,?,?)");
+    query.prepare("insert into evenement (nom, debut, fin, lieu, id_evenement_precedent) values (?,?,?,?,?)"); // FIXME : gérer les erreurs
     query.addBindValue(nom);
     query.addBindValue(dateEtHeureDebut);
     query.addBindValue(dateEtHeureFin);
     query.addBindValue(lieu);
     query.addBindValue(id_evenement_precedent);
     if (query.exec()) {
-
-        m_liste_des_evenements->query().exec();
-
-        setIdEvenementFromModelIndex(0);
+        setIdEvenement(query.lastInsertId().toInt());
+        m_liste_des_evenements->reload();
     }
     else {
-        qDebug() << "Insertion: " << query.lastError().text();
+        qDebug() << "Insertion: " << query.lastError().text(); // FIXME
     }
-
-
-
 }
 
 void GestionnaireDAffectations::supprimerEvenement() {
 
     QSqlQuery query;
-    query.prepare("DELETE FROM evenement WHERE id = :id");
-    query.bindValue(":id", idEvenement());
+    query.prepare("DELETE FROM evenement WHERE id = :id_evenement"); // FIXME gérer les erreurs
+    query.bindValue(":id_evenement", getIdEvenement());
     query.exec();
 
-    m_liste_des_evenements->query().exec();
-    setIdEvenementFromModelIndex(0);
-
-
+    m_liste_des_evenements->reload();
 }
 
 void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
@@ -650,12 +510,12 @@ void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
     QXmlInputSource source(&file);
     if(xmlReader.parse(&source)) {
         QSqlQuery query;
-        if (query.prepare("update evenement set plan=:plan where id=:id")) {
+        if (query.prepare("update evenement set plan=:plan where id=:id_evenement")) {
             file.seek(0);
             query.bindValue(":plan", QString(file.readAll()));
-            query.bindValue(":id", idEvenement());
+            query.bindValue(":id_evenement", getIdEvenement());
             if (query.exec()) {
-                // setIdEvenement(idEvenement());
+                // setIdEvenement(m_id_evenement);
                 emit planMisAJour();
             } else {
                 qCritical() << "Echec d'execution de la requête d'enregistrement du plan :" << query.lastError();
@@ -669,25 +529,58 @@ void GestionnaireDAffectations::enregistrerPlanEvenement(QUrl url)
     file.close();
 }
 
-void GestionnaireDAffectations::setHeureEtatTour() {
-
-    QSqlQuery query;
-    query.prepare("SELECT distinct t.debut, t.fin, nom FROM poste left join tour on id_poste=poste.id left join taux_de_remplissage_tour as t on t.id_tour = tour.id WHERE (t.debut < :debut  AND t.fin > :fin) or t.debut is null AND id_evenement = :evt ORDER BY nom ;");
-    query.bindValue(":evt",idEvenement());
-    query.bindValue(":debut",m_heure_courante.toString("yyyy-MM-d h:m:s"));
-    query.bindValue(":fin",m_heure_courante.toString("yyyy-MM-d h:m:s"));
-    query.exec();
-
-    m_etat_tour_heure_sql = new SqlQueryModel;
-    m_etat_tour_heure_sql->setQuery(query);
-
-
-    m_etat_tour_heure = new QSortFilterProxyModel();
-    m_etat_tour_heure->setSourceModel(m_etat_tour_heure_sql);
-}
 
 void GestionnaireDAffectations::mettreAJourModelPlan(){
     m_proxy_de_la_liste_des_postes_de_l_evenement_par_heure->setHeure(m_heure);
+}
+
+void GestionnaireDAffectations::mettreAJourLesModelesQuiDependentDeIdEvenement(int id_evenement)
+{
+    for (int i = 0; i < m_liste_des_modeles_qui_dependent_de_id_evenement.size(); ++i) {
+        m_liste_des_modeles_qui_dependent_de_id_evenement[i]->query().bindValue(":id_evenement", id_evenement);
+        m_liste_des_modeles_qui_dependent_de_id_evenement[i]->reload();
+    }
+    m_toursParPosteModel->setIdEvenement(id_evenement);
+}
+
+void GestionnaireDAffectations::mettreAJourLesModelesQuiDependentDeIdPersonne(int id_personne)
+{
+    for (int i = 0; i < m_liste_des_modeles_qui_dependent_de_id_personne.size(); ++i) {
+        m_liste_des_modeles_qui_dependent_de_id_personne[i]->query().bindValue(":id_personne", id_personne);
+        m_liste_des_modeles_qui_dependent_de_id_personne[i]->reload();
+    }
+}
+
+void GestionnaireDAffectations::mettreAJourLesModelesQuiDependentDeIdDisponibilite(int id_disponibilite)
+{
+    for (int i = 0; i < m_liste_des_modeles_qui_dependent_de_id_disponibilite.size(); ++i) {
+        m_liste_des_modeles_qui_dependent_de_id_disponibilite[i]->query().bindValue(":id_disponibilite", id_disponibilite);
+        m_liste_des_modeles_qui_dependent_de_id_disponibilite[i]->reload();
+    }
+}
+
+void GestionnaireDAffectations::mettreAJourLesModelesQuiDependentDeIdPoste(int id_poste)
+{
+    for (int i = 0; i < m_liste_des_modeles_qui_dependent_de_id_poste.size(); ++i) {
+        m_liste_des_modeles_qui_dependent_de_id_poste[i]->query().bindValue(":id_poste", id_poste);
+        m_liste_des_modeles_qui_dependent_de_id_poste[i]->reload();
+    }
+}
+
+void GestionnaireDAffectations::mettreAJourLesModelesQuiDependentDeIdTour(int id_tour)
+{
+    for (int i = 0; i < m_liste_des_modeles_qui_dependent_de_id_tour.size(); ++i) {
+        m_liste_des_modeles_qui_dependent_de_id_tour[i]->query().bindValue(":id_tour", id_tour);
+        m_liste_des_modeles_qui_dependent_de_id_tour[i]->reload();
+    }
+}
+
+void GestionnaireDAffectations::mettreAJourLesModelesQuiDependentDeIdAffectation(int id_affectation)
+{
+    for (int i = 0; i < m_liste_des_modeles_qui_dependent_de_id_affectation.size(); ++i) {
+        m_liste_des_modeles_qui_dependent_de_id_affectation[i]->query().bindValue(":id_affectation", id_affectation);
+        m_liste_des_modeles_qui_dependent_de_id_affectation[i]->reload();
+    }
 }
 
 
@@ -699,8 +592,6 @@ void GestionnaireDAffectations::ajouterResponsable(int id){
     query.exec();
     qDebug() << query.lastError().text();
 
-    setResponsables();
-
     tableauResponsablesChanged();
 }
 
@@ -710,7 +601,8 @@ void GestionnaireDAffectations::rejeterResponsable(int id){
     query.bindValue(":id_personne",id);
     query.bindValue(":id_poste", m_id_poste);
     query.exec();
-    setResponsables();
+
+    m_responsables->reload();
 
     qDebug() << "Rejeté: " << id;
 
@@ -722,7 +614,7 @@ bool GestionnaireDAffectations::insererPoste(QString nom, QString description, b
     bool r = false;
     if (query.prepare("insert into poste (id_evenement, nom, description, posx, posy, autonome)"
                       "     values (:id_evenement, :nom, :description, :posx, :posy, :autonome)")) {
-        query.bindValue(":id_evenement", idEvenement());
+        query.bindValue(":id_evenement", getIdEvenement());
         query.bindValue(":nom", nom);
         query.bindValue(":autonome", autonome);
         query.bindValue(":description", description);
@@ -777,6 +669,7 @@ void GestionnaireDAffectations::creerAffectation(QString commentaire){
         query.bindValue(":commentaire", commentaire);
         if (query.exec()) {
             m_id_affectation = query.lastInsertId().toInt();
+            emit idAffectationChanged(m_id_affectation);
             m_liste_des_disponibilites_de_l_evenement->reload();
             m_fiche_de_la_disponibilite->reload();
             m_liste_des_tours_de_l_evenement->reload();
@@ -809,11 +702,7 @@ void GestionnaireDAffectations::modifierTourDebut(QDateTime date, int heure, int
 
     if(query.exec())
     {
-        query.prepare("select * from tours where id_poste= :poste ORDER BY debut ASC;");
-        query.bindValue(":poste", m_id_poste);
-        query.exec();
-        m_fiche_poste_tour->setQuery(query);
-
+        m_liste_des_tours_du_poste->reload();
         tableauTourChanged();
     }
     else
@@ -845,10 +734,7 @@ void GestionnaireDAffectations::modifierTourFin(QDateTime date, int heure, int m
     if(query.exec())
     {
 
-        query.prepare("select * from tours where id_poste= :poste ORDER BY debut ASC;");
-        query.bindValue(":poste", m_id_poste);
-        query.exec();
-        m_fiche_poste_tour->setQuery(query);
+        m_liste_des_tours_du_poste->reload();
 
         tableauTourChanged();
     }
@@ -883,10 +769,7 @@ void GestionnaireDAffectations::modifierTourMinMax(QString type, int nombre, int
             qCritical() << query.lastError().text();
         }
         else {
-            query = m_liste_des_tours_de_l_evenement->query();
-            query.bindValue(0,idEvenement());
-            query.exec();
-            m_liste_des_tours_de_l_evenement->setQuery(query);
+            m_liste_des_tours_de_l_evenement->reload();
         }
 
     }
@@ -915,14 +798,11 @@ void GestionnaireDAffectations::insererTour(QDateTime dateFinPrecedente, int min
     }
     else {
         // On recharge la fiche du poste
-        query.prepare("select * from tours where id_poste= :poste ORDER BY debut ASC;");
-        query.bindValue(":poste", m_id_poste);
-        query.exec();
-        m_fiche_poste_tour->setQuery(query);
+        m_liste_des_tours_du_poste->reload();
 
         // On recharge la liste des postes
         query = m_liste_des_tours_de_l_evenement->query();
-        query.bindValue(":id_evenement",idEvenement());
+        query.bindValue(":id_evenement", getIdEvenement());
         query.exec();
         m_liste_des_tours_de_l_evenement->setQuery(query);
         m_proxy_de_la_liste_des_tours_de_l_evenement->setSourceModel(m_liste_des_tours_de_l_evenement);
@@ -935,20 +815,13 @@ void GestionnaireDAffectations::insererTour(QDateTime dateFinPrecedente, int min
 }
 
 void GestionnaireDAffectations::supprimerTour(int id){
-
     QSqlQuery query;
-
-    query.prepare("DELETE FROM tour WHERE id = :id;");
+    query.prepare("DELETE FROM tour WHERE id = :id;"); // FIXME : gestion des erreurs
     query.bindValue(":id",id);
     query.exec();
-    qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
 
-    query.prepare("select * from tours where id_poste= :poste ORDER BY debut ASC;");
-    query.bindValue(0,m_id_poste);
-    query.exec();
-    m_fiche_poste_tour->setQuery(query);
-
-    tableauTourChanged();
+    m_liste_des_tours_du_poste->reload();
+    emit tableauTourChanged(); // FIXME deprecated
 }
 
 void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString prenomBenevole, QString adresseBenevole,
@@ -1005,7 +878,7 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
     else {
         query.prepare("INSERT INTO disponibilite (id_personne,id_evenement,date_inscription,jours_et_heures_dispo, liste_amis,type_poste,commentaire,statut) VALUES (:id_personne,:id_evenement,:date_inscription,:jours_et_heures_dispo, :liste_amis,:type_poste,:commentaire,:statut)");
         query.bindValue(":id_personne",query.lastInsertId());
-        query.bindValue(":id_evenement",idEvenement());
+        query.bindValue(":id_evenement", getIdEvenement());
         query.bindValue(":date_inscription",QDateTime::currentDateTime());
         query.bindValue(":jours_et_heures_dispo",joursEtHeures);
         query.bindValue(":liste_amis",listeAmis);
@@ -1018,10 +891,7 @@ void GestionnaireDAffectations::inscrireBenevole(QString nomBenevole, QString pr
             qCritical() << query.lastError().text();
         }
         else {
-            query = m_candidatures_en_attente->query();
-            query.bindValue(0,idEvenement());
-            query.exec();
-            m_candidatures_en_attente->setQuery(query);
+            m_candidatures_en_attente->reload();
             inscriptionOk();
         }
     }
@@ -1040,21 +910,10 @@ void GestionnaireDAffectations::validerCandidature(){
     query.bindValue(":id", m_id_disponibilite);
     query.exec();
 
-    query.prepare("select * from benevoles_disponibles where id_evenement=?");
-    query.addBindValue(idEvenement());
-    query.exec();
-    m_liste_des_disponibilites_de_l_evenement->setQuery(query);
-    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setSourceModel(m_liste_des_disponibilites_de_l_evenement);
-    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterKeyColumn(-1);
-
-    query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
-    query.bindValue(":id_evenement",idEvenement());
-    query.exec();
-    m_candidatures_en_attente->setQuery(query);
+    m_liste_des_disponibilites_de_l_evenement->reload();
+    m_candidatures_en_attente->reload();
 
     candidatureValidee();
-
 }
 
 void GestionnaireDAffectations::rejeterCandidature(){
@@ -1063,18 +922,8 @@ void GestionnaireDAffectations::rejeterCandidature(){
     query.bindValue(":id", m_id_disponibilite);
     query.exec();
 
-    query.prepare("select * from benevoles_disponibles where id_evenement=?");
-    query.addBindValue(idEvenement());
-    query.exec();
-    m_liste_des_disponibilites_de_l_evenement->setQuery(query);
-    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setSourceModel(m_liste_des_disponibilites_de_l_evenement);
-    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_proxy_de_la_liste_des_disponibilites_de_l_evenement->setFilterKeyColumn(-1);
-
-    query.prepare("select * from candidatures_en_attente WHERE id_evenement = :id_evenement;");
-    query.bindValue(":id_evenement",idEvenement());
-    query.exec();
-    m_candidatures_en_attente->setQuery(query);
+    m_liste_des_disponibilites_de_l_evenement->reload();
+    m_candidatures_en_attente->reload();
 
     candidatureRejetee();
 }
@@ -1105,7 +954,7 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
                 if (proposees) titre << "déjà proposées";
                 QSqlQuery query;
                 if (query.prepare("insert into lot(id_evenement, titre) values(:id_evenement, :titre) returning cle")) {
-                    query.bindValue(":id_evenement", idEvenement());
+                    query.bindValue(":id_evenement", getIdEvenement());
                     query.bindValue(":titre", "Affectations " + titre.join(" ou "));
                     if (query.exec()) {
                         QVariant id = query.lastInsertId();
@@ -1125,13 +974,11 @@ QString GestionnaireDAffectations::creerLotDAffectations(bool possibles, bool pr
                                     " and (" + conditions.join(" or ") + ")"
                                     )) {
                             query.bindValue(":id_lot", id.toInt());
-                            query.bindValue(":id_evenement", idEvenement());
+                            query.bindValue(":id_evenement", getIdEvenement());
                             if (query.exec()) {
                                 database.commit();
 
-                                query.prepare("select id_evenement, date_de_creation, titre, traite, id, cle from lot;");
-                                query.exec();
-                                m_lotsDejaCrees->setQuery(query);
+                                m_lotsDejaCrees->reload();
 
                             } else {
                                 qCritical() << "Impossible d'executer la requête de population du lot d'affectations : " << query.lastError();
@@ -1190,7 +1037,7 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
 
                 QSqlQuery query;
                 if (query.prepare("insert into lot(id_evenement, titre) values(:id_evenement, :titre) returning cle")) {
-                    query.bindValue(":id_evenement", idEvenement());
+                    query.bindValue(":id_evenement", getIdEvenement());
                     query.bindValue(":titre", "Bénévoles ayant participé à " + nomEvenements.join(" ou "));
                     if (query.exec()) {
                         QVariant id = query.lastInsertId();
@@ -1216,9 +1063,7 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
                             if (query.exec()) {
                                 database.commit();
 
-                                query.prepare("select date_de_creation, titre, traite, id, cle from lot;");
-                                query.exec();
-                                m_lotsDejaCrees->setQuery(query);
+                                m_lotsDejaCrees->reload();
 
                             } else {
                                 qCritical() << "Impossible d'executer la requête de population du lot de bénévoles : " << query.lastError();
@@ -1249,48 +1094,6 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
 }
 
 
-float GestionnaireDAffectations::getRatioX() { return this->ratioX ; }
-float GestionnaireDAffectations::getRatioY() { return this->ratioY ;}
-void GestionnaireDAffectations::setRatioX(float x) {this->ratioX = x ;}
-void GestionnaireDAffectations::setRatioY(float y) {this->ratioY = y;}
-
-
-int GestionnaireDAffectations::getNombreDeTours() { return this->nombreDeTours ; }
-int GestionnaireDAffectations::getNombreDAffectations() { return this->nombreDAffectations ;}
-QString GestionnaireDAffectations::getNomPoste() { return this->nomPoste ;}
-int GestionnaireDAffectations::getIdPoste() { return this->m_id_poste ;}
-
-
-void GestionnaireDAffectations::rafraichirStatistiquePoste(int id, QString nom) {
-
-    m_id_poste = id;
-    QSqlQuery query;
-
-    query.prepare("SELECT nombre_tours,nombre_affectations FROM statistiques_postes WHERE id_poste = :id");
-    query.bindValue(":id",m_id_poste);
-    query.exec();
-
-    if(query.first())
-    {
-        // La requete a réussie
-        nombreDeTours = query.value(0).toInt();
-        nombreDAffectations = query.value(1).toInt();
-        nomPoste = nom;
-    }
-    else
-    {
-        // La requete a renvoyé 0 lignes, on ne considère pas qu'elle a raté mais qu'aucun tour n'a été associé au poste.
-        nombreDeTours = 0;
-        nombreDAffectations = 0;
-        nomPoste = nom;
-    }
-
-    qDebug() << query.lastError().text(); // Si erreur, on l'affiche dans la console
-
-
-}
-
-
 // ==============================================
 // =============GENERATION DES ETATS ============
 // ==============================================
@@ -1305,7 +1108,7 @@ void GestionnaireDAffectations::genererFichesDePostes()
     // REQUETE //
     QSqlQuery query;
     query.prepare("select * from fiche_de_poste_benevoles_par_tour where id_evenement= :evt");
-    query.bindValue(":evt",idEvenement());
+    query.bindValue(":evt", getIdEvenement());
     query.exec();
 
     // PANDOC //
@@ -1403,7 +1206,7 @@ void GestionnaireDAffectations::genererCarteBenevoles()
     // REQUETE //
     QSqlQuery query;
     query.prepare("select * from carte_de_benevole_inscriptions_postes where id_evenement= :evt");
-    query.bindValue(":evt",idEvenement());
+    query.bindValue(":evt", getIdEvenement());
     query.exec();
 
     // PANDOC //
@@ -1505,7 +1308,7 @@ void GestionnaireDAffectations::genererTableauRemplissage()
     // REQUETE //
     QSqlQuery query; // Création d'une requete
     query.prepare("select * from tableau_de_remplissage where id_evenement= :evt"); // Alimentation de la requete
-    query.bindValue(":evt",idEvenement()); // Affectation des parametres de la requete
+    query.bindValue(":evt", getIdEvenement()); // Affectation des parametres de la requete
     query.exec(); //Execution de la requete
 
     // PANDOC //
@@ -1711,7 +1514,7 @@ void GestionnaireDAffectations::genererFichesProblemes()
     // REQUETE //
     QSqlQuery query;
     query.prepare("select * from fiches_a_probleme where id_evenement= :evt");
-    query.bindValue(":evt",idEvenement());
+    query.bindValue(":evt", getIdEvenement());
     query.exec();
 
     // PANDOC //
@@ -1855,7 +1658,7 @@ void GestionnaireDAffectations::genererExportGeneral()
     // REQUETE //
     QSqlQuery query;
     query.prepare("select * from export_general_personnes where id_evenement= :evt");
-    query.bindValue(":evt",idEvenement());
+    query.bindValue(":evt", getIdEvenement());
     query.exec();
 
 
@@ -2033,7 +1836,7 @@ void GestionnaireDAffectations::genererExportGeneral()
     // Deuxieme requete //
     QSqlQuery query2;
     query2.prepare("select * from export_general_tours where id_evenement= :evt");
-    query2.bindValue(":evt",idEvenement());
+    query2.bindValue(":evt", getIdEvenement());
     query2.exec();
 
     // Initilisation //

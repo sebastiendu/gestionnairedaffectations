@@ -13,7 +13,7 @@ Image {
 
     sourceSize { height: 1000; width: 1000 }
     fillMode: Image.PreserveAspectFit
-    source: "image://plan/" + app.idEvenement
+    source: "image://plan/" + app.id_evenement
 
     Rectangle {
         id: cadre

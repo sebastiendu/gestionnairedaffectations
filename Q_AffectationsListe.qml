@@ -2,9 +2,10 @@ import QtQuick 2.0
 import QtQuick.Layouts 1.2
 
 Item {
+
     ColumnLayout {
         anchors.fill: parent
-        anchors.bottomMargin: 30
+
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
