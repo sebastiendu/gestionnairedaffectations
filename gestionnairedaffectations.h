@@ -78,7 +78,8 @@ public:
     Q_INVOKABLE void setFinEvenement(QDateTime date, int heure, int minutes);
     Q_INVOKABLE void updateEvenement(QString nom, QString lieu, bool archive);
 
-    Q_INVOKABLE bool insererPoste(QString nom, QString description, bool autonome, float posx, float posy);
+    Q_INVOKABLE bool enregistrerPoste();
+    Q_INVOKABLE bool supprimerPoste();
 
     Q_INVOKABLE void modifierTourDebut(QDateTime date, int heure, int minutes, int id);
     Q_INVOKABLE void modifierTourFin(QDateTime date, int heure, int minutes, int id);

@@ -5,6 +5,7 @@
 #include <QtDebug>
 #include <QQuickView>
 #include <QXmlSimpleReader>
+#include <QSqlField>
 #include "gestionnairedaffectations.h"
 
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
@@ -97,7 +98,6 @@ GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     if (m_settings->value("database/rememberPassword").toBool()) {
         ouvrirLaBase();
     }
-
     connect(this,SIGNAL(idEvenementChanged(int)),this,SLOT(mettreAJourLesModelesQuiDependentDeIdEvenement(int)));
     connect(this,SIGNAL(idPersonneChanged(int)),this,SLOT(mettreAJourLesModelesQuiDependentDeIdPersonne(int)));
     connect(this,SIGNAL(idDisponibiliteChanged(int)),this,SLOT(mettreAJourLesModelesQuiDependentDeIdDisponibilite(int)));
@@ -609,26 +609,36 @@ void GestionnaireDAffectations::rejeterResponsable(int id){
     tableauResponsablesChanged();
 }
 
-bool GestionnaireDAffectations::insererPoste(QString nom, QString description, bool autonome, float posx, float posy) {
-    QSqlQuery query;
+bool GestionnaireDAffectations::enregistrerPoste() {
     bool r = false;
-    if (query.prepare("insert into poste (id_evenement, nom, description, posx, posy, autonome)"
-                      "     values (:id_evenement, :nom, :description, :posx, :posy, :autonome)")) {
-        query.bindValue(":id_evenement", getIdEvenement());
-        query.bindValue(":nom", nom);
-        query.bindValue(":autonome", autonome);
-        query.bindValue(":description", description);
-        query.bindValue(":posx", posx);
-        query.bindValue(":posy", posy);
-        if (query.exec()) {
-            setIdPoste(query.lastInsertId().toInt());
+    if (m_fiche_du_poste->data(0, "id").toBool()) {
+        if (m_fiche_du_poste->submitAll()) {
             m_liste_des_postes_de_l_evenement->reload();
             r = true;
         } else {
-            qCritical() << tr("Echec d'execution de la requète de création du nouveau poste : %1").arg(query.lastError().text());
+            qCritical() << "Echec lors de l'enregistrement du poste :" << m_fiche_du_poste->lastError();
         }
     } else {
-        qCritical() << tr("Echec de préparation de la requète de création du nouveau poste : %1").arg(query.lastError().text());
+        m_fiche_du_poste->setData(0, "id_evenement", getIdEvenement());
+        if (m_fiche_du_poste->submitAll()) {
+            setIdPoste(m_fiche_du_poste->lastInsertId().toInt());
+            m_liste_des_postes_de_l_evenement->reload();
+            r = true;
+        } else {
+            qCritical() << "Echec lors de l'enregistrement du nouveau poste :" << m_fiche_du_poste->lastError();
+        }
+    }
+    return r;
+}
+
+bool GestionnaireDAffectations::supprimerPoste()
+{
+    bool r = false;
+    if (m_fiche_du_poste->removeRow(0) && m_fiche_du_poste->submitAll()) {
+        m_liste_des_postes_de_l_evenement->reload();
+        r = true;
+    } else {
+        qCritical() << "Echec lors de la suppression du poste :" << m_liste_des_postes_de_l_evenement->lastError();
     }
     return r;
 }

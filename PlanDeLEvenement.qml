@@ -1,14 +1,11 @@
-import QtQuick 2.0
+import QtQuick 2.5
 import QtQuick.Controls 1.4
 
 Image {
     id: image
 
     property var modeleListeDesPostes // id_poste, nom, min, max, nombre_affectations_*
-    property var fonctionSelectionnerPoste: app.setIdPoste // (id_poste)
-    property var fonctionAjouterPoste // (x, y)
-    property var fonctionDeplacerPoste // (x, y)
-    property var fonctionSupprimerPoste // (id_poste)
+    property bool modifiable: false
     readonly property int cote: Math.min(width, height)
 
     sourceSize { height: 1000; width: 1000 }
@@ -26,8 +23,21 @@ Image {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: if (fonctionAjouterPoste) fonctionAjouterPoste(mouse.x/cote, mouse.y/cote)
-            cursorShape: if (fonctionAjouterPoste) Qt.CrossCursor
+            cursorShape: if (modifiable) Qt.CrossCursor
+            onClicked: if (modifiable) {
+                app.setIdPoste(-1);
+                app.fiche_du_poste.insertRows(0, 1);
+                app.fiche_du_poste.setData(0, "posx", mouse.x/cote);
+                app.fiche_du_poste.setData(0, "posy", mouse.y/cote);
+                // TODO montrer la position du nouveau poste sur le plan
+            }
+        }
+
+        Keys.onDeletePressed: { // FIXME : n'arrive jamais
+            if (modifiable && app.id_poste) {
+                app.supprimerPoste();
+                event.accepted = true
+            }
         }
 
         Repeater {
@@ -77,13 +87,13 @@ Image {
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.RightButton | Qt.LeftButton
-                    cursorShape: fonctionDeplacerPoste
+                    cursorShape: modifiable
                                  ? drag.active
                                    ? Qt.DragMoveCursor
                                    : Qt.PointingHandCursor
-                    : Qt.ArrowCursor
+                                 : Qt.ArrowCursor
                     drag {
-                        target: fonctionDeplacerPoste ? parent : null
+                        target: modifiable ? parent : null
                         minimumX: 0
                         minimumY: 0
                         maximumX: cadre.width  - parent.width
@@ -95,17 +105,18 @@ Image {
 
                         MenuItem {
                             text: qsTr("Supprimer")
-                            onTriggered: fonctionSupprimerPoste(parent._id_poste);
+                            onTriggered: app.supprimerPoste();
                         }
                     }
 
-                    onReleased: if (drag.active) fonctionDeplacerPoste(
-                                                     (parent.x + parent.width /2) / cote,
-                                                     (parent.y + parent.height/2) / cote
-                                                     );
+                    onReleased: if (drag.active) {
+                                    app.fiche_du_poste.setData(0, "posx", (parent.x + parent.width /2) / cote);
+                                    app.fiche_du_poste.setData(0, "posy", (parent.y + parent.height/2) / cote);
+                                    app.enregistrerPoste();
+                                }
                     onPressed: {
-                        fonctionSelectionnerPoste(parent._id_poste);
-                        if (mouse.button == Qt.RightButton && fonctionSupprimerPoste) {
+                        app.setIdPoste(parent._id_poste); // TODO: essayer [[view.]model.]id_poste
+                        if (mouse.button == Qt.RightButton && modifiable) {
                             contextMenu.popup();
                         }
                     }

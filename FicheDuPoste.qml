@@ -12,11 +12,10 @@ Rectangle {
         delegate: ColumnLayout {
 
             TextField {
+                id: _nom
                 placeholderText: qsTr("Nom du poste")
                 text: nom
                 font.pointSize: 12 // FIXME
-
-                onEditingFinished: app.fiche_du_poste.setData(0, "nom", text)
             }
 
             ColumnLayout {
@@ -27,31 +26,28 @@ Rectangle {
                 }
 
                 TextArea { // FIXME: si description est vide, submitAll() fails
+                    id: _description
                     text: description
                     tabChangesFocus: true
-                    onTextChanged: app.fiche_du_poste.setData(0, "description", text)
                 }
             }
 
             CheckBox {
+                id: _autonome
                 text: qsTr("Ce poste est autonome")
                 checked: autonome
-                onClicked: app.fiche_du_poste.setData(0, "autonome", checked)
             }
 
             Button {
                 text: qsTr("Valider")
-                enabled: nom != ""
+                enabled: _nom.text != ""
                 isDefault: true
                 activeFocusOnPress: true
                 onClicked: {
-                    if (model.id) {
-                        if (app.fiche_du_poste.submitAll()) {
-                            app.liste_des_postes_de_l_evenement.reload();
-                        } else {
-                            console.log("Echec de l'enregistrement des valeurs", model.id, nom, description, autonome, posx, posy);
-                        }
-                    } else app.insererPoste(nom, description, autonome, posx, posy)
+                    app.fiche_du_poste.setData(0, "nom", _nom.text);
+                    app.fiche_du_poste.setData(0, "description", _description.text);
+                    app.fiche_du_poste.setData(0, "autonome", _autonome.checked);
+                    app.enregistrerPoste();
                 }
             }
 //MessageDialog  {

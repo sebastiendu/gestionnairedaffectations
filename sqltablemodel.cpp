@@ -7,6 +7,11 @@ SqlTableModel::SqlTableModel(QObject *parent, QSqlDatabase db):
     setEditStrategy(OnManualSubmit);
 }
 
+QVariant SqlTableModel::data(int row, const QString &fieldName) const
+{
+    return data(createIndex(row, fieldIndex(fieldName)), Qt::DisplayRole);
+}
+
 QVariant SqlTableModel::data(const QModelIndex &index, int role) const
 {
     QVariant value;

@@ -13,6 +13,7 @@ class SqlTableModel : public QSqlTableModel
 public:
     explicit SqlTableModel(QObject *parent = 0, QSqlDatabase db = QSqlDatabase());
 
+    Q_INVOKABLE QVariant data(int row, const QString &fieldName) const;
     Q_INVOKABLE bool setData(int row, const QString &fieldName, const QVariant &value);
     Q_INVOKABLE bool submitAll() Q_DECL_OVERRIDE { return QSqlTableModel::submitAll(); }
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE { return QSqlTableModel::insertRows(row, count, parent); }
