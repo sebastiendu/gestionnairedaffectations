@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
 
     engine.addImageProvider(QLatin1String("plan"), new PlanSVGImageProvider);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml"))); // On charge l'interface à partir du .qml
-
+    if (engine.rootObjects().isEmpty()) { // echec de chargement de l'interface
+        return -1;
+    }
     return app.exec(); // On execute l'application
 }
