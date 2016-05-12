@@ -12,6 +12,7 @@ public:
     explicit SqlQueryModel(QObject *parent = 0);
 
     Q_INVOKABLE QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
+    Q_INVOKABLE QVariant data(int row, const QString &fieldName) const;
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
     Q_INVOKABLE int getIdFromIndex(int);
     Q_INVOKABLE int getIndexFromId(int);
@@ -22,9 +23,7 @@ public:
     Q_INVOKABLE void reload();
     Q_INVOKABLE int rowCount() Q_DECL_OVERRIDE;
 
-signals:
-
-public slots:
+    int fieldIndex(const QString &fieldName) const;
 
 };
 

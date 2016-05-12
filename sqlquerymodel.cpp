@@ -25,6 +25,11 @@ QVariant SqlQueryModel::data(const QModelIndex &index, int role) const
     return value;
 }
 
+QVariant SqlQueryModel::data(int row, const QString &fieldName) const
+{
+    return data(createIndex(row, fieldIndex(fieldName)), Qt::DisplayRole);
+}
+
 QHash<int, QByteArray> SqlQueryModel::roleNames() const {
     QHash<int, QByteArray> roleNames;
     for( int i = 0; i < record().count(); i++) {
@@ -63,4 +68,9 @@ void SqlQueryModel::reload()
 int SqlQueryModel::rowCount()
 {
     return QSqlQueryModel::rowCount();
+}
+
+int SqlQueryModel::fieldIndex(const QString &fieldName) const
+{
+    return query().record().indexOf(fieldName);
 }
