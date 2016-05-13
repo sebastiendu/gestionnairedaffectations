@@ -2,9 +2,21 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.2
 
-Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "par date de debut", "par taux de remplissage"
+// TODO : implémenter plusieurs etats pour ce composant : "par poste", "par date de debut", "par taux de remplissage"
+Rectangle {
+    color: "#333333"
+    implicitWidth: 350 // TODO pas codé en dur
+    implicitHeight: children[0].implicitHeight
+
     ColumnLayout {
-        anchors.fill: parent;
+        anchors.fill: parent
+        anchors.margins: 4
+
+        Label {
+            text: qsTr("Liste des tours")
+            font.pointSize: 16
+            color: "#CCCCCC"
+        }
 
         TextField {
             Layout.fillWidth: true
@@ -23,6 +35,7 @@ Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "
                 cacheBuffer: 800
                 delegate: Rectangle { // une ligne pour chaque tour du poste
                     property int _id_tour: id_tour
+                    property int _id_poste: id_poste
                     height: children[0].height
                     width: parent.width
 
@@ -81,7 +94,10 @@ Item { // TODO : implémenter plusieurs etats pour ce composant : "par poste", "
                 focus: true
                 Keys.onUpPressed: decrementCurrentIndex()
                 Keys.onDownPressed: incrementCurrentIndex()
-                onCurrentItemChanged: app.setIdTour(currentItem._id_tour);
+                onCurrentItemChanged: {
+                    app.setIdTour(currentItem._id_tour);
+                    app.setIdPoste(currentItem._id_poste);
+                }
             }
         }
     }

@@ -3,10 +3,8 @@
         <file>main.qml</file>
         <file>nouvelevenement.qml</file>
         <file>fonctions.js</file>
-        <file>personne.png</file>
         <file>ScrollBar.qml</file>
         <file>parametres_de_connexion.qml</file>
-        <file>nouveauPoste.qml</file>
         <file>RectangleTitre.qml</file>
         <file>Calendrier.qml</file>
         <file>Q_AffectationsListe.qml</file>
@@ -28,11 +26,13 @@
         <file>ListeDesAffectationsDuTour.qml</file>
         <file>ListeDesAffectationsDeLaDisponibilite.qml</file>
         <file>traductions/gestionnairedaffectations_eu.qm</file>
-        <file>FicheDUneNouvelleAffectation.qml</file>
         <file>FicheDeLAffectation.qml</file>
         <file>FicheDuPoste.qml</file>
         <file>ListeDesToursDuMoment.qml</file>
-        <file>PlanDesPostesDansLeTemps.qml</file>
         <file>PlanDeLEvenement.qml</file>
+        <file>ListeDesToursDuPoste.qml</file>
+        <file>FicheDeLaPersonne.qml</file>
+        <file>ChoixDeLHeure.qml</file>
+        <file>BoutonAffecter.qml</file>
     </qresource>
 </RCC>

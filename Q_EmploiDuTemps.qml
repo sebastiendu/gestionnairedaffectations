@@ -2,6 +2,7 @@ import QtQuick 2.3
 import "fonctions.js" as Fonctions
 
 Item {
+    anchors.fill: parent
     ListView {
         id: joursView
         anchors.fill: parent
@@ -108,15 +109,15 @@ Item {
                             onClicked: {
                                 fenetre.visible = true
                                 console.info("setIdTour(" + modelData.split('|')[0] + ") (TODO)");
-                                app.setIdTourPoste(modelData.split('|')[0]);
+                                app.setIdTour(modelData.split('|')[0]);
 
-                                nomPoste.text = app.fiche_poste_tour.getDataFromModel(0,"nom");
-                                date.text = Fonctions.dateTour(new Date(app.fiche_poste_tour.getDataFromModel(0,"debut")),new Date(app.fiche_poste_tour.getDataFromModel(0,"fin"))).trim();
-                               // fin.text = app.fiche_poste_tour.getDataFromModel(0,"fin");
+                                nomPoste.text = app.liste_des_tours_du_poste.getDataFromModel(0,"nom");
+                                date.text = Fonctions.dateTour(new Date(app.liste_des_tours_du_poste.getDataFromModel(0,"debut")),new Date(app.liste_des_tours_du_poste.getDataFromModel(0,"fin"))).trim();
+                               // fin.text = app.liste_des_tours_du_poste.getDataFromModel(0,"fin");
 
-                                affectationsOk.text = (app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees") == "" ) ? "aucune" : app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees");
-                                affectationsMax.text = "/ " + app.fiche_poste_tour.getDataFromModel(0,"max") + " (minimum: " + app.fiche_poste_tour.getDataFromModel(0,"min")+ ")";
-                                affectationsProposees.text = "<i>"+ app.fiche_poste_tour.getDataFromModel(0,"nombre_affectations_proposees") +" affectations proposées </i>"
+                                affectationsOk.text = (app.liste_des_tours_du_poste.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees") == "" ) ? "aucune" : app.liste_des_tours_du_poste.getDataFromModel(0,"nombre_affectations_validees_ou_acceptees");
+                                affectationsMax.text = "/ " + app.liste_des_tours_du_poste.getDataFromModel(0,"max") + " (minimum: " + app.liste_des_tours_du_poste.getDataFromModel(0,"min")+ ")";
+                                affectationsProposees.text = "<i>"+ app.liste_des_tours_du_poste.getDataFromModel(0,"nombre_affectations_proposees") +" affectations proposées </i>"
                             }
                         }
                     }

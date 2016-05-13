@@ -2,9 +2,20 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 
-Item {
+Rectangle {
+    color: "#333333"
+    implicitWidth: 350 // TODO pas codé en dur
+    implicitHeight: children[0].implicitHeight
+
     ColumnLayout {
         anchors.fill: parent
+        anchors.margins: 4
+
+        Label {
+            text: qsTr("Liste des affectations du tour")
+            font.pointSize: 16
+            color: "#CCCCCC"
+        }
 
         ScrollView {
             flickableItem.interactive: true
@@ -23,7 +34,7 @@ Item {
                         duration: 1000
                         from: "red"
                         to: color
-                        running: app.id_affectation == id_affectation
+                        running: app.id_affectation === id_affectation
                         alwaysRunToEnd: true
                     }
 
@@ -118,9 +129,6 @@ Item {
                 Keys.onDownPressed: incrementCurrentIndex()
                 onCurrentItemChanged: app.setIdAffectation(currentItem._id_affectation)
             }
-
         }
-
     }
-
 }

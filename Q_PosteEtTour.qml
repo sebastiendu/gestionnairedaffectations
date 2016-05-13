@@ -1,24 +1,27 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 
-Item {
+RowLayout {
 
-    RowLayout {
-        anchors.fill: parent
+    PlanDeLEvenement {
+        Layout.maximumWidth: parent.width - colonneDeDroite.width
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+        modeleListeDesPostes: app.liste_des_postes_de_l_evenement
+        modifiable: true
+    }
 
-        PlanDeLEvenement {
-            Layout.fillWidth: true; Layout.fillHeight: true
-            Layout.preferredWidth: cote
-            Layout.preferredHeight: cote
-
-            modeleListeDesPostes: app.liste_des_postes_de_l_evenement
-            modifiable: true
-        }
+    ColumnLayout {
+        id: colonneDeDroite
 
         FicheDuPoste {
-            Layout.fillWidth: true; Layout.fillHeight: true
-            Layout.preferredWidth: 200 // FIXME
+        }
+
+        ListeDesToursDuPoste {
+            Layout.fillHeight: true
+        }
+
+        FicheDuTour {
         }
     }
 }

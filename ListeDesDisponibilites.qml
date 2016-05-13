@@ -2,9 +2,21 @@ import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.2
 
-Item { // TODO : plusieurs états : "selon le nombre d'affectations (les sans-tour en premier)", "alphabétique" (ViewSection.FirstCharacter)
+// TODO : plusieurs états : "selon le nombre d'affectations (les sans-tour en premier)", "alphabétique" (ViewSection.FirstCharacter)
+Rectangle {
+    color: "#333333"
+    implicitWidth: 350 // TODO pas codé en dur
+    implicitHeight: children[0].implicitHeight
+
     ColumnLayout {
-        anchors.fill: parent;
+        anchors.fill: parent
+        anchors.margins: 4
+
+        Label {
+            text: qsTr("Liste des disponibilités")
+            font.pointSize: 16
+            color: "#CCCCCC"
+        }
 
         TextField {
             Layout.fillWidth: true
@@ -23,6 +35,7 @@ Item { // TODO : plusieurs états : "selon le nombre d'affectations (les sans-to
                 cacheBuffer: 800
                 delegate: Rectangle {
                     property int _id_disponibilite: id_disponibilite
+                    property int _id_personne: id_personne
                     height: children[0].height
                     width: parent.width
 
@@ -67,7 +80,10 @@ Item { // TODO : plusieurs états : "selon le nombre d'affectations (les sans-to
                 focus: true
                 Keys.onUpPressed: decrementCurrentIndex()
                 Keys.onDownPressed: incrementCurrentIndex()
-                onCurrentItemChanged: app.setIdDisponibilite(currentItem._id_disponibilite);
+                onCurrentItemChanged: {
+                    app.setIdPersonne(currentItem._id_personne);
+                    app.setIdDisponibilite(currentItem._id_disponibilite);
+                }
             }
         }
     }

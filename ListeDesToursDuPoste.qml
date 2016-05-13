@@ -12,33 +12,33 @@ Rectangle {
         anchors.margins: 4
 
         Label {
-            text: qsTr("Liste des tours à %1").arg(app.heure.toLocaleTimeString(null, {hour: "numeric", minute: "2-digit"}))
+            text: qsTr("Liste des tours du poste")
             font.pointSize: 16
             color: "#CCCCCC"
         }
+
         ScrollView {
             Layout.fillWidth: true
-//            implicitHeight: 200 // TODO pas codé en dur
+            implicitHeight: 200 // TODO pas codé en dur
 
             flickableItem.interactive: true
 
             ListView {
                 id: liste
 
-                model: app.proxy_de_la_liste_des_postes_de_l_evenement_par_heure
+                model: app.liste_des_tours_du_poste
                 delegate: Rectangle {
-                    property int _id_tour: id_tour
-                    property int _id_poste: id_poste
+                    property int _id_tour: id
 
                     height: children[0].height
                     width: parent.width
 
                     Text {
-                        text: qsTr("De %1 à %2 (%3) : %4")
+                        text: qsTr("%1 de %2 à %3 (%4)")
+                        .arg(debut.toLocaleDateString())
                         .arg(debut.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"}))
                         .arg(fin.toLocaleTimeString(null, {hour: "2-digit", minute: "2-digit"}))
                         .arg((new Date(0,0,0,0,0,0,fin-debut)).toLocaleTimeString(null, {hour: "numeric", minute: "2-digit"}))
-                        .arg(nom)
                         horizontalAlignment: Text.AlignRight
                         elide: Text.ElideLeft
                     }
@@ -61,10 +61,7 @@ Rectangle {
 
                 Keys.onUpPressed: decrementCurrentIndex()
                 Keys.onDownPressed: incrementCurrentIndex()
-                onCurrentItemChanged: {
-                    app.setIdPoste(currentItem._id_poste);
-                    app.setIdTour(currentItem._id_tour);
-                }
+                onCurrentItemChanged: app.setIdTour(currentItem._id_tour);
             }
         }
     }

@@ -2,58 +2,66 @@ import QtQuick 2.3
 import QtQuick.Layouts 1.1
 
 // Comme AffectationListe mais sans la liste des postes et tours, remplacée par le plan et la fiche du poste
-// TODO : sortir le slider et le plan dans leur propre fichier
 
-Item  {
+RowLayout {
+    anchors.fill: parent
 
-    RowLayout {
-        anchors.fill: parent
+    ColumnLayout {
 
-        ColumnLayout {
-            Layout.fillWidth: true; Layout.fillHeight: true
-
-            ListeDesDisponibilites {
-                Layout.fillWidth: true; Layout.fillHeight: true
-            }
-
-            FicheDeLaDisponibilite {
-                Layout.fillWidth: true; Layout.fillHeight: true
-            }
-
-            ListeDesAffectationsDeLaDisponibilite {
-                Layout.fillWidth: true; Layout.fillHeight: true
-            }
+        ListeDesDisponibilites {
+            Layout.fillHeight: true
         }
 
-        ColumnLayout {
-            Layout.fillWidth: true; Layout.fillHeight: true
-
-            PlanDesPostesDansLeTemps {
-                Layout.fillWidth: true; Layout.fillHeight: true
-            }
-
-            FicheDeLAffectation {
-                Layout.fillWidth: true; Layout.fillHeight: true
-            }
+        FicheDeLaPersonne {
         }
 
-        ColumnLayout {
-            Layout.fillWidth: true; Layout.fillHeight: true
+        FicheDeLaDisponibilite {
+        }
 
-            ListeDesToursDuMoment {
-                Layout.fillWidth: true; Layout.fillHeight: true
+        ListeDesAffectationsDeLaDisponibilite {
+            Layout.fillHeight: true
+        }
+    }
+
+    ColumnLayout {
+
+        ChoixDeLHeure {
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            ColumnLayout {
+                Layout.alignment: Qt.AlignTop
+                Layout.fillWidth: true
+
+                PlanDeLEvenement {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.alignment: Qt.AlignTop
+                    modeleListeDesPostes: app.proxy_de_la_liste_des_postes_de_l_evenement_par_heure
+                }
+
+                FicheDeLAffectation {
+                }
             }
 
-            FicheDuPoste {
-                Layout.fillWidth: true; Layout.fillHeight: true
-            }
+            ColumnLayout {
 
-            FicheDuTour {
-                Layout.fillWidth: true; Layout.fillHeight: true
-            }
+                ListeDesToursDuMoment {
+                    Layout.fillHeight: true
+                }
 
-            ListeDesAffectationsDuTour {
-                Layout.fillWidth: true; Layout.fillHeight: true
+                FicheDuPoste {
+                }
+
+                FicheDuTour {
+                }
+
+                ListeDesAffectationsDuTour {
+                    Layout.fillHeight: true
+                }
             }
         }
     }
