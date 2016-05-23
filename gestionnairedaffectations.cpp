@@ -6,7 +6,10 @@
 #include <QQuickView>
 #include <QXmlSimpleReader>
 #include <QSqlField>
+#include <QTextDocumentWriter>
+#include <QPrinter>
 #include "gestionnairedaffectations.h"
+#include "cartesdesbenevoles.h"
 
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     QGuiApplication(argc,argv),
@@ -1093,12 +1096,6 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
     return adresseEmail;
 }
 
-
-// ==============================================
-// =============GENERATION DES ETATS ============
-// ==============================================
-
-
 void GestionnaireDAffectations::genererFichesDePostes()
 {
     // FICHIER //
@@ -1196,107 +1193,40 @@ void GestionnaireDAffectations::genererFichesDePostes()
 
 }
 
-
-void GestionnaireDAffectations::genererCarteBenevoles()
+void GestionnaireDAffectations::genererLesCartesDesBenevolesODT()
 {
-    // FICHIER //
-    QTemporaryFile* f = new QTemporaryFile("Carte_de_benevoles_XXXXXX.odt");
-    f->open();
-
-    // REQUETE //
-    QSqlQuery query;
-    query.prepare("select * from carte_de_benevole_inscriptions_postes where id_evenement= :evt");
-    query.bindValue(":evt", getIdEvenement());
-    query.exec();
-
-    // PANDOC //
-    QProcess* pandoc = new QProcess(this);
-    pandoc->setProgram("pandoc");
-    QStringList arguments;
-    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f->fileName() << "-";
-    pandoc->setArguments(arguments);
-    pandoc->start();
-    pandoc->waitForStarted();
-
-    // INITIALISATIONS //
-    int id_personne = -2;
-    QString jourCourant = "-2";
-
-    // TRAITEMENTS //
-    afficherEntete(pandoc,query);
-
-
-    while (query.next())
-    {
-        if (query.record().value("id_personne").toInt() != id_personne)
-        {
-            id_personne = query.record().value("id_personne").toInt();
-
-            jourCourant = "-1";
-
-            pandoc->write("\n\n"); // Pour forcer la fin du tableau
-            faireUnRetourALaLigne(pandoc);
-            faireUnRetourALaLigne(pandoc);
-            pandoc->write("\n");
-            pandoc->write("# ");
-            pandoc->write(query.record().value("nom_personne").toString().toUtf8());
-            pandoc->write(" ");
-            pandoc->write(query.record().value("prenom_personne").toString().toUtf8());
-            pandoc->write("\n");
-
-            if (query.record().value("domicile").toString().toUtf8() != "")
-            {
-                pandoc->write(QString("[").append(query.record().value("domicile").toString()).append("]").append("(callto:").append(query.record().value("portable").toString()).append(")\n\n").toUtf8());
-
-                if (query.record().value("portable").toString().toUtf8() != "")
-                {
-                    pandoc->write(" | ");
-                }
-            }
-            if (query.record().value("portable").toString().toUtf8() != "")
-            {
-                pandoc->write(QString("[").append(query.record().value("portable").toString()).append("]").append("(callto:").append(query.record().value("portable").toString()).append(")\n\n").toUtf8());
-                pandoc->write("\n\n");
-            }
-            else
-            {
-                pandoc->write("\n\n");
-            }
+    CartesDesBenevoles document(getIdEvenement(), this);
+    QTemporaryFile* temporaryFile = new QTemporaryFile(this);
+    if (temporaryFile->open()) {
+        QTextDocumentWriter writer(temporaryFile, "odt");
+        if (writer.write(&document)) {
+            temporaryFile->close();
+            QProcess* process = new QProcess();
+            connect(process, SIGNAL(finished(int)), temporaryFile, SLOT(deleteLater()));
+            process->start("lowriter", QStringList { writer.fileName() });
+        } else {
+            qCritical() << tr("Echec d'écriture du document ODT dans le fichier '%1'")
+                           .arg(temporaryFile->fileName());
         }
-
-        if (query.record().value("debut_tour").toDateTime().toString("d") != jourCourant)
-        {
-            pandoc->write("\n");
-            jourCourant = query.record().value("debut_tour").toDateTime().toString("d");
-
-            pandoc->write("##");
-            pandoc->write(query.record().value("debut_tour").toDateTime().toString("dddd d MMMM yyyy").toUtf8());
-            pandoc->write("\n");
-            pandoc->write("Poste|Debut|Fin\n");
-            pandoc->write("---|---|---\n");
-
-        }
-        pandoc->write(query.record().value("nom_poste").toString().toUtf8());
-        pandoc->write("|");
-        pandoc->write(query.record().value("debut_tour").toDateTime().toString("H:mm").toUtf8());
-        pandoc->write("|");
-        pandoc->write(query.record().value("fin_tour").toDateTime().toString("H:mm").toUtf8());
-        pandoc->write("\n");
+    } else {
+        qCritical() << temporaryFile->errorString();
     }
-
-    pandoc->closeWriteChannel();
-    pandoc->waitForFinished();
-
-
-    qDebug() << pandoc->readAll();
-
-    QProcess* lowriter = new QProcess(this);
-    lowriter->start("lowriter", QStringList() << f->fileName());
-    lowriter->waitForFinished();
-
-    qDebug() << f->fileName();
-
-    qDebug() << lowriter->readAll();
+}
+void GestionnaireDAffectations::genererLesCartesDesBenevolesPDF()
+{
+    CartesDesBenevoles document(getIdEvenement(), this);
+    QTemporaryFile* temporaryFile = new QTemporaryFile(this);
+    if (temporaryFile->open()) {
+        QPrinter printer;
+        temporaryFile->close();
+        printer.setOutputFileName(temporaryFile->fileName());
+        document.print(&printer);
+        QProcess* process = new QProcess();
+        process->start("evince", QStringList { printer.outputFileName() });
+        connect(process, SIGNAL(finished(int)), temporaryFile, SLOT(deleteLater()));
+    } else {
+        qCritical() << temporaryFile->errorString();
+    }
 }
 
 void GestionnaireDAffectations::genererTableauRemplissage()

@@ -21,7 +21,7 @@ public:
     Q_INVOKABLE QVariant getDataFromModel(int ligne, QString colonne);
 
     Q_INVOKABLE void reload();
-    Q_INVOKABLE int rowCount() Q_DECL_OVERRIDE;
+    Q_INVOKABLE int rowCount();
 
     int fieldIndex(const QString &fieldName) const;
 

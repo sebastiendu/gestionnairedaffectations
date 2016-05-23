@@ -116,7 +116,8 @@ public:
     Q_INVOKABLE void setIdPersonne(int id);
 
     Q_INVOKABLE void genererFichesDePostes();
-    Q_INVOKABLE void genererCarteBenevoles();
+    Q_INVOKABLE void genererLesCartesDesBenevolesODT();
+    Q_INVOKABLE void genererLesCartesDesBenevolesPDF();
     Q_INVOKABLE void genererTableauRemplissage();
     Q_INVOKABLE void genererFichesProblemes();
     Q_INVOKABLE void genererExportGeneral();

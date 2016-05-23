@@ -15,7 +15,7 @@ public:
 
     Q_INVOKABLE QVariant data(int row, const QString &fieldName) const;
     Q_INVOKABLE bool setData(int row, const QString &fieldName, const QVariant &value);
-    Q_INVOKABLE bool submitAll() Q_DECL_OVERRIDE { return QSqlTableModel::submitAll(); }
+    Q_INVOKABLE bool submitAll() { return QSqlTableModel::submitAll(); }
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE { return QSqlTableModel::insertRows(row, count, parent); }
     Q_INVOKABLE QVariant lastInsertId() const { return query().lastInsertId(); }
     Q_INVOKABLE QString lastError() const { return QSqlTableModel::lastError().text(); }

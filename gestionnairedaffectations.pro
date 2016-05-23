@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick sql svg xml
+QT += qml quick sql svg xml printsupport
 
 SOURCES += main.cpp \
     sqlquerymodel.cpp \
@@ -11,7 +11,9 @@ SOURCES += main.cpp \
     toursparpostemodel.cpp \
     sortfilterproxymodel.cpp \
     modeledelalistedespostesdelevenementparheure.cpp \
-    sqltablemodel.cpp
+    sqltablemodel.cpp \
+    cartesdesbenevoles.cpp \
+    etat.cpp
 
 RESOURCES += \
     gestionnairedaffectations.qrc
@@ -31,7 +33,9 @@ HEADERS += \
     toursparpostemodel.h \
     sortfilterproxymodel.h \
     modeledelalistedespostesdelevenementparheure.h \
-    sqltablemodel.h
+    sqltablemodel.h \
+    cartesdesbenevoles.h \
+    etat.h
 
 TRANSLATIONS = \
     traductions/gestionnairedaffectations_eu.ts
@@ -42,5 +46,4 @@ SOURCES += \
     *.js
 }
 
-DISTFILES += \
-    PlanDeLEvenement.qml
+CONFIG += c++14

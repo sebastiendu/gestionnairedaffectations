@@ -428,10 +428,21 @@ ApplicationWindow { // Fenetre principale
                 text: qsTr("Fiche de postes / Bénévoles par tours")
                 onTriggered: app.genererFichesDePostes();
             }
-            MenuItem {
-                text: qsTr("Carte de bénévole / Inscription postes")
-                onTriggered: app.genererCarteBenevoles();
+
+            Menu {
+                title: qsTr("Carte de bénévole / Inscription postes")
+
+                MenuItem {
+                    text: qsTr("PDF")
+                    onTriggered: app.genererLesCartesDesBenevolesPDF();
+                }
+
+                MenuItem {
+                    text: qsTr("ODT")
+                    onTriggered: app.genererLesCartesDesBenevolesODT();
+                }
             }
+
             MenuItem {
                 text: qsTr("Tableau de remplissage")
                 onTriggered: app.genererTableauRemplissage();
