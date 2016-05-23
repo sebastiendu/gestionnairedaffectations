@@ -39,25 +39,22 @@ CartesDesBenevoles::CartesDesBenevoles(int idEvenement, QObject*parent=0)
             QTextBlockFormat formatDuBlocDeLAffectation;
 
             QTextCharFormat formatDesCaracteresDeLAffecation;
-            //formatDesCaracteresDeLAffecation.setUnderlineStyle(QTextCharFormat::SingleUnderline);
 
             if (query.first()) {
                 QSqlRecord r = query.record();
                 do {
                     int id_personne = r.value("id_personne").toInt();
-                    QStringList tel{
-                                r.value("domicile").toString(),
-                                r.value("portable").toString()
-                    };
+                    QStringList tel { r.value("domicile").toString(), r.value("portable").toString() };
                     tel.removeAll("");
                     c.movePosition(QTextCursor::End);
                     c.insertBlock(formatDuBlocDuNomDeLaPersonne, formatDesCaracteresDuNomDeLaPersonne);
-                    c.insertText(
-                                tr("%1 %2, %3")
-                                .arg(r.value("prenom_personne").toString())
-                                .arg(r.value("nom_personne").toString())
-                                .arg(r.value("ville").toString())
-                                );
+                    c.insertText(tr("%1 %2")
+                                 .arg(r.value("prenom_personne").toString())
+                                 .arg(r.value("nom_personne").toString())
+                                 );
+                    if (!r.value("ville").toString().isEmpty()) {
+                        c.insertText(tr(", %1").arg(r.value("ville").toString()));
+                    }
                     if (!tel.isEmpty()) {
                         c.insertText(tr(" (%1)").arg(tel.join(" — ")));
                     }
@@ -68,8 +65,8 @@ CartesDesBenevoles::CartesDesBenevoles(int idEvenement, QObject*parent=0)
                         c.movePosition(QTextCursor::End);
                         c.insertBlock(formatDuBlocDeLaDate, formatDesCaracteresDeLaDate);
                         c.insertText(QLocale().toString(jour));
-                        c.movePosition(QTextCursor::End);
                         do {
+                            c.movePosition(QTextCursor::End);
                             c.insertBlock(formatDuBlocDeLAffectation, formatDesCaracteresDeLAffecation);
                             c.insertText(tr("De %1 à %2 : %3")
                                          .arg(r.value("debut_tour").toTime().toString("H:mm"))

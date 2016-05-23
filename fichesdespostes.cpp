@@ -66,21 +66,20 @@ FichesDesPostes::FichesDesPostes(int idEvenement, QObject *parent)
                             c.insertText(tr("De %1 à %2")
                                          .arg(r.value("debut_tour").toTime().toString("H:mm"))
                                          .arg(r.value("fin_tour").toTime().toString("H:mm"))
-                                        );
+                                         );
                             do {
+                                QStringList tel { r.value("domicile").toString(), r.value("portable").toString() };
+                                tel.removeAll("");
                                 // TODO : liste numérotée
                                 c.movePosition(QTextCursor::End);
                                 c.insertBlock(formatDuBlocDeLAffectation, formatDesCaracteresDeLAffecation);
-                                c.insertText(tr("%1 %2, %3")
-                                         .arg(r.value("prenom_personne").toString())
-                                         .arg(r.value("nom_personne").toString())
-                                         .arg(r.value("ville").toString())
-                                         );
-                                QStringList tel{
-                                            r.value("domicile").toString(),
-                                            r.value("portable").toString()
-                                };
-                                tel.removeAll("");
+                                c.insertText(tr("%1 %2")
+                                             .arg(r.value("prenom_personne").toString())
+                                             .arg(r.value("nom_personne").toString())
+                                             );
+                                if (!r.value("ville").toString().isEmpty()) {
+                                    c.insertText(tr(", %1").arg(r.value("ville").toString()));
+                                }
                                 if (!tel.isEmpty()) {
                                     c.insertText(tr(" (%1)").arg(tel.join(" — ")));
                                 }
@@ -88,6 +87,7 @@ FichesDesPostes::FichesDesPostes(int idEvenement, QObject *parent)
                                 r = query.record();
                             } while (query.isValid()
                                      && r.value("id_tour").toInt() == id_tour);
+                            // TODO : compléter la liste avec des lignes vides numérotées (jusqu'à tour.min en noir et jusqu'à tour.max en gris) pour compléter à la main
                         } while (query.isValid()
                                  && r.value("id_poste").toInt() == id_poste
                                  && r.value("debut_tour").toDate() == jour);
