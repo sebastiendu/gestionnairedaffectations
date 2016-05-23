@@ -115,7 +115,8 @@ public:
     Q_INVOKABLE void setIdDoublons(int id);
     Q_INVOKABLE void setIdPersonne(int id);
 
-    Q_INVOKABLE void genererFichesDePostes();
+    Q_INVOKABLE void genererLesFichesDesPostesODT();
+    Q_INVOKABLE void genererLesFichesDesPostesPDF();
     Q_INVOKABLE void genererLesCartesDesBenevolesODT();
     Q_INVOKABLE void genererLesCartesDesBenevolesPDF();
     Q_INVOKABLE void genererTableauRemplissage();

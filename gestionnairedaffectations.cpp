@@ -10,6 +10,7 @@
 #include <QPrinter>
 #include "gestionnairedaffectations.h"
 #include "cartesdesbenevoles.h"
+#include "fichesdespostes.h"
 
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     QGuiApplication(argc,argv),
@@ -1096,137 +1097,27 @@ QString GestionnaireDAffectations::creerLotDeSolicitation(QString evenementsSele
     return adresseEmail;
 }
 
-void GestionnaireDAffectations::genererFichesDePostes()
+void GestionnaireDAffectations::genererLesFichesDesPostesODT()
 {
-    // FICHIER //
-    QTemporaryFile* f = new QTemporaryFile("Fiches_De_Postes_XXXXXX");
-    f->open();
-    qDebug("reussi !");
-    // REQUETE //
-    QSqlQuery query;
-    query.prepare("select * from fiche_de_poste_benevoles_par_tour where id_evenement= :evt");
-    query.bindValue(":evt", getIdEvenement());
-    query.exec();
+    FichesDesPostes document(getIdEvenement(), this);
+    document.ouvrirODT();
+}
 
-    // PANDOC //
-    QProcess* pandoc = new QProcess(this);
-    pandoc->setProgram("pandoc");
-    QStringList arguments;
-    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f->fileName() << "-";
-    pandoc->setArguments(arguments);
-    pandoc->start();
-    pandoc->waitForStarted();
-
-    // INITIALISATIONS //
-    int id_poste = -2;
-    int id_tourPrecedent = -1;
-    QString dateTourCourant = QString("-1");
-    QString dateTourPrecedent = QString("-2");
-
-    // TRAITEMENTS //
-    afficherEntete(pandoc,query);
-
-    while (query.next())
-    {
-        if (query.record().value("id_poste").toInt() != id_poste)
-        {
-            dateTourCourant = "-1";  // On réinitialise les deux variables à des valeurs différentes pour
-            dateTourPrecedent = "-2";// l'affichage de la date
-            //(id_poste!=-2?pandoc->write("\n -------- \n"):id_poste=id_poste);
-            id_poste = query.record().value("id_poste").toInt();
-            id_tourPrecedent = -1;
-
-
-            pandoc->write("\n\n"); // Pour forcer la fin du tableau
-            faireUnRetourALaLigne(pandoc);
-            pandoc->write("\n### ");
-            pandoc->write(query.record().value("nom_poste").toString().toUtf8());
-            pandoc->write("\n\n");
-        }
-
-        if (query.record().value("id_tour").toInt() != id_tourPrecedent)
-        {
-            id_tourPrecedent = query.record().value("id_tour").toInt();
-
-            dateTourCourant = query.record().value("debut_tour").toDateTime().toString("dMMYYYY");
-
-            if (dateTourCourant != dateTourPrecedent)
-            {
-                dateTourPrecedent = dateTourCourant;
-                pandoc->write("\n\n"); // Pour forcer la fin du tableau
-                faireUnRetourALaLigne(pandoc);
-                pandoc->write("\n\n##       ");
-                pandoc->write(query.record().value("debut_tour").toDateTime().toString("dddd d MMMM yyyy").toUtf8());
-                pandoc->write("\n\n");
-                //pandoc->write(" de ")
-            }
-            pandoc->write("\n\n "); // PAS TOUCHER A CA ... //
-            pandoc->write(" \n\n ");// CA MARCHE ...     //
-            pandoc->write("              ● ");
-            pandoc->write(query.record().value("debut_tour").toDateTime().toString("H:mm").toUtf8());
-            pandoc->write(" → ");
-            pandoc->write(query.record().value("fin_tour").toDateTime().toString("H:mm").toUtf8());
-            pandoc->write("\n\n");
-
-            pandoc->write("Nom|Prénom|Portable\n");
-            pandoc->write("---|---|---\n");
-        }
-
-        pandoc->write(query.record().value("nom_personne").toString().toUtf8());
-        pandoc->write("|");
-        pandoc->write(query.record().value("prenom_personne").toString().toUtf8());
-        pandoc->write("|");
-        pandoc->write(query.record().value("portable").toString().toUtf8());
-        pandoc->write("\n");
-    }
-
-    pandoc->closeWriteChannel();
-    pandoc->waitForFinished();
-
-    qDebug() << pandoc->readAll();
-
-    QProcess* lowriter = new QProcess(this);
-    lowriter->start("lowriter", QStringList() << f->fileName());
-    lowriter->waitForFinished();
-
-    qDebug() << lowriter->readAll();
-
+void GestionnaireDAffectations::genererLesFichesDesPostesPDF()
+{
+    FichesDesPostes document(getIdEvenement(), this);
+    document.ouvrirPDF();
 }
 
 void GestionnaireDAffectations::genererLesCartesDesBenevolesODT()
 {
     CartesDesBenevoles document(getIdEvenement(), this);
-    QTemporaryFile* temporaryFile = new QTemporaryFile(this);
-    if (temporaryFile->open()) {
-        QTextDocumentWriter writer(temporaryFile, "odt");
-        if (writer.write(&document)) {
-            temporaryFile->close();
-            QProcess* process = new QProcess();
-            connect(process, SIGNAL(finished(int)), temporaryFile, SLOT(deleteLater()));
-            process->start("lowriter", QStringList { writer.fileName() });
-        } else {
-            qCritical() << tr("Echec d'écriture du document ODT dans le fichier '%1'")
-                           .arg(temporaryFile->fileName());
-        }
-    } else {
-        qCritical() << temporaryFile->errorString();
-    }
+    document.ouvrirODT();
 }
 void GestionnaireDAffectations::genererLesCartesDesBenevolesPDF()
 {
     CartesDesBenevoles document(getIdEvenement(), this);
-    QTemporaryFile* temporaryFile = new QTemporaryFile(this);
-    if (temporaryFile->open()) {
-        QPrinter printer;
-        temporaryFile->close();
-        printer.setOutputFileName(temporaryFile->fileName());
-        document.print(&printer);
-        QProcess* process = new QProcess();
-        process->start("evince", QStringList { printer.outputFileName() });
-        connect(process, SIGNAL(finished(int)), temporaryFile, SLOT(deleteLater()));
-    } else {
-        qCritical() << temporaryFile->errorString();
-    }
+    document.ouvrirPDF();
 }
 
 void GestionnaireDAffectations::genererTableauRemplissage()

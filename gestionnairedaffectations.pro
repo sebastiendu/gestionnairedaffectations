@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     modeledelalistedespostesdelevenementparheure.cpp \
     sqltablemodel.cpp \
     cartesdesbenevoles.cpp \
-    etat.cpp
+    etat.cpp \
+    fichesdespostes.cpp
 
 RESOURCES += \
     gestionnairedaffectations.qrc
@@ -35,7 +36,8 @@ HEADERS += \
     modeledelalistedespostesdelevenementparheure.h \
     sqltablemodel.h \
     cartesdesbenevoles.h \
-    etat.h
+    etat.h \
+    fichesdespostes.h
 
 TRANSLATIONS = \
     traductions/gestionnairedaffectations_eu.ts

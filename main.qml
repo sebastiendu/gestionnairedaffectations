@@ -424,9 +424,18 @@ ApplicationWindow { // Fenetre principale
 
         Menu {
             title: qsTr("&Générer Etat")
-            MenuItem {
-                text: qsTr("Fiche de postes / Bénévoles par tours")
-                onTriggered: app.genererFichesDePostes();
+            Menu {
+                title: qsTr("Fiches de postes / Bénévoles par tours")
+
+                MenuItem {
+                    text: qsTr("PDF")
+                    onTriggered: app.genererLesFichesDesPostesPDF();
+                }
+
+                MenuItem {
+                    text: qsTr("ODT")
+                    onTriggered: app.genererLesFichesDesPostesODT();
+                }
             }
 
             Menu {

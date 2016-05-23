@@ -6,6 +6,10 @@
 #include <QDate>
 #include <QDebug>
 #include <QSqlError>
+#include <QTemporaryFile>
+#include <QPrinter>
+#include <QProcess>
+#include <QTextDocumentWriter>
 
 Etat::Etat(QString titre, int idEvenement, QObject *parent) :
     QTextDocument(parent),
@@ -66,5 +70,40 @@ Etat::Etat(QString titre, int idEvenement, QObject *parent) :
         }
     } else {
         qCritical() << query.lastError();
+    }
+}
+
+void Etat::ouvrirPDF(QString commande)
+{
+    QTemporaryFile* temporaryFile = new QTemporaryFile(parent());
+    if (temporaryFile->open()) {
+        QPrinter printer;
+        temporaryFile->close();
+        printer.setOutputFileName(temporaryFile->fileName());
+        print(&printer);
+        QProcess* process = new QProcess();
+        process->start(commande, QStringList { printer.outputFileName() });
+        connect(process, SIGNAL(finished(int)), temporaryFile, SLOT(deleteLater()));
+    } else {
+        qCritical() << temporaryFile->errorString();
+    }
+}
+
+void Etat::ouvrirODT(QString commande)
+{
+    QTemporaryFile* temporaryFile = new QTemporaryFile(parent());
+    if (temporaryFile->open()) {
+        QTextDocumentWriter writer(temporaryFile, "odt");
+        if (writer.write(this)) {
+            temporaryFile->close();
+            QProcess* process = new QProcess();
+            connect(process, SIGNAL(finished(int)), temporaryFile, SLOT(deleteLater()));
+            process->start(commande, QStringList { writer.fileName() });
+        } else {
+            qCritical() << tr("Echec d'écriture du document ODT dans le fichier '%1'")
+                           .arg(temporaryFile->fileName());
+        }
+    } else {
+        qCritical() << temporaryFile->errorString();
     }
 }
