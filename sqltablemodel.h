@@ -19,6 +19,7 @@ public:
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE { return QSqlTableModel::insertRows(row, count, parent); }
     Q_INVOKABLE QVariant lastInsertId() const { return query().lastInsertId(); }
     Q_INVOKABLE QString lastError() const { return QSqlTableModel::lastError().text(); }
+    Q_INVOKABLE void ouvrirCSV(QString commande = "localc");
 
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
     QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;

@@ -1,5 +1,9 @@
 #include <QSqlRecord>
+#include <QTemporaryFile>
+#include <QProcess>
+#include <QDebug>
 #include "sqltablemodel.h"
+#include "qxtcsvmodel.h"
 
 SqlTableModel::SqlTableModel(QObject *parent, QSqlDatabase db):
     QSqlTableModel(parent, db)
@@ -31,6 +35,32 @@ QVariant SqlTableModel::data(const QModelIndex &index, int role) const
 bool SqlTableModel::setData(int row, const QString &fieldName, const QVariant &value)
 {
     return QSqlTableModel::setData(createIndex(row, fieldIndex(fieldName)), value, Qt::EditRole);
+}
+
+void SqlTableModel::ouvrirCSV(QString commande)
+{
+    QTemporaryFile* temporaryFile = new QTemporaryFile(parent());
+    if (temporaryFile->open()) {
+        QxtCsvModel csv(this);
+        csv.insertColumns(0, columnCount());
+        csv.insertRows(0, rowCount());
+        for (int column = 0; column < csv.columnCount(); column ++) {
+            csv.setHeaderText(column, headerData(column, Qt::Horizontal).toString());
+        }
+        for (int row = 0; row < csv.rowCount(); row ++) {
+            for (int column = 0; column < csv.columnCount(); column ++) {
+                csv.setText(row, column, QSqlTableModel::data(index(row, column)).toString());
+            }
+        }
+        csv.toCSV(temporaryFile->fileName(), true);
+        temporaryFile->close();
+        QProcess* process = new QProcess();
+        process->start(commande, QStringList { temporaryFile->fileName() });
+        connect(process, SIGNAL(finished(int)), temporaryFile, SLOT(deleteLater()));
+    } else {
+        qCritical() << temporaryFile->errorString();
+    }
+
 }
 
 QHash<int, QByteArray> SqlTableModel::roleNames() const {
