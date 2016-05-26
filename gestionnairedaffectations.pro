@@ -16,7 +16,9 @@ SOURCES += main.cpp \
     etat.cpp \
     fichesdespostes.cpp \
     tableauderemplissage.cpp \
-    listedesdisponibilitessansaffectation.cpp
+    listedesdisponibilitessansaffectation.cpp \
+    qxtcsvmodel.cpp \
+    qxtglobal.cpp
 
 RESOURCES += \
     gestionnairedaffectations.qrc
@@ -41,7 +43,9 @@ HEADERS += \
     etat.h \
     fichesdespostes.h \
     tableauderemplissage.h \
-    listedesdisponibilitessansaffectation.h
+    listedesdisponibilitessansaffectation.h \
+    qxtcsvmodel.h \
+    qxtglobal.h
 
 TRANSLATIONS = \
     traductions/gestionnairedaffectations_eu.ts
