@@ -30,7 +30,6 @@ CartesDesBenevoles::CartesDesBenevoles(int idEvenement, QObject*parent=0)
 
             QTextBlockFormat formatDuBlocDeLaDate;
             formatDuBlocDeLaDate.setTopMargin(50);
-            formatDuBlocDeLaDate.setAlignment(Qt::AlignLeft);
 
             QTextCharFormat formatDesCaracteresDeLaDate;
             formatDesCaracteresDeLaDate.setFontWeight(QFont::Bold);
