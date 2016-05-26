@@ -458,7 +458,7 @@ ApplicationWindow { // Fenetre principale
             }
             MenuItem {
                 text: qsTr("Bénévoles sans tour de travail")
-                onTriggered: app.genererFichesProblemes();
+                onTriggered: app.genererLaListeDesDisponibilitesSansAffectation();
             }
             MenuItem {
                 text: qsTr("Export général")

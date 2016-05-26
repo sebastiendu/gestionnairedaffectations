@@ -120,7 +120,7 @@ public:
     Q_INVOKABLE void genererLesCartesDesBenevolesODT();
     Q_INVOKABLE void genererLesCartesDesBenevolesPDF();
     Q_INVOKABLE void genererTableauDeRemplissage();
-    Q_INVOKABLE void genererFichesProblemes();
+    Q_INVOKABLE void genererLaListeDesDisponibilitesSansAffectation();
     Q_INVOKABLE void genererExportGeneral();
 
 

@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     cartesdesbenevoles.cpp \
     etat.cpp \
     fichesdespostes.cpp \
-    tableauderemplissage.cpp
+    tableauderemplissage.cpp \
+    listedesdisponibilitessansaffectation.cpp
 
 RESOURCES += \
     gestionnairedaffectations.qrc
@@ -39,7 +40,8 @@ HEADERS += \
     cartesdesbenevoles.h \
     etat.h \
     fichesdespostes.h \
-    tableauderemplissage.h
+    tableauderemplissage.h \
+    listedesdisponibilitessansaffectation.h
 
 TRANSLATIONS = \
     traductions/gestionnairedaffectations_eu.ts

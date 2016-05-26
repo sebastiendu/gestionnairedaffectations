@@ -12,6 +12,7 @@
 #include "cartesdesbenevoles.h"
 #include "fichesdespostes.h"
 #include "tableauderemplissage.h"
+#include "listedesdisponibilitessansaffectation.h"
 
 GestionnaireDAffectations::GestionnaireDAffectations(int & argc, char ** argv):
     QGuiApplication(argc,argv),
@@ -1127,147 +1128,10 @@ void GestionnaireDAffectations::genererTableauDeRemplissage()
     document.ouvrirPDF();
 }
 
-void GestionnaireDAffectations::genererFichesProblemes()
+void GestionnaireDAffectations::genererLaListeDesDisponibilitesSansAffectation()
 {
-    // FICHIER //
-
-    QTemporaryFile* f = new QTemporaryFile("Fiche_bénévoles_sans_tour_de_travail_XXXXXX.odt");
-    f->open();
-
-    // REQUETE //
-    QSqlQuery query;
-    query.prepare("select * from fiches_a_probleme where id_evenement= :evt");
-    query.bindValue(":evt", getIdEvenement());
-    query.exec();
-
-    // PANDOC //
-    QProcess* pandoc = new QProcess(this);
-    pandoc->setProgram("pandoc");
-    QStringList arguments;
-    arguments << "-f" << "markdown" << "-t" << "odt" << "-o" << f->fileName() << "-";
-    pandoc->setArguments(arguments);
-    pandoc->start();
-    pandoc->waitForStarted();
-
-    // INITISALISATION //
-
-    QString nomEvenementCourant;
-    QString lieuEvenementCourant;
-    QString nomPersonneCourant;
-    QString prenomPersonneCourant;
-    QString adressePersonneCourant;
-    QString codePostalPersonneCourant;
-    QString villePersonneCourant;
-    QString portablePersonneCourant;
-    QString domicilePersonneCourant;
-    QString emailPersonneCourant;
-    int agePersonneCourant;
-    QString professionPersonneCourant;
-    QString competencesPersonneCourant;
-    QString languesPersonneCourant;
-    QString amisPersonneCourant;
-    QString typePostePersonneCourant;
-    QString commentairePersonneCourant;
-    QDate dateDebutEvenement;
-    QDate dateNaissancePersonneCourant;
-    QString dateEtHeureDispo;
-
-    afficherEntete(pandoc,query);
-
-    while (query.next())
-    {
-
-        nomPersonneCourant = query.record().value("nom_personne").toString();
-        prenomPersonneCourant = query.record().value("prenom_personne").toString();
-        adressePersonneCourant = query.record().value("adresse").toString();
-        codePostalPersonneCourant = query.record().value("code_postal").toString();
-        villePersonneCourant = query.record().value("ville").toString();
-        portablePersonneCourant = query.record().value("portable").toString();
-        domicilePersonneCourant = query.record().value("domicile").toString();
-        emailPersonneCourant = query.record().value("email").toString();
-        dateNaissancePersonneCourant = query.record().value("date_naissance").toDate();
-        professionPersonneCourant = query.record().value("profession").toString();
-        competencesPersonneCourant = query.record().value("competences").toString();
-        languesPersonneCourant = query.record().value("langues").toString();
-        amisPersonneCourant = query.record().value("liste_amis").toString();
-        typePostePersonneCourant = query.record().value("type_poste").toString();
-        commentairePersonneCourant = query.record().value("commentaire_disponibilite").toString();
-        dateEtHeureDispo = query.record().value("jours_et_heures_dispo").toString();
-
-        faireUnRetourALaLigne(pandoc);
-        pandoc->write("\n###");
-        pandoc->write(nomPersonneCourant.toUtf8());
-
-        if (prenomPersonneCourant != "")
-            pandoc->write(QString(" ").append(prenomPersonneCourant).toUtf8());
-
-        pandoc->write("\n\n");
-
-        if (adressePersonneCourant != "")
-        {
-            /*pandoc->write(QString("* Adresse :").toUtf8());
-            pandoc->write(QString("\n\n").toUtf8());
-            pandoc->write(QString("          ").append(adressePersonneCourant).toUtf8());*/
-            //pandoc->write("###");
-            pandoc->write(adressePersonneCourant.toUtf8());
-            pandoc->write(QString("\n\n").toUtf8());
-            pandoc->write(codePostalPersonneCourant.append(" ").append(villePersonneCourant).toUtf8());
-            pandoc->write("\n\n");
-        }
-        if (portablePersonneCourant != "")
-            pandoc->write((QString("[").append(portablePersonneCourant).append("]").append("(callto:").append(portablePersonneCourant).append(")\n\n")).toUtf8());
-
-        if (domicilePersonneCourant != "")
-            pandoc->write((QString("[").append(domicilePersonneCourant).append("]").append("(callto:").append(domicilePersonneCourant).append(")\n\n")).toUtf8());
-
-        if (emailPersonneCourant != "")
-            pandoc->write((QString("[").append(emailPersonneCourant).append("]").append("(mailto:").append(emailPersonneCourant).append(")\n\n")).toUtf8());
-
-        if (!dateNaissancePersonneCourant.isNull())
-        {
-            QDate dateNais = query.record().value("date_naissance").toDate();
-            QDate dateRepere = query.record().value("debut_evenement").toDate();
-            int agePersonneCourant = age(dateNais,dateRepere);
-
-
-            pandoc->write(QString("                    ● ").toUtf8());
-
-            pandoc->write(QString().setNum(agePersonneCourant).toUtf8());
-
-            pandoc->write(QString(" ans ").toUtf8());
-
-            pandoc->write(QString(" (né(e) le ").toUtf8());
-
-            pandoc->write(dateNaissancePersonneCourant.toString("d/MM/yyyy)").toUtf8());
-
-            pandoc->write(QString("\n\n").toUtf8());
-
-        }
-
-
-        if (professionPersonneCourant != "")
-            pandoc->write(QString("                    ● Profession : ").append(professionPersonneCourant).append("\n\n").toUtf8());
-
-        if (competencesPersonneCourant != "")
-            pandoc->write(QString("                    ● Competences : ").append(competencesPersonneCourant).append("\n\n").toUtf8());
-
-        if (languesPersonneCourant != "")
-            pandoc->write(QString("                    ● Langues: ").append(languesPersonneCourant).append("\n\n").toUtf8());
-
-        if (amisPersonneCourant != "")
-            pandoc->write(QString("                    ● Disponibilités : ").append(dateEtHeureDispo).append("\n\n").toUtf8());
-
-        if (amisPersonneCourant != "")
-            pandoc->write(QString("                    ● Affinités : ").append(amisPersonneCourant).append("\n\n").toUtf8());
-
-        if (typePostePersonneCourant != "")
-            pandoc->write(QString("                    ● Type de poste souhaité : ").append(typePostePersonneCourant).append("\n\n").toUtf8());
-
-        if (commentairePersonneCourant != "")
-            pandoc->write(QString("                    ● Commentaire : ").append(commentairePersonneCourant).append("\n\n").toUtf8());
-    }
-
-    terminerGenerationEtat(pandoc,f);
+     ListeDesDisponibilitesSansAffectation document(getIdEvenement(), this);
+     document.ouvrirPDF();
 }
 
 void GestionnaireDAffectations::genererExportGeneral()
