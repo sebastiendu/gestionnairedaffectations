@@ -27,10 +27,16 @@ Etat::Etat(QString titre, int idEvenement, QObject *parent) :
             if (query.first()) {
                 QSqlRecord r = query.record();
 
-                QTextBlockFormat formatDUnBlocNormal(c.blockFormat());
-                formatDUnBlocNormal.setAlignment(Qt::AlignCenter);
+                QTextBlockFormat formatDuBlocDuNom;
+                formatDuBlocDuNom.setAlignment(Qt::AlignCenter);
 
-                QTextCharFormat formatDesCaracteresNormaux(c.charFormat());
+                QTextCharFormat formatDesCaracteresDuNom;
+                formatDesCaracteresDuNom.setFontWeight(QFont::Bold);
+
+                QTextBlockFormat formatDuBlocDuLieuEtDesDates;
+                formatDuBlocDuLieuEtDesDates.setAlignment(Qt::AlignCenter);
+
+                QTextCharFormat formatDesCaracteresDuLieuEtDesDates;
 
                 QTextBlockFormat formatDuBlocDeTitre;
                 formatDuBlocDeTitre.setAlignment(Qt::AlignHCenter);
@@ -41,12 +47,18 @@ Etat::Etat(QString titre, int idEvenement, QObject *parent) :
                 formatDesCaracteresDuTitre.setFontWeight(QFont::Bold);
                 formatDesCaracteresDuTitre.setFontPointSize(30);
 
+                QTextBlockFormat formatDuBlocDeLaDate;
+                formatDuBlocDeLaDate.setAlignment(Qt::AlignRight);
+                formatDuBlocDeLaDate.setBottomMargin(100);
+
+                QTextCharFormat formatDesCaracteresDeLaDate;
+
                 c.movePosition(QTextCursor::Start);
 
-                c.insertBlock(formatDUnBlocNormal, formatDesCaracteresNormaux);
+                c.insertBlock(formatDuBlocDuNom, formatDesCaracteresDuNom);
                 c.insertText(r.value("nom").toString());
 
-                c.insertBlock();
+                c.insertBlock(formatDuBlocDuLieuEtDesDates, formatDesCaracteresDuLieuEtDesDates);
                 c.insertText(
                             tr("%1, du %3 au %4")
                             .arg(r.value("lieu").toString())
@@ -57,7 +69,7 @@ Etat::Etat(QString titre, int idEvenement, QObject *parent) :
                 c.insertBlock(formatDuBlocDeTitre, formatDesCaracteresDuTitre);
                 c.insertText(titre);
 
-                c.insertBlock(formatDUnBlocNormal, formatDesCaracteresNormaux);
+                c.insertBlock(formatDuBlocDeLaDate, formatDesCaracteresDeLaDate);
                 c.insertText(
                             tr("Rapport généré le %1").arg(
                                 QLocale().toString(QDateTime::currentDateTime()))
