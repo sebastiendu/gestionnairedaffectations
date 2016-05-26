@@ -38,7 +38,7 @@
 #include <QString>
 #include <QStringList>
 #include <QModelIndex>
-#include <qxtglobal.h>
+#include "qxtglobal.h"
 class QTextCodec;
 
 class QxtCsvModelPrivate;
