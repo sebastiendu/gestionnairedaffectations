@@ -11,9 +11,7 @@ FichesDesPostes::FichesDesPostes(int idEvenement, QObject *parent)
     : Etat(tr("Fiches des postes"), idEvenement, parent)
 {
     QSqlQuery query;
-    if (query.prepare("select *"
-                      " from fiche_de_poste_benevoles_par_tour"
-                      " where id_evenement=:id_evenement")) {
+    if (query.prepare("select * from fiches_des_postes where id_evenement = :id_evenement")) {
         query.bindValue(":id_evenement", idEvenement);
         if (query.exec()) {
 

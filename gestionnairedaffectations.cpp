@@ -1148,10 +1148,10 @@ void GestionnaireDAffectations::genererExportCSV(QString nomVue, QString filtre)
 
 void GestionnaireDAffectations::genererExportGeneralDesTours()
 {
-    genererExportCSV("export_general_tours", QString("id_evenement = %1").arg(getIdEvenement()));
+    genererExportCSV("export_general_des_tours", QString("id_evenement = %1").arg(getIdEvenement()));
 }
 
 void GestionnaireDAffectations::genererExportGeneralDesPersonnes()
 {
-    genererExportCSV("export_general_personnes", QString("id_evenement = %1").arg(getIdEvenement()));
+    genererExportCSV("export_general_des_personnes", QString("id_evenement = %1").arg(getIdEvenement()));
 }

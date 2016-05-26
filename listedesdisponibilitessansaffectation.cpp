@@ -12,9 +12,7 @@ ListeDesDisponibilitesSansAffectation::ListeDesDisponibilitesSansAffectation(int
     : Etat(tr("Liste des personnes disponibles sans affectation"), idEvenement, parent)
 {
     QSqlQuery query;
-    if (query.prepare("select *"
-                      " from fiches_a_probleme"
-                      " where id_evenement = :id_evenement")) {
+    if (query.prepare("select * from liste_des_disponibilites_sans_affectation where id_evenement = :id_evenement")) {
         query.bindValue(":id_evenement", idEvenement);
         if (query.exec()) {
 

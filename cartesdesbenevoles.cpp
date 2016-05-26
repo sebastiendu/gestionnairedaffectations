@@ -11,9 +11,7 @@ CartesDesBenevoles::CartesDesBenevoles(int idEvenement, QObject*parent=0)
     : Etat(tr("Cartes des bénévoles"), idEvenement, parent)
 {
     QSqlQuery query;
-    if (query.prepare("select *"
-                      " from carte_de_benevole_inscriptions_postes"
-                      " where id_evenement=:id_evenement")) {
+    if (query.prepare("select * from cartes_des_benevoles where id_evenement = :id_evenement")) {
         query.bindValue(":id_evenement", idEvenement);
         if (query.exec()) {
 

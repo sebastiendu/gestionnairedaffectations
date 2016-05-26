@@ -425,7 +425,7 @@ ApplicationWindow { // Fenetre principale
         Menu {
             title: qsTr("&Générer Etat")
             Menu {
-                title: qsTr("Fiches de postes")
+                title: qsTr("Fiches des postes")
 
                 MenuItem {
                     text: qsTr("PDF")
