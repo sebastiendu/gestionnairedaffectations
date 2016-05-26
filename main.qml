@@ -454,7 +454,7 @@ ApplicationWindow { // Fenetre principale
 
             MenuItem {
                 text: qsTr("Tableau de remplissage")
-                onTriggered: app.genererTableauRemplissage();
+                onTriggered: app.genererTableauDeRemplissage();
             }
             MenuItem {
                 text: qsTr("Bénévoles sans tour de travail")

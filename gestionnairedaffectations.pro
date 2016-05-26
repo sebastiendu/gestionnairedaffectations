@@ -14,7 +14,8 @@ SOURCES += main.cpp \
     sqltablemodel.cpp \
     cartesdesbenevoles.cpp \
     etat.cpp \
-    fichesdespostes.cpp
+    fichesdespostes.cpp \
+    tableauderemplissage.cpp
 
 RESOURCES += \
     gestionnairedaffectations.qrc
@@ -37,7 +38,8 @@ HEADERS += \
     sqltablemodel.h \
     cartesdesbenevoles.h \
     etat.h \
-    fichesdespostes.h
+    fichesdespostes.h \
+    tableauderemplissage.h
 
 TRANSLATIONS = \
     traductions/gestionnairedaffectations_eu.ts
