@@ -425,7 +425,7 @@ ApplicationWindow { // Fenetre principale
         Menu {
             title: qsTr("&Générer Etat")
             Menu {
-                title: qsTr("Fiches de postes / Bénévoles par tours")
+                title: qsTr("Fiches de postes")
 
                 MenuItem {
                     text: qsTr("PDF")
@@ -439,7 +439,7 @@ ApplicationWindow { // Fenetre principale
             }
 
             Menu {
-                title: qsTr("Carte de bénévole / Inscription postes")
+                title: qsTr("Cartes des bénévoles")
 
                 MenuItem {
                     text: qsTr("PDF")
@@ -448,21 +448,28 @@ ApplicationWindow { // Fenetre principale
 
                 MenuItem {
                     text: qsTr("ODT")
-                    onTriggered: app.genererLesCartesDesBenevolesODT();
+                    onTriggered: app.genererLesCartesDesBenevolesODT()
                 }
             }
 
             MenuItem {
                 text: qsTr("Tableau de remplissage")
-                onTriggered: app.genererTableauDeRemplissage();
+                onTriggered: app.genererTableauDeRemplissage()
             }
+
             MenuItem {
-                text: qsTr("Bénévoles sans tour de travail")
-                onTriggered: app.genererLaListeDesDisponibilitesSansAffectation();
+                text: qsTr("Liste des personnes disponibles sans affectation")
+                onTriggered: app.genererLaListeDesDisponibilitesSansAffectation()
             }
+
             MenuItem {
-                text: qsTr("Export général")
-                onTriggered: app.genererExportGeneral();
+                text: qsTr("Export général des tours")
+                onTriggered: app.genererExportGeneralDesTours()
+            }
+
+            MenuItem {
+                text: qsTr("Export général des personnes")
+                onTriggered: app.genererExportGeneralDesPersonnes()
             }
         }
     }

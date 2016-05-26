@@ -121,7 +121,8 @@ public:
     Q_INVOKABLE void genererLesCartesDesBenevolesPDF();
     Q_INVOKABLE void genererTableauDeRemplissage();
     Q_INVOKABLE void genererLaListeDesDisponibilitesSansAffectation();
-    Q_INVOKABLE void genererExportGeneral();
+    Q_INVOKABLE void genererExportGeneralDesPersonnes();
+    Q_INVOKABLE void genererExportGeneralDesTours();
 
 
 
@@ -243,6 +244,8 @@ private:
     static void gestionDesMessages(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
     bool initialiserModele(SqlQueryModel *modele, const QString &requete);
+
+    void genererExportCSV(QString nomVue, QString filtre = "");
 };
 
 #endif // GESTIONNAIREDAFFECTATIONS_H
